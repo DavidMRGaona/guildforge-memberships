@@ -91,4 +91,19 @@ interface MemberRepositoryInterface
      * @return array<Member>
      */
     public function all(): array;
+
+    /**
+     * Count all members.
+     */
+    public function count(): int;
+
+    /**
+     * Count members by status.
+     */
+    public function countByStatus(MemberStatus $status): int;
+
+    /**
+     * Count members with an active membership.
+     */
+    public function countWithActiveMembership(): int;
 }

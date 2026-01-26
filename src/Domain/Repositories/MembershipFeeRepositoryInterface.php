@@ -60,4 +60,9 @@ interface MembershipFeeRepositoryInterface
      * @return array<MembershipFee>
      */
     public function all(): array;
+
+    /**
+     * Count unpaid fees.
+     */
+    public function countUnpaid(): int;
 }

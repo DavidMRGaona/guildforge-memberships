@@ -171,6 +171,27 @@ final readonly class EloquentMemberRepository implements MemberRepositoryInterfa
             ->all();
     }
 
+    public function count(): int
+    {
+        return MemberModel::query()->count();
+    }
+
+    public function countByStatus(MemberStatus $status): int
+    {
+        return MemberModel::query()
+            ->where('status', $status->value)
+            ->count();
+    }
+
+    public function countWithActiveMembership(): int
+    {
+        return MemberModel::query()
+            ->whereHas('memberships', function ($query): void {
+                $query->where('status', \Modules\Memberships\Domain\Enums\MembershipStatus::Active->value);
+            })
+            ->count();
+    }
+
     public function toEntity(MemberModel $model): Member
     {
         return new Member(

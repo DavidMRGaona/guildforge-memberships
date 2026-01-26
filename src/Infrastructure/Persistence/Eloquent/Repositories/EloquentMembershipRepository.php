@@ -107,6 +107,19 @@ final readonly class EloquentMembershipRepository implements MembershipRepositor
             ->all();
     }
 
+    /**
+     * @return array<Membership>
+     */
+    public function findActiveExpiredBefore(DateTimeImmutable $date): array
+    {
+        return MembershipModel::query()
+            ->where('status', MembershipStatus::Active->value)
+            ->where('end_date', '<', $date->format('Y-m-d'))
+            ->get()
+            ->map(fn (MembershipModel $model): Membership => $this->toEntity($model))
+            ->all();
+    }
+
     public function delete(MembershipId $id): void
     {
         MembershipModel::query()->where('id', $id->value)->delete();

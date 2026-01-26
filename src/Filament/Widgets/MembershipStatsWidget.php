@@ -7,10 +7,8 @@ namespace Modules\Memberships\Filament\Widgets;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\Memberships\Domain\Enums\MemberStatus;
-use Modules\Memberships\Domain\Enums\MembershipStatus;
-use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
-use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipFeeModel;
-use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
+use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
 
 final class MembershipStatsWidget extends StatsOverviewWidget
 {
@@ -19,15 +17,16 @@ final class MembershipStatsWidget extends StatsOverviewWidget
      */
     protected function getStats(): array
     {
-        $totalMembers = MemberModel::count();
+        $memberRepository = resolve(MemberRepositoryInterface::class);
+        $feeRepository = resolve(MembershipFeeRepositoryInterface::class);
 
-        $activeMembers = MemberModel::where('status', MemberStatus::Active->value)->count();
+        $totalMembers = $memberRepository->count();
 
-        $membersWithActiveMembership = MemberModel::whereHas('memberships', function ($query): void {
-            $query->where('status', MembershipStatus::Active->value);
-        })->count();
+        $activeMembers = $memberRepository->countByStatus(MemberStatus::Active);
 
-        $pendingPayments = MembershipFeeModel::whereNull('paid_at')->count();
+        $membersWithActiveMembership = $memberRepository->countWithActiveMembership();
+
+        $pendingPayments = $feeRepository->countUnpaid();
 
         return [
             Stat::make(

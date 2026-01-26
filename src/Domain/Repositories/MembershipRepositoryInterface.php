@@ -56,6 +56,13 @@ interface MembershipRepositoryInterface
     public function getExpiredMemberships(): array;
 
     /**
+     * Find active memberships that have expired (end_date < given date but status = Active).
+     *
+     * @return array<Membership>
+     */
+    public function findActiveExpiredBefore(DateTimeImmutable $date): array;
+
+    /**
      * Delete a membership by ID.
      */
     public function delete(MembershipId $id): void;

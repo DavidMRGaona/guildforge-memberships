@@ -8,13 +8,11 @@ use DateTimeImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Events\Dispatcher;
 use Modules\Memberships\Domain\Entities\Membership;
-use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Events\FeePaymentOverdue;
 use Modules\Memberships\Domain\Events\MembershipExpired;
 use Modules\Memberships\Domain\Events\MembershipExpiring;
 use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
-use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
 
 final class ProcessExpiredMemberships extends Command
 {
@@ -72,20 +70,9 @@ final class ProcessExpiredMemberships extends Command
             $today = new DateTimeImmutable('today');
 
             // Get all active memberships that have expired (end_date < today)
-            $memberships = MembershipModel::query()
-                ->where('status', MembershipStatus::Active->value)
-                ->where('end_date', '<', $today->format('Y-m-d'))
-                ->get();
+            $memberships = $this->membershipRepository->findActiveExpiredBefore($today);
 
-            foreach ($memberships as $model) {
-                $membership = $this->membershipRepository->find(
-                    new \Modules\Memberships\Domain\ValueObjects\MembershipId($model->id)
-                );
-
-                if ($membership === null) {
-                    continue;
-                }
-
+            foreach ($memberships as $membership) {
                 // Mark as expired
                 $membership->expire();
                 $this->membershipRepository->save($membership);

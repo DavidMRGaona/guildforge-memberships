@@ -100,6 +100,13 @@ final readonly class EloquentMembershipFeeRepository implements MembershipFeeRep
             ->all();
     }
 
+    public function countUnpaid(): int
+    {
+        return MembershipFeeModel::query()
+            ->whereNull('paid_at')
+            ->count();
+    }
+
     public function toEntity(MembershipFeeModel $model): MembershipFee
     {
         return new MembershipFee(

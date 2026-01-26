@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships;
 
 use App\Modules\ModuleServiceProvider;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 use Modules\Memberships\Application\Services\FeeStructureServiceInterface;
@@ -73,6 +74,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         parent::boot();
 
         $this->registerCommands();
+        $this->registerSchedule();
         $this->registerEventListeners();
         $this->registerLivewireComponents();
     }
@@ -98,6 +100,20 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
                 ProcessExpiredMemberships::class,
             ]);
         }
+    }
+
+    /**
+     * Register scheduled tasks for this module.
+     */
+    private function registerSchedule(): void
+    {
+        $this->app->booted(function (): void {
+            /** @var Schedule $schedule */
+            $schedule = $this->app->make(Schedule::class);
+
+            // Process expired memberships daily at midnight
+            $schedule->command('memberships:process-expired')->daily();
+        });
     }
 
     /**
