@@ -11,7 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Filament\Resources\BaseResource;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
@@ -25,7 +25,7 @@ use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
 
-class FeeStructureResource extends Resource
+class FeeStructureResource extends BaseResource
 {
     protected static ?string $model = FeeStructureModel::class;
 
