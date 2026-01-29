@@ -80,7 +80,7 @@ final readonly class MemberService implements MemberServiceInterface
 
         $this->memberRepository->save($member);
 
-        $activeMembership = $this->membershipRepository->findActiveMembership($member->id());
+        $activeMembership = $this->membershipRepository->findActiveMembership($member->id);
 
         return MemberDTO::fromEntity($member, $activeMembership);
     }
@@ -98,7 +98,7 @@ final readonly class MemberService implements MemberServiceInterface
             return null;
         }
 
-        $activeMembership = $this->membershipRepository->findActiveMembership($member->id());
+        $activeMembership = $this->membershipRepository->findActiveMembership($member->id);
 
         return MemberDTO::fromEntity($member, $activeMembership);
     }
@@ -106,7 +106,7 @@ final readonly class MemberService implements MemberServiceInterface
     public function findOrFail(string $id): MemberDTO
     {
         $member = $this->memberRepository->findOrFail(MemberId::fromString($id));
-        $activeMembership = $this->membershipRepository->findActiveMembership($member->id());
+        $activeMembership = $this->membershipRepository->findActiveMembership($member->id);
 
         return MemberDTO::fromEntity($member, $activeMembership);
     }
@@ -121,7 +121,7 @@ final readonly class MemberService implements MemberServiceInterface
             return null;
         }
 
-        $activeMembership = $this->membershipRepository->findActiveMembership($member->id());
+        $activeMembership = $this->membershipRepository->findActiveMembership($member->id);
 
         return MemberDTO::fromEntity($member, $activeMembership);
     }
@@ -134,7 +134,7 @@ final readonly class MemberService implements MemberServiceInterface
             return null;
         }
 
-        $activeMembership = $this->membershipRepository->findActiveMembership($member->id());
+        $activeMembership = $this->membershipRepository->findActiveMembership($member->id);
 
         return MemberDTO::fromEntity($member, $activeMembership);
     }
@@ -149,7 +149,7 @@ final readonly class MemberService implements MemberServiceInterface
         return array_map(
             fn (Member $member) => MemberDTO::fromEntity(
                 $member,
-                $this->membershipRepository->findActiveMembership($member->id())
+                $this->membershipRepository->findActiveMembership($member->id)
             ),
             $members
         );
@@ -165,7 +165,7 @@ final readonly class MemberService implements MemberServiceInterface
         return array_map(
             fn (Member $member) => MemberDTO::fromEntity(
                 $member,
-                $this->membershipRepository->findActiveMembership($member->id())
+                $this->membershipRepository->findActiveMembership($member->id)
             ),
             $members
         );
@@ -177,7 +177,7 @@ final readonly class MemberService implements MemberServiceInterface
         $member->changeStatus(MemberStatus::from($status));
         $this->memberRepository->save($member);
 
-        $activeMembership = $this->membershipRepository->findActiveMembership($member->id());
+        $activeMembership = $this->membershipRepository->findActiveMembership($member->id);
 
         return MemberDTO::fromEntity($member, $activeMembership);
     }
@@ -188,7 +188,7 @@ final readonly class MemberService implements MemberServiceInterface
         $member->linkToUser($userId);
         $this->memberRepository->save($member);
 
-        $activeMembership = $this->membershipRepository->findActiveMembership($member->id());
+        $activeMembership = $this->membershipRepository->findActiveMembership($member->id);
 
         return MemberDTO::fromEntity($member, $activeMembership);
     }
@@ -199,7 +199,7 @@ final readonly class MemberService implements MemberServiceInterface
         $member->unlinkFromUser();
         $this->memberRepository->save($member);
 
-        $activeMembership = $this->membershipRepository->findActiveMembership($member->id());
+        $activeMembership = $this->membershipRepository->findActiveMembership($member->id);
 
         return MemberDTO::fromEntity($member, $activeMembership);
     }
@@ -214,7 +214,7 @@ final readonly class MemberService implements MemberServiceInterface
         return array_map(
             fn (Member $member) => MemberDTO::fromEntity(
                 $member,
-                $this->membershipRepository->findActiveMembership($member->id())
+                $this->membershipRepository->findActiveMembership($member->id)
             ),
             $members
         );
