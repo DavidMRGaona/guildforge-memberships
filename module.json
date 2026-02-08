@@ -1,7 +1,7 @@
 {
   "name": "memberships",
   "displayName": "Gestión de socios",
-  "version": "1.0.0-beta",
+  "version": "1.0.1-beta",
   "namespace": "Modules\\Memberships",
   "provider": "MembershipsServiceProvider",
   "description": "Módulo de gestión de socios, membresías y cuotas",
