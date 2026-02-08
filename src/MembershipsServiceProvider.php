@@ -47,10 +47,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     {
         parent::register();
 
-        $this->mergeConfigFrom(
-            $this->modulePath('config/memberships.php'),
-            'memberships'
-        );
+        $this->forceLoadConfig($this->modulePath('config/memberships.php'), 'memberships');
 
         // Repository bindings
         $this->app->bind(MemberRepositoryInterface::class, EloquentMemberRepository::class);
