@@ -6,10 +6,11 @@ namespace Modules\Memberships\Notifications;
 
 use DateTimeImmutable;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-final class MembershipExpiringNotification extends Notification
+final class MembershipExpiringNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
