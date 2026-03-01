@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Widgets;
 
+use App\Application\Services\DashboardWidgetConfigServiceInterface;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Filament\Resources\MemberResource;
@@ -56,7 +56,13 @@ final class ExpiringMembershipsWidget extends BaseWidget
                     })
                     ->suffix(fn (int $state): string => $state === 1 ? ' día' : ' días'),
             ])
-            ->paginated([5])
-            ->defaultPaginationPageOption(5);
+            ->paginated([$this->getConfiguredLimit()])
+            ->defaultPaginationPageOption($this->getConfiguredLimit());
+    }
+
+    private function getConfiguredLimit(): int
+    {
+        return app(DashboardWidgetConfigServiceInterface::class)
+            ->getLimit(static::class, 5);
     }
 }
