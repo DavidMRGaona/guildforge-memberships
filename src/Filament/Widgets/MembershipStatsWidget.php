@@ -12,6 +12,8 @@ use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
 
 final class MembershipStatsWidget extends StatsOverviewWidget
 {
+    protected static ?int $sort = 4;
+
     /**
      * @return array<Stat>
      */

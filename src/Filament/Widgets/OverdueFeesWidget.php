@@ -15,7 +15,7 @@ final class OverdueFeesWidget extends BaseWidget
 {
     protected int | string | array $columnSpan = 'full';
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 14;
 
     public function table(Table $table): Table
     {
