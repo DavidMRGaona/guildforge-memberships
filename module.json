@@ -2,6 +2,7 @@
   "name": "memberships",
   "displayName": "Gestión de socios",
   "version": "1.0.1-beta",
+  "repository": "DavidMRGaona/guildforge-memberships",
   "namespace": "Modules\\Memberships",
   "provider": "MembershipsServiceProvider",
   "description": "Módulo de gestión de socios, membresías y cuotas",
