@@ -4,31 +4,31 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Pages;
 
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use App\Application\Modules\Services\ModuleManagerServiceInterface;
 use App\Domain\Modules\ValueObjects\ModuleName;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
 /**
- * @property Form $form
+ * @property \Filament\Schemas\Schema $form
  */
 final class MembershipSettings extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     protected static ?int $navigationSort = 99;
 
-    protected static string $view = 'filament.pages.simple-settings';
+    protected string $view = 'filament.pages.simple-settings';
 
     /**
      * @var array<string, mixed>
@@ -68,7 +68,7 @@ final class MembershipSettings extends Page implements HasForms
     /**
      * Get the form schema components for settings.
      *
-     * @return array<\Filament\Forms\Components\Component>
+     * @return array<\Filament\Schemas\Components\Component>
      */
     public static function getFormSchemaComponents(): array
     {
@@ -165,10 +165,10 @@ final class MembershipSettings extends Page implements HasForms
         ];
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema(self::getFormSchemaComponents())
+        return $schema
+            ->components(self::getFormSchemaComponents())
             ->statePath('data');
     }
 

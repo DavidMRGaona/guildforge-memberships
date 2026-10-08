@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\RelationManagers;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -25,10 +25,10 @@ class MembershipFeesRelationManager extends RelationManager
         return __('memberships::memberships.sections.fees');
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('payment_method')
                     ->label(__('memberships::memberships.fields.payment_method'))
                     ->options([
@@ -84,13 +84,13 @@ class MembershipFeesRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->defaultSort('due_date', 'desc')
-            ->actions([
+            ->recordActions([
                 Action::make('record_payment')
                     ->label(__('memberships::memberships.actions.record_payment'))
                     ->icon('heroicon-o-banknotes')
                     ->color('success')
                     ->visible(fn ($record): bool => $record->paid_at === null)
-                    ->form([
+                    ->schema([
                         Select::make('payment_method')
                             ->label(__('memberships::memberships.fields.payment_method'))
                             ->options([

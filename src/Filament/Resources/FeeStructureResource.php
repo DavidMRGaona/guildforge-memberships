@@ -4,18 +4,21 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\ListFeeStructures;
+use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\CreateFeeStructure;
+use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\EditFeeStructure;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use App\Filament\Resources\BaseResource;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -29,7 +32,7 @@ class FeeStructureResource extends BaseResource
 {
     protected static ?string $model = FeeStructureModel::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-currency-euro';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-currency-euro';
 
     protected static ?int $navigationSort = 3;
 
@@ -53,10 +56,10 @@ class FeeStructureResource extends BaseResource
         return __('memberships::memberships.model.fee_structure.plural');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make(__('memberships::memberships.sections.fee_structure_data'))
                     ->schema([
                         Select::make('member_type')
@@ -196,11 +199,11 @@ class FeeStructureResource extends BaseResource
                         MembershipPeriodType::Rolling->value => __('memberships::memberships.enums.membership_period_type.rolling'),
                     ]),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
@@ -211,9 +214,9 @@ class FeeStructureResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListFeeStructures::route('/'),
-            'create' => Pages\CreateFeeStructure::route('/create'),
-            'edit' => Pages\EditFeeStructure::route('/{record}/edit'),
+            'index' => ListFeeStructures::route('/'),
+            'create' => CreateFeeStructure::route('/create'),
+            'edit' => EditFeeStructure::route('/{record}/edit'),
         ];
     }
 }

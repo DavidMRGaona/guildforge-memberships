@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\RelationManagers;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
@@ -29,10 +29,10 @@ class MembershipsRelationManager extends RelationManager
         return __('memberships::memberships.sections.memberships');
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('period_type')
                     ->label(__('memberships::memberships.fields.period_type'))
                     ->options([
@@ -159,7 +159,7 @@ class MembershipsRelationManager extends RelationManager
                     ->label(__('memberships::memberships.pages.create_membership'))
                     ->modalHeading(__('memberships::memberships.pages.create_membership')),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->modalHeading(__('memberships::memberships.pages.edit_membership')),
                 DeleteAction::make(),

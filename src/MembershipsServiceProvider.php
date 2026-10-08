@@ -4,6 +4,17 @@ declare(strict_types=1);
 
 namespace Modules\Memberships;
 
+use Modules\Memberships\Filament\RelationManagers\MembershipsRelationManager;
+use Modules\Memberships\Filament\Resources\MemberResource;
+use Modules\Memberships\Filament\Resources\FeeStructureResource;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
+use Modules\Memberships\Policies\MemberPolicy;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
+use Modules\Memberships\Policies\FeeStructurePolicy;
+use App\Application\Modules\DTOs\PermissionDTO;
+use App\Application\Modules\DTOs\NavigationItemDTO;
+use Modules\Memberships\Filament\Pages\MembershipSettings;
+use Filament\Resources\Resource;
 use App\Modules\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
@@ -83,7 +94,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     {
         Livewire::component(
             'modules.memberships.filament.relation-managers.memberships-relation-manager',
-            \Modules\Memberships\Filament\RelationManagers\MembershipsRelationManager::class
+            MembershipsRelationManager::class
         );
     }
 
@@ -147,13 +158,13 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     /**
      * Register Filament resources provided by this module.
      *
-     * @return array<class-string<\Filament\Resources\Resource>>
+     * @return array<class-string<Resource>>
      */
     public function registerFilamentResources(): array
     {
         return [
-            \Modules\Memberships\Filament\Resources\MemberResource::class,
-            \Modules\Memberships\Filament\Resources\FeeStructureResource::class,
+            MemberResource::class,
+            FeeStructureResource::class,
         ];
     }
 
@@ -165,8 +176,8 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     public function registerPolicies(): array
     {
         return [
-            \Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel::class => \Modules\Memberships\Policies\MemberPolicy::class,
-            \Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel::class => \Modules\Memberships\Policies\FeeStructurePolicy::class,
+            MemberModel::class => MemberPolicy::class,
+            FeeStructureModel::class => FeeStructurePolicy::class,
         ];
     }
 
@@ -185,41 +196,41 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     }
 
     /**
-     * @return array<\App\Application\Modules\DTOs\PermissionDTO>
+     * @return array<PermissionDTO>
      */
     public function registerPermissions(): array
     {
         return [
             // Member permissions
-            new \App\Application\Modules\DTOs\PermissionDTO(
+            new PermissionDTO(
                 name: 'members.view_any',
                 label: __('memberships::memberships.permissions.members.view_any'),
                 group: __('memberships::memberships.navigation.members'),
                 module: 'memberships',
                 roles: ['editor'],
             ),
-            new \App\Application\Modules\DTOs\PermissionDTO(
+            new PermissionDTO(
                 name: 'members.view',
                 label: __('memberships::memberships.permissions.members.view'),
                 group: __('memberships::memberships.navigation.members'),
                 module: 'memberships',
                 roles: ['editor'],
             ),
-            new \App\Application\Modules\DTOs\PermissionDTO(
+            new PermissionDTO(
                 name: 'members.create',
                 label: __('memberships::memberships.permissions.members.create'),
                 group: __('memberships::memberships.navigation.members'),
                 module: 'memberships',
                 roles: ['editor'],
             ),
-            new \App\Application\Modules\DTOs\PermissionDTO(
+            new PermissionDTO(
                 name: 'members.update',
                 label: __('memberships::memberships.permissions.members.update'),
                 group: __('memberships::memberships.navigation.members'),
                 module: 'memberships',
                 roles: ['editor'],
             ),
-            new \App\Application\Modules\DTOs\PermissionDTO(
+            new PermissionDTO(
                 name: 'members.delete',
                 label: __('memberships::memberships.permissions.members.delete'),
                 group: __('memberships::memberships.navigation.members'),
@@ -227,35 +238,35 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
                 roles: [],
             ),
             // Fee structure permissions
-            new \App\Application\Modules\DTOs\PermissionDTO(
+            new PermissionDTO(
                 name: 'fee_structures.view_any',
                 label: __('memberships::memberships.permissions.fee_structures.view_any'),
                 group: __('memberships::memberships.navigation.fee_structures'),
                 module: 'memberships',
                 roles: ['editor'],
             ),
-            new \App\Application\Modules\DTOs\PermissionDTO(
+            new PermissionDTO(
                 name: 'fee_structures.view',
                 label: __('memberships::memberships.permissions.fee_structures.view'),
                 group: __('memberships::memberships.navigation.fee_structures'),
                 module: 'memberships',
                 roles: ['editor'],
             ),
-            new \App\Application\Modules\DTOs\PermissionDTO(
+            new PermissionDTO(
                 name: 'fee_structures.create',
                 label: __('memberships::memberships.permissions.fee_structures.create'),
                 group: __('memberships::memberships.navigation.fee_structures'),
                 module: 'memberships',
                 roles: [],
             ),
-            new \App\Application\Modules\DTOs\PermissionDTO(
+            new PermissionDTO(
                 name: 'fee_structures.update',
                 label: __('memberships::memberships.permissions.fee_structures.update'),
                 group: __('memberships::memberships.navigation.fee_structures'),
                 module: 'memberships',
                 roles: [],
             ),
-            new \App\Application\Modules\DTOs\PermissionDTO(
+            new PermissionDTO(
                 name: 'fee_structures.delete',
                 label: __('memberships::memberships.permissions.fee_structures.delete'),
                 group: __('memberships::memberships.navigation.fee_structures'),
@@ -266,12 +277,12 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     }
 
     /**
-     * @return array<\App\Application\Modules\DTOs\NavigationItemDTO>
+     * @return array<NavigationItemDTO>
      */
     public function registerNavigation(): array
     {
         return [
-            new \App\Application\Modules\DTOs\NavigationItemDTO(
+            new NavigationItemDTO(
                 label: __('memberships::memberships.navigation.members'),
                 route: 'filament.admin.resources.members.index',
                 icon: 'heroicon-o-user-group',
@@ -280,7 +291,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
                 permissions: ['memberships:members.view_any'],
                 module: 'memberships',
             ),
-            new \App\Application\Modules\DTOs\NavigationItemDTO(
+            new NavigationItemDTO(
                 label: __('memberships::memberships.navigation.fee_structures'),
                 route: 'filament.admin.resources.fee-structures.index',
                 icon: 'heroicon-o-currency-euro',
@@ -295,10 +306,10 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     /**
      * Get the Filament form schema for module settings.
      *
-     * @return array<\Filament\Forms\Components\Component>
+     * @return array<\Filament\Schemas\Components\Component>
      */
     public function getSettingsSchema(): array
     {
-        return \Modules\Memberships\Filament\Pages\MembershipSettings::getFormSchemaComponents();
+        return MembershipSettings::getFormSchemaComponents();
     }
 }
