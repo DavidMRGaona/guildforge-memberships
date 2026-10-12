@@ -114,7 +114,7 @@ final class MembershipSettings extends Page implements HasForms
                         ->label(__('memberships::memberships.settings.fields.enable_role_assignment'))
                         ->helperText(__('memberships::memberships.settings.fields.enable_role_assignment_help'))
                         ->default(false)
-                        ->reactive(),
+                        ->live(),
 
                     TextInput::make('member_role_name')
                         ->label(__('memberships::memberships.settings.fields.member_role_name'))

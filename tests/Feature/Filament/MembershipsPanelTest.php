@@ -94,6 +94,17 @@ final class MembershipsPanelTest extends ModuleTestCase
         Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])->assertOk();
     }
 
+    public function test_the_member_role_field_follows_the_role_assignment_toggle(): void
+    {
+        Livewire::test(MembershipSettings::class)
+            // A test re-renders on every fillForm(); in the browser only a live toggle does
+            ->assertSeeHtml("\$wire.\$entangle('data.enable_role_assignment', true)")
+            ->fillForm(['enable_role_assignment' => false])
+            ->assertFormFieldIsHidden('member_role_name')
+            ->fillForm(['enable_role_assignment' => true])
+            ->assertFormFieldIsVisible('member_role_name');
+    }
+
     public function test_widgets_render(): void
     {
         foreach ([MembershipStatsWidget::class, ExpiringMembershipsWidget::class, OverdueFeesWidget::class] as $widget) {
