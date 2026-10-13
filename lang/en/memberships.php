@@ -208,7 +208,7 @@ return [
             'academic_start_month' => 'Academic year start month',
             'academic_start_month_help' => 'Only applies if period type is academic year',
             'enable_role_assignment' => 'Assign role automatically',
-            'enable_role_assignment_help' => 'Grants the role when a membership is activated and removes it when the last active membership expires',
+            'enable_role_assignment_help' => 'Grants the role to the linked user while the member has an active membership and removes it when they no longer do',
             'member_role_name' => 'Member role name',
             'member_role_name_help' => 'The role to be assigned to active members',
             'expiration_warning_days' => 'Warning days before expiration',

@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Events\MembershipActivated;
+use Modules\Memberships\Domain\Events\MembershipDeactivated;
 use Modules\Memberships\Domain\Events\MembershipExpired;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
 
@@ -31,15 +32,34 @@ final readonly class MembershipModelObserver
 
     public function updated(MembershipModel $membership): void
     {
-        if (! $membership->wasChanged('status')) {
+        $statusChanged = $membership->wasChanged('status');
+        $memberChanged = $membership->wasChanged('member_id');
+
+        if (! $statusChanged && ! $memberChanged) {
             return;
         }
 
-        match ($membership->status) {
-            MembershipStatus::Active => $this->dispatchActivated($membership),
-            MembershipStatus::Expired => $this->dispatchExpired($membership),
-            default => null,
-        };
+        $wasActive = $membership->getRawOriginal('status') === MembershipStatus::Active->value;
+        $isActive = $membership->status === MembershipStatus::Active;
+
+        if ($wasActive && (! $isActive || $memberChanged)) {
+            $this->dispatchDeactivated($membership, (string) $membership->getRawOriginal('member_id'));
+        }
+
+        if ($isActive) {
+            $this->dispatchActivated($membership);
+        }
+
+        if ($statusChanged && $membership->status === MembershipStatus::Expired) {
+            $this->dispatchExpired($membership);
+        }
+    }
+
+    public function deleted(MembershipModel $membership): void
+    {
+        if ($membership->status === MembershipStatus::Active) {
+            $this->dispatchDeactivated($membership, $membership->member_id);
+        }
     }
 
     private function dispatchActivated(MembershipModel $membership): void
@@ -48,6 +68,15 @@ final readonly class MembershipModelObserver
             membershipId: $membership->id,
             memberId: $membership->member_id,
             activatedAt: $membership->activated_at?->toDateTimeImmutable() ?? new DateTimeImmutable(),
+            occurredAt: new DateTimeImmutable(),
+        ));
+    }
+
+    private function dispatchDeactivated(MembershipModel $membership, string $memberId): void
+    {
+        $this->events->dispatch(new MembershipDeactivated(
+            membershipId: $membership->id,
+            memberId: $memberId,
             occurredAt: new DateTimeImmutable(),
         ));
     }

@@ -26,8 +26,9 @@ use Modules\Memberships\Application\Services\MembershipFeeServiceInterface;
 use Modules\Memberships\Application\Services\MembershipServiceInterface;
 use Modules\Memberships\Application\Services\ProrationCalculatorInterface;
 use Modules\Memberships\Console\Commands\ProcessExpiredMemberships;
+use Modules\Memberships\Console\Commands\SyncMemberRoles;
 use Modules\Memberships\Domain\Events\MembershipActivated;
-use Modules\Memberships\Domain\Events\MembershipExpired;
+use Modules\Memberships\Domain\Events\MembershipDeactivated;
 use Modules\Memberships\Domain\Events\MembershipExpiring;
 use Modules\Memberships\Domain\Repositories\FeeStructureRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
@@ -45,13 +46,14 @@ use Modules\Memberships\Infrastructure\Services\MembershipService;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 use Modules\Memberships\Infrastructure\Services\ProrationCalculator;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MemberModelObserver;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MembershipModelObserver;
 use Modules\Memberships\Filament\Widgets\ExpiringMembershipsWidget;
 use Modules\Memberships\Filament\Widgets\MembershipStatsWidget;
 use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
 use Modules\Memberships\Listeners\AssignMemberRoleOnActivation;
 use Modules\Memberships\Listeners\NotifyMembershipExpiring;
-use Modules\Memberships\Listeners\RevokeMemberRoleOnExpiration;
+use Modules\Memberships\Listeners\RevokeMemberRoleOnDeactivation;
 
 final class MembershipsServiceProvider extends ModuleServiceProvider
 {
@@ -93,6 +95,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         $this->registerLivewireComponents();
 
         MembershipModel::observe(MembershipModelObserver::class);
+        MemberModel::observe(MemberModelObserver::class);
     }
 
     /**
@@ -114,6 +117,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 ProcessExpiredMemberships::class,
+                SyncMemberRoles::class,
             ]);
         }
     }
@@ -141,8 +145,8 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         );
 
         Event::listen(
-            MembershipExpired::class,
-            [RevokeMemberRoleOnExpiration::class, 'handle']
+            MembershipDeactivated::class,
+            [RevokeMemberRoleOnDeactivation::class, 'handle']
         );
 
         Event::listen(

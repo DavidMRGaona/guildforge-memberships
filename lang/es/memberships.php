@@ -208,7 +208,7 @@ return [
             'academic_start_month' => 'Mes de inicio del año académico',
             'academic_start_month_help' => 'Solo aplica si el tipo de periodo es año académico',
             'enable_role_assignment' => 'Asignar rol automáticamente',
-            'enable_role_assignment_help' => 'Asigna el rol al activar una cuota y lo retira cuando caduca la última cuota activa',
+            'enable_role_assignment_help' => 'Asigna el rol al usuario vinculado mientras el socio tiene una cuota activa y lo retira cuando deja de tenerla',
             'member_role_name' => 'Nombre del rol de socio',
             'member_role_name_help' => 'El rol que se asignará a los socios activos',
             'expiration_warning_days' => 'Días de aviso antes de expiración',
