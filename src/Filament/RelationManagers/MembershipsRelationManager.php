@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
+use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 class MembershipsRelationManager extends RelationManager
 {
@@ -40,7 +41,7 @@ class MembershipsRelationManager extends RelationManager
                         MembershipPeriodType::AcademicYear->value => __('memberships::memberships.enums.membership_period_type.academic_year'),
                         MembershipPeriodType::Rolling->value => __('memberships::memberships.enums.membership_period_type.rolling'),
                     ])
-                    ->default(fn (): string => config('memberships.default_period_type', MembershipPeriodType::CalendarYear->value))
+                    ->default(fn (MembershipSettingsReader $settings): string => $settings->defaultPeriodType()->value)
                     ->required()
                     ->native(false)
                     ->live()
@@ -90,7 +91,7 @@ class MembershipsRelationManager extends RelationManager
         }
 
         $start = Carbon::parse($startDate);
-        $academicStartMonth = (int) config('memberships.academic_start_month', 9);
+        $academicStartMonth = app(MembershipSettingsReader::class)->academicStartMonth();
 
         $endDate = match ($periodType) {
             MembershipPeriodType::CalendarYear->value => $start->copy()->endOfYear(),

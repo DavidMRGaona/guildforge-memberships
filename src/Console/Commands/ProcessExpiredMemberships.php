@@ -13,6 +13,7 @@ use Modules\Memberships\Domain\Events\MembershipExpired;
 use Modules\Memberships\Domain\Events\MembershipExpiring;
 use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
+use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 final class ProcessExpiredMemberships extends Command
 {
@@ -34,6 +35,7 @@ final class ProcessExpiredMemberships extends Command
         private readonly MembershipRepositoryInterface $membershipRepository,
         private readonly MembershipFeeRepositoryInterface $membershipFeeRepository,
         private readonly Dispatcher $eventDispatcher,
+        private readonly MembershipSettingsReader $settings,
     ) {
         parent::__construct();
     }
@@ -94,7 +96,7 @@ final class ProcessExpiredMemberships extends Command
     {
         $this->components->task('Processing expiring memberships', function () use (&$count): void {
             $count = 0;
-            $warningDays = (int) config('memberships.expiration_warning_days', 30);
+            $warningDays = $this->settings->expirationWarningDays();
             $today = new DateTimeImmutable('today');
 
             $expiringMemberships = $this->membershipRepository->getExpiringMemberships($warningDays);

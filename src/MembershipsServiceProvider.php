@@ -42,6 +42,7 @@ use Modules\Memberships\Infrastructure\Services\MemberNumberGenerator;
 use Modules\Memberships\Infrastructure\Services\MemberService;
 use Modules\Memberships\Infrastructure\Services\MembershipFeeService;
 use Modules\Memberships\Infrastructure\Services\MembershipService;
+use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 use Modules\Memberships\Infrastructure\Services\ProrationCalculator;
 use Modules\Memberships\Listeners\AssignMemberRoleOnActivation;
 use Modules\Memberships\Listeners\NotifyMembershipExpiring;
@@ -68,8 +69,8 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
 
         // Service bindings
         $this->app->bind(MemberNumberGeneratorInterface::class, MemberNumberGenerator::class);
-        $this->app->bind(ProrationCalculatorInterface::class, fn () => new ProrationCalculator(
-            (int) config('memberships.academic_start_month', 9)
+        $this->app->bind(ProrationCalculatorInterface::class, fn (): ProrationCalculator => new ProrationCalculator(
+            $this->app->make(MembershipSettingsReader::class)->academicStartMonth()
         ));
         $this->app->bind(MemberServiceInterface::class, MemberService::class);
         $this->app->bind(MembershipServiceInterface::class, MembershipService::class);

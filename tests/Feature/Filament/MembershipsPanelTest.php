@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Tests\Feature\Filament;
 
 use App\Filament\Pages\ModuleSettingsPage;
+use Filament\Actions\CreateAction;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Modules\Memberships\Filament\Pages\MembershipSettings;
@@ -110,6 +111,25 @@ final class MembershipsPanelTest extends ModuleTestCase
         foreach ([MembershipStatsWidget::class, ExpiringMembershipsWidget::class, OverdueFeesWidget::class] as $widget) {
             Livewire::test($widget)->assertOk();
         }
+    }
+
+    public function test_the_settings_form_has_no_unused_fields(): void
+    {
+        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+            ->assertOk()
+            ->assertFormFieldExists('expiration_warning_days')
+            ->assertFormFieldDoesNotExist('grace_period_days')
+            ->assertFormFieldDoesNotExist('enable_proration')
+            ->assertFormFieldDoesNotExist('default_currency');
+    }
+
+    public function test_new_memberships_default_to_the_period_type_saved_in_the_panel(): void
+    {
+        config()->set('modules.settings.memberships.default_period_type', 'rolling');
+
+        Livewire::test(MembershipsRelationManager::class, ['ownerRecord' => $this->member(), 'pageClass' => EditMember::class])
+            ->mountTableAction(CreateAction::class)
+            ->assertTableActionDataSet(['period_type' => 'rolling']);
     }
 
     private function member(): MemberModel

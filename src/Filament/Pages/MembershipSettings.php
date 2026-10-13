@@ -125,17 +125,8 @@ final class MembershipSettings extends Page implements HasForms
                 ])
                 ->columns(2),
 
-            Section::make(__('memberships::memberships.settings.sections.grace_and_notifications'))
+            Section::make(__('memberships::memberships.settings.sections.notifications'))
                 ->schema([
-                    TextInput::make('grace_period_days')
-                        ->label(__('memberships::memberships.settings.fields.grace_period_days'))
-                        ->helperText(__('memberships::memberships.settings.fields.grace_period_days_help'))
-                        ->numeric()
-                        ->minValue(0)
-                        ->maxValue(365)
-                        ->default(30)
-                        ->required(),
-
                     TextInput::make('expiration_warning_days')
                         ->label(__('memberships::memberships.settings.fields.expiration_warning_days'))
                         ->helperText(__('memberships::memberships.settings.fields.expiration_warning_days_help'))
@@ -143,22 +134,6 @@ final class MembershipSettings extends Page implements HasForms
                         ->minValue(0)
                         ->maxValue(365)
                         ->default(30)
-                        ->required(),
-                ])
-                ->columns(2),
-
-            Section::make(__('memberships::memberships.settings.sections.fees'))
-                ->schema([
-                    Toggle::make('enable_proration')
-                        ->label(__('memberships::memberships.settings.fields.enable_proration'))
-                        ->helperText(__('memberships::memberships.settings.fields.enable_proration_help'))
-                        ->default(true),
-
-                    TextInput::make('default_currency')
-                        ->label(__('memberships::memberships.settings.fields.default_currency'))
-                        ->helperText(__('memberships::memberships.settings.fields.default_currency_help'))
-                        ->default('EUR')
-                        ->maxLength(3)
                         ->required(),
                 ])
                 ->columns(2),

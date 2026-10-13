@@ -200,8 +200,7 @@ return [
         'sections' => [
             'membership_period' => 'Membership period settings',
             'role_integration' => 'Role integration',
-            'grace_and_notifications' => 'Grace period and notifications',
-            'fees' => 'Fee settings',
+            'notifications' => 'Notifications',
         ],
         'fields' => [
             'default_period_type' => 'Default period type',
@@ -209,17 +208,11 @@ return [
             'academic_start_month' => 'Academic year start month',
             'academic_start_month_help' => 'Only applies if period type is academic year',
             'enable_role_assignment' => 'Assign role automatically',
-            'enable_role_assignment_help' => 'Assign a role when membership is active',
+            'enable_role_assignment_help' => 'Grants the role when a membership is activated and removes it when the last active membership expires',
             'member_role_name' => 'Member role name',
             'member_role_name_help' => 'The role to be assigned to active members',
-            'grace_period_days' => 'Grace period days',
-            'grace_period_days_help' => 'Days after expiration before deactivating membership',
             'expiration_warning_days' => 'Warning days before expiration',
             'expiration_warning_days_help' => 'Days before expiration to send notification',
-            'enable_proration' => 'Enable proration',
-            'enable_proration_help' => 'Calculate fees proportionally for mid-period registrations',
-            'default_currency' => 'Default currency',
-            'default_currency_help' => 'Currency for fees (ISO 4217 code)',
         ],
         'months' => [
             '1' => 'January',

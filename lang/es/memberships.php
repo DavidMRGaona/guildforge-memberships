@@ -200,8 +200,7 @@ return [
         'sections' => [
             'membership_period' => 'Configuración de periodo de cuota',
             'role_integration' => 'Integración con roles',
-            'grace_and_notifications' => 'Periodo de gracia y notificaciones',
-            'fees' => 'Configuración de cuotas',
+            'notifications' => 'Notificaciones',
         ],
         'fields' => [
             'default_period_type' => 'Tipo de periodo predeterminado',
@@ -209,17 +208,11 @@ return [
             'academic_start_month' => 'Mes de inicio del año académico',
             'academic_start_month_help' => 'Solo aplica si el tipo de periodo es año académico',
             'enable_role_assignment' => 'Asignar rol automáticamente',
-            'enable_role_assignment_help' => 'Asignar un rol cuando la cuota está activa',
+            'enable_role_assignment_help' => 'Asigna el rol al activar una cuota y lo retira cuando caduca la última cuota activa',
             'member_role_name' => 'Nombre del rol de socio',
             'member_role_name_help' => 'El rol que se asignará a los socios activos',
-            'grace_period_days' => 'Días de periodo de gracia',
-            'grace_period_days_help' => 'Días después de la expiración antes de desactivar la cuota',
             'expiration_warning_days' => 'Días de aviso antes de expiración',
             'expiration_warning_days_help' => 'Días antes de la expiración para enviar notificación',
-            'enable_proration' => 'Habilitar prorrateo',
-            'enable_proration_help' => 'Calcular cuotas proporcionalmente para altas a mitad de periodo',
-            'default_currency' => 'Moneda predeterminada',
-            'default_currency_help' => 'Moneda para las cuotas (código ISO 4217)',
         ],
         'months' => [
             '1' => 'Enero',
