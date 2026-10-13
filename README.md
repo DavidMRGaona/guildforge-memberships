@@ -94,9 +94,14 @@ Para lanzarlo a mano:
 Con `enable_role_assignment` activado:
 
 - Cuando una cuota se crea como activa o pasa a activa (desde la ficha del socio en el panel o por código), el usuario vinculado al socio recibe el rol `member_role_name`.
-- Cuando una cuota pasa a expirada (por el comando diario o a mano) y el socio no tiene otra cuota activa, se le retira el rol.
+- Cuando una cuota activa deja de estarlo (expira por el comando diario, se marca como expirada, cancelada o pendiente, o se borra), se retira el rol si el usuario no tiene otra cuota activa en ningún socio vinculado.
+- Si se cambia o se quita el usuario vinculado a un socio, el rol pasa al usuario nuevo (si hay cuota activa) y se retira al anterior. Borrar el socio retira el rol; restaurarlo lo devuelve si tiene una cuota activa.
 
-El rol debe existir; por defecto es `member`, el rol de socio del core. Si no existe, no se asigna nada. Cancelar o borrar una cuota no retira el rol. Los socios sin usuario vinculado no reciben ningún rol.
+El rol debe existir; por defecto es `member`, el rol de socio del core. Si no existe, no se asigna nada. Los socios sin usuario vinculado no reciben ningún rol. Los cambios de rol se aplican al momento.
+
+Al activar la opción, las cuotas que ya estaban activas no dan el rol por sí solas: ejecuta `php artisan memberships:sync-roles`, que asigna el rol a los usuarios vinculados con una cuota activa y lo retira a los demás usuarios vinculados a un socio (los usuarios sin socio vinculado no se tocan).
+
+Al desactivar la opción, el módulo deja de asignar y retirar el rol, pero no quita los roles ya asignados: retíralos desde el editor de roles si hace falta. `memberships:sync-roles` no hace nada mientras la opción esté desactivada.
 
 Los módulos que deciden quién es socio por el rol `member` no siguen un cambio de `member_role_name`.
 
@@ -139,6 +144,7 @@ Los permisos llevan el prefijo `memberships:` y se asignan a los roles en el edi
 | Evento | Cuándo se dispara |
 |--------|-------------------|
 | `MembershipActivated` | Al crear una cuota activa o pasarla a activa |
+| `MembershipDeactivated` | Cuando una cuota activa deja de estarlo (cambio de estado, borrado o cambio de socio) |
 | `MembershipExpired` | Al pasar una cuota a expirada |
 | `MembershipExpiring` | Cuando el comando diario envía el aviso de expiración |
 | `FeePaymentOverdue` | Cuando el comando diario detecta un pago vencido |
@@ -158,10 +164,10 @@ src/modules/memberships/
 ├── routes/                      # api.php y web.php (vacíos)
 ├── src/
 │   ├── Application/             # DTOs e interfaces de servicios
-│   ├── Console/Commands/        # memberships:process-expired
+│   ├── Console/Commands/        # memberships:process-expired, memberships:sync-roles
 │   ├── Domain/                  # Entidades, value objects, enums, eventos
 │   ├── Filament/                # Resources, relation manager, widgets, formulario de configuración
-│   ├── Infrastructure/          # Modelos, observer, repositorios, servicios
+│   ├── Infrastructure/          # Modelos, observers, repositorios, servicios
 │   ├── Listeners/               # Rol de socio y aviso de expiración
 │   ├── Notifications/
 │   └── Policies/
