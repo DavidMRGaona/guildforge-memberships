@@ -9,7 +9,6 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Events\Dispatcher;
 use Modules\Memberships\Domain\Entities\Membership;
 use Modules\Memberships\Domain\Events\FeePaymentOverdue;
-use Modules\Memberships\Domain\Events\MembershipExpired;
 use Modules\Memberships\Domain\Events\MembershipExpiring;
 use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
@@ -75,12 +74,9 @@ final class ProcessExpiredMemberships extends Command
             $memberships = $this->membershipRepository->findActiveExpiredBefore($today);
 
             foreach ($memberships as $membership) {
-                // Mark as expired
+                // Mark as expired: MembershipModelObserver dispatches MembershipExpired
                 $membership->expire();
                 $this->membershipRepository->save($membership);
-
-                // Dispatch expired event
-                $this->eventDispatcher->dispatch(MembershipExpired::create($membership));
 
                 $count++;
             }

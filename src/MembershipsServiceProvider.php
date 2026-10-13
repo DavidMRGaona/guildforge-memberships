@@ -44,6 +44,8 @@ use Modules\Memberships\Infrastructure\Services\MembershipFeeService;
 use Modules\Memberships\Infrastructure\Services\MembershipService;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 use Modules\Memberships\Infrastructure\Services\ProrationCalculator;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MembershipModelObserver;
 use Modules\Memberships\Listeners\AssignMemberRoleOnActivation;
 use Modules\Memberships\Listeners\NotifyMembershipExpiring;
 use Modules\Memberships\Listeners\RevokeMemberRoleOnExpiration;
@@ -86,6 +88,8 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         $this->registerSchedule();
         $this->registerEventListeners();
         $this->registerLivewireComponents();
+
+        MembershipModel::observe(MembershipModelObserver::class);
     }
 
     /**
