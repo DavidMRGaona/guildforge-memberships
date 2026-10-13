@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Tests\Feature\Filament;
 
 use App\Filament\Pages\ModuleSettingsPage;
+use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Filament\Actions\CreateAction;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -24,6 +25,7 @@ use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\MembershipsServiceProvider;
 use Tests\Support\Modules\InteractsWithModulePanel;
 use Tests\Support\Modules\ModuleTestCase;
 
@@ -130,6 +132,32 @@ final class MembershipsPanelTest extends ModuleTestCase
         Livewire::test(MembershipsRelationManager::class, ['ownerRecord' => $this->member(), 'pageClass' => EditMember::class])
             ->mountTableAction(CreateAction::class)
             ->assertTableActionDataSet(['period_type' => 'rolling']);
+    }
+
+    public function test_dashboard_widgets_are_registered(): void
+    {
+        $widgets = (new MembershipsServiceProvider($this->app))->registerFilamentWidgets();
+
+        $this->assertSame(
+            [MembershipStatsWidget::class, ExpiringMembershipsWidget::class, OverdueFeesWidget::class],
+            $widgets,
+        );
+    }
+
+    public function test_widgets_are_shown_to_users_who_can_list_members(): void
+    {
+        foreach ([MembershipStatsWidget::class, ExpiringMembershipsWidget::class, OverdueFeesWidget::class] as $widget) {
+            $this->assertTrue($widget::canView(), $widget);
+        }
+    }
+
+    public function test_widgets_are_hidden_without_permission_to_list_members(): void
+    {
+        $this->actingAs(UserModel::factory()->create());
+
+        foreach ([MembershipStatsWidget::class, ExpiringMembershipsWidget::class, OverdueFeesWidget::class] as $widget) {
+            $this->assertFalse($widget::canView(), $widget);
+        }
     }
 
     private function member(): MemberModel

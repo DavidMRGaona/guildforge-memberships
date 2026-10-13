@@ -46,6 +46,9 @@ use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 use Modules\Memberships\Infrastructure\Services\ProrationCalculator;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MembershipModelObserver;
+use Modules\Memberships\Filament\Widgets\ExpiringMembershipsWidget;
+use Modules\Memberships\Filament\Widgets\MembershipStatsWidget;
+use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
 use Modules\Memberships\Listeners\AssignMemberRoleOnActivation;
 use Modules\Memberships\Listeners\NotifyMembershipExpiring;
 use Modules\Memberships\Listeners\RevokeMemberRoleOnExpiration;
@@ -170,6 +173,20 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         return [
             MemberResource::class,
             FeeStructureResource::class,
+        ];
+    }
+
+    /**
+     * Register dashboard widgets provided by this module.
+     *
+     * @return array<class-string<\Filament\Widgets\Widget>>
+     */
+    public function registerFilamentWidgets(): array
+    {
+        return [
+            MembershipStatsWidget::class,
+            ExpiringMembershipsWidget::class,
+            OverdueFeesWidget::class,
         ];
     }
 
