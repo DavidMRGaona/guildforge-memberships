@@ -42,7 +42,7 @@ El módulo no tiene componentes Vue, así que no necesita `module:build`.
 
 ## Configuración
 
-Se configura en el panel, en **Módulos** → **Gestión de socios** → **Configurar**. Los valores guardados ahí tienen prioridad sobre `config/memberships.php`, que solo aporta los valores por defecto. `config/settings.php` es el fichero que escribe el panel y se publica con los valores por defecto: no lo edites a mano. Comprueba la configuración después de actualizar el módulo.
+Se configura en el panel, en **Módulos** → **Gestión de socios** → **Configurar**. Los valores guardados ahí tienen prioridad sobre `config/memberships.php`, que solo aporta los valores por defecto. `config/settings.php` contiene los valores por defecto con los que se publica el módulo: no lo edites a mano.
 
 | Opción | Descripción | Por defecto |
 |--------|-------------|-------------|
@@ -99,7 +99,7 @@ Con `enable_role_assignment` activado:
 
 El rol debe existir; por defecto es `member`, el rol de socio del core. Si no existe, no se asigna nada. Los socios sin usuario vinculado no reciben ningún rol. Los cambios de rol se aplican al momento.
 
-Al activar la opción, las cuotas que ya estaban activas no dan el rol por sí solas: ejecuta `php artisan memberships:sync-roles`, que asigna el rol a los usuarios vinculados con una cuota activa y lo retira a los demás usuarios vinculados a un socio (los usuarios sin socio vinculado no se tocan).
+Para empezar a usarlo, activa la opción en el panel y ejecuta después `php artisan memberships:sync-roles`: las cuotas que ya estaban activas no dan el rol por sí solas. El comando asigna el rol a los usuarios vinculados con una cuota activa y lo retira a los demás usuarios vinculados a un socio (los usuarios sin socio vinculado no se tocan).
 
 Al desactivar la opción, el módulo deja de asignar y retirar el rol, pero no quita los roles ya asignados: retíralos desde el editor de roles si hace falta. `memberships:sync-roles` no hace nada mientras la opción esté desactivada.
 
@@ -158,7 +158,7 @@ src/modules/memberships/
 ├── config/
 │   ├── memberships.php          # Valores por defecto
 │   ├── module.php
-│   └── settings.php             # Configuración guardada desde el panel
+│   └── settings.php             # Valores por defecto del formulario del panel
 ├── database/migrations/
 ├── lang/{es,en}/                # memberships.php, notifications.php
 ├── routes/                      # api.php y web.php (vacíos)

@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 /*
- * Values of the panel form (Módulos → Gestión de socios → Configurar).
- * The panel rewrites this file when the settings are saved.
+ * Defaults of the panel form (Módulos → Gestión de socios → Configurar).
+ * Edit the settings in the panel, not here.
  */
 return [
     'default_period_type' => 'calendar_year',
