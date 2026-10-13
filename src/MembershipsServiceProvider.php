@@ -123,10 +123,8 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
      */
     private function registerSchedule(): void
     {
-        $this->app->booted(function (): void {
-            /** @var Schedule $schedule */
-            $schedule = $this->app->make(Schedule::class);
-
+        // Only when the scheduler is resolved, so web requests do not build it
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             // Process expired memberships daily at midnight
             $schedule->command('memberships:process-expired')->daily();
         });

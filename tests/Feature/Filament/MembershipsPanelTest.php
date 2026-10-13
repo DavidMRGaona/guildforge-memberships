@@ -7,6 +7,8 @@ namespace Modules\Memberships\Tests\Feature\Filament;
 use App\Filament\Pages\ModuleSettingsPage;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Filament\Actions\CreateAction;
+use Illuminate\Console\Scheduling\Event as ScheduledEvent;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Modules\Memberships\Filament\Pages\MembershipSettings;
@@ -158,6 +160,17 @@ final class MembershipsPanelTest extends ModuleTestCase
         foreach ([MembershipStatsWidget::class, ExpiringMembershipsWidget::class, OverdueFeesWidget::class] as $widget) {
             $this->assertFalse($widget::canView(), $widget);
         }
+    }
+
+    public function test_the_expiry_command_is_scheduled_daily(): void
+    {
+        $events = array_values(array_filter(
+            $this->app->make(Schedule::class)->events(),
+            fn (ScheduledEvent $event): bool => str_contains((string) $event->command, 'memberships:process-expired'),
+        ));
+
+        $this->assertCount(1, $events);
+        $this->assertSame('0 0 * * *', $events[0]->expression);
     }
 
     private function member(): MemberModel
