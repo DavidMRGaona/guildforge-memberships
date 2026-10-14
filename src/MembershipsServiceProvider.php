@@ -27,8 +27,6 @@ use Modules\Memberships\Application\Services\MembershipServiceInterface;
 use Modules\Memberships\Application\Services\ProrationCalculatorInterface;
 use Modules\Memberships\Console\Commands\ProcessExpiredMemberships;
 use Modules\Memberships\Console\Commands\SyncMemberRoles;
-use Modules\Memberships\Domain\Events\MembershipActivated;
-use Modules\Memberships\Domain\Events\MembershipDeactivated;
 use Modules\Memberships\Domain\Events\MembershipExpiring;
 use Modules\Memberships\Domain\Repositories\FeeStructureRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
@@ -51,9 +49,7 @@ use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\Membership
 use Modules\Memberships\Filament\Widgets\ExpiringMembershipsWidget;
 use Modules\Memberships\Filament\Widgets\MembershipStatsWidget;
 use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
-use Modules\Memberships\Listeners\AssignMemberRoleOnActivation;
 use Modules\Memberships\Listeners\NotifyMembershipExpiring;
-use Modules\Memberships\Listeners\RevokeMemberRoleOnDeactivation;
 
 final class MembershipsServiceProvider extends ModuleServiceProvider
 {
@@ -139,16 +135,6 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
      */
     private function registerEventListeners(): void
     {
-        Event::listen(
-            MembershipActivated::class,
-            [AssignMemberRoleOnActivation::class, 'handle']
-        );
-
-        Event::listen(
-            MembershipDeactivated::class,
-            [RevokeMemberRoleOnDeactivation::class, 'handle']
-        );
-
         Event::listen(
             MembershipExpiring::class,
             [NotifyMembershipExpiring::class, 'handle']

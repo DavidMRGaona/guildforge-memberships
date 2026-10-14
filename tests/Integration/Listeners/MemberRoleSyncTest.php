@@ -339,6 +339,91 @@ final class MemberRoleSyncTest extends ModuleTestCase
         $this->assertFalse($this->authorization()->hasRole($this->user, 'member'));
     }
 
+    public function test_cancelling_from_a_stale_copy_revokes_the_role(): void
+    {
+        $membership = $this->membership('pending');
+        $staleCopy = MembershipModel::query()->findOrFail($membership->id);
+
+        $membership->update(['status' => 'active']);
+        $this->assertTrue($this->authorization()->hasRole($this->user, 'member'));
+
+        // The stale copy still believes the membership is pending
+        $staleCopy->update(['status' => 'cancelled']);
+
+        $this->assertFalse($this->authorization()->hasRole($this->user, 'member'));
+    }
+
+    public function test_deleting_a_stale_copy_revokes_the_role(): void
+    {
+        $membership = $this->membership('pending');
+        $staleCopy = MembershipModel::query()->findOrFail($membership->id);
+
+        $membership->update(['status' => 'active']);
+        $this->assertTrue($this->authorization()->hasRole($this->user, 'member'));
+
+        $staleCopy->delete();
+
+        $this->assertFalse($this->authorization()->hasRole($this->user, 'member'));
+    }
+
+    public function test_a_stale_copy_saving_other_fields_leaves_the_role_matching_the_database(): void
+    {
+        $membership = $this->membership('pending');
+        $staleCopy = MembershipModel::query()->findOrFail($membership->id);
+
+        $membership->update(['status' => 'active']);
+        $this->assertTrue($this->authorization()->hasRole($this->user, 'member'));
+        $membership->update(['status' => 'cancelled']);
+        $this->assertFalse($this->authorization()->hasRole($this->user, 'member'));
+
+        // The stale copy believes the membership is pending; Eloquent writes only the notes
+        $staleCopy->update(['notes' => 'Revisada']);
+
+        $this->assertSame('cancelled', MembershipModel::query()->findOrFail($membership->id)->status->value);
+        $this->assertFalse($this->authorization()->hasRole($this->user, 'member'));
+    }
+
+    public function test_moving_an_active_membership_to_another_member_moves_the_role(): void
+    {
+        $membership = $this->membership('active');
+        $otherUser = UserModel::factory()->create();
+        $otherMember = $this->linkedMember($otherUser, '2026-0003');
+        $this->assertTrue($this->authorization()->hasRole($this->user, 'member'));
+        $this->assertFalse($this->authorization()->hasRole($otherUser, 'member'));
+
+        $membership->update(['member_id' => $otherMember->id]);
+
+        $this->assertFalse($this->authorization()->hasRole($this->user, 'member'));
+        $this->assertTrue($this->authorization()->hasRole($otherUser, 'member'));
+    }
+
+    public function test_moving_a_membership_keeps_the_role_of_a_member_with_another_active_one(): void
+    {
+        $this->membership('active', now()->startOfYear(), now()->endOfYear());
+        $moved = $this->membership('active', now()->addYear()->startOfYear(), now()->addYear()->endOfYear());
+        $otherUser = UserModel::factory()->create();
+        $otherMember = $this->linkedMember($otherUser, '2026-0004');
+
+        $moved->update(['member_id' => $otherMember->id]);
+
+        $this->assertTrue($this->authorization()->hasRole($this->user, 'member'));
+        $this->assertTrue($this->authorization()->hasRole($otherUser, 'member'));
+    }
+
+    private function linkedMember(UserModel $user, string $number): MemberModel
+    {
+        return MemberModel::create([
+            'id' => (string) Str::uuid(),
+            'member_number' => $number,
+            'first_name' => 'Luis',
+            'last_name' => 'García',
+            'member_type' => 'regular',
+            'status' => 'active',
+            'user_id' => $user->id,
+            'joined_at' => now(),
+        ]);
+    }
+
     private function membership(string $status, ?\DateTimeInterface $start = null, ?\DateTimeInterface $end = null): MembershipModel
     {
         return MembershipModel::create([
