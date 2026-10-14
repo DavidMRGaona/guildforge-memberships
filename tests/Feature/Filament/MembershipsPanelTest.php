@@ -11,6 +11,7 @@ use Illuminate\Console\Scheduling\Event as ScheduledEvent;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Filament\Pages\MembershipSettings;
 use Modules\Memberships\Filament\RelationManagers\MembershipsRelationManager;
 use Modules\Memberships\Filament\Resources\FeeStructureResource;
@@ -26,7 +27,9 @@ use Modules\Memberships\Filament\Widgets\MembershipStatsWidget;
 use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipFeeModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 use Modules\Memberships\MembershipsServiceProvider;
 use Tests\Support\Modules\InteractsWithModulePanel;
 use Tests\Support\Modules\ModuleTestCase;
@@ -99,15 +102,27 @@ final class MembershipsPanelTest extends ModuleTestCase
         Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])->assertOk();
     }
 
-    public function test_the_member_role_field_follows_the_role_assignment_toggle(): void
+    public function test_the_settings_form_offers_the_permanent_member_types_and_no_role_name(): void
     {
-        Livewire::test(MembershipSettings::class)
-            // A test re-renders on every fillForm(); in the browser only a live toggle does
-            ->assertSeeHtml("\$wire.\$entangle('data.enable_role_assignment', true)")
-            ->fillForm(['enable_role_assignment' => false])
-            ->assertFormFieldIsHidden('member_role_name')
-            ->fillForm(['enable_role_assignment' => true])
-            ->assertFormFieldIsVisible('member_role_name');
+        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+            ->assertOk()
+            ->assertFormFieldExists('permanent_member_types')
+            ->assertFormFieldDoesNotExist('member_role_name')
+            ->assertSee(__('memberships::memberships.enums.member_type.honorary'))
+            ->assertSee(__('memberships::memberships.settings.fields.permanent_member_types_help'));
+    }
+
+    public function test_the_permanent_member_types_saved_in_the_panel_are_used(): void
+    {
+        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+            ->fillForm(['permanent_member_types' => ['founder', 'honorary']])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertEqualsCanonicalizing(
+            [MemberType::Founder, MemberType::Honorary],
+            $this->app->make(MembershipSettingsReader::class)->permanentMemberTypes(),
+        );
     }
 
     public function test_widgets_render(): void
@@ -127,25 +142,47 @@ final class MembershipsPanelTest extends ModuleTestCase
             ->assertFormFieldDoesNotExist('default_currency');
     }
 
-    public function test_the_member_role_cannot_be_an_administration_role(): void
+    public function test_an_empty_list_of_permanent_member_types_saved_in_the_panel_is_kept(): void
     {
-        $settingsFile = dirname(__DIR__, 3).'/config/settings.php';
-        $shipped = (string) file_get_contents($settingsFile);
+        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+            ->fillForm(['permanent_member_types' => []])
+            ->call('save')
+            ->assertHasNoFormErrors();
 
-        try {
-            foreach (['admin', 'editor'] as $roleName) {
-                Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
-                    ->fillForm(['enable_role_assignment' => true, 'member_role_name' => $roleName])
-                    ->call('save')
-                    ->assertHasFormErrors(['member_role_name' => 'not_in'])
-                    ->assertSee(__('memberships::memberships.settings.fields.member_role_name_not_privileged'));
-            }
-        } finally {
-            // A save that slipped through validation would have rewritten the shipped defaults
-            file_put_contents($settingsFile, $shipped);
-        }
+        // The shipped default (honorary) must not come back over the saved empty list
+        $this->assertSame([], $this->app->make(MembershipSettingsReader::class)->permanentMemberTypes());
+        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+            ->assertFormSet(['permanent_member_types' => []]);
+    }
 
-        $this->assertSame($shipped, file_get_contents($settingsFile));
+    public function test_the_expiring_memberships_widget_leaves_permanent_members_out(): void
+    {
+        $regular = $this->membershipFor($this->member(), now()->addDays(10));
+        $honorary = $this->membershipFor($this->member('honorary', '0002'), now()->addDays(10));
+
+        Livewire::test(ExpiringMembershipsWidget::class)
+            ->assertCanSeeTableRecords([$regular])
+            ->assertCanNotSeeTableRecords([$honorary]);
+    }
+
+    public function test_the_overdue_fees_widget_leaves_permanent_members_out(): void
+    {
+        $regular = $this->overdueFee($this->membershipFor($this->member(), now()->endOfYear()));
+        $honorary = $this->overdueFee($this->membershipFor($this->member('honorary', '0002'), now()->endOfYear()));
+
+        Livewire::test(OverdueFeesWidget::class)
+            ->assertCanSeeTableRecords([$regular])
+            ->assertCanNotSeeTableRecords([$honorary]);
+    }
+
+    public function test_a_type_left_out_of_the_permanent_types_shows_in_the_widgets_again(): void
+    {
+        config()->set('modules.settings.memberships.permanent_member_types', []);
+        $membership = $this->membershipFor($this->member('honorary', '0002'), now()->addDays(10));
+        $fee = $this->overdueFee($membership);
+
+        Livewire::test(ExpiringMembershipsWidget::class)->assertCanSeeTableRecords([$membership]);
+        Livewire::test(OverdueFeesWidget::class)->assertCanSeeTableRecords([$fee]);
     }
 
     public function test_new_memberships_default_to_the_period_type_saved_in_the_panel(): void
@@ -194,17 +231,40 @@ final class MembershipsPanelTest extends ModuleTestCase
         $this->assertSame('0 0 * * *', $events[0]->expression);
     }
 
-    private function member(): MemberModel
+    private function member(string $type = 'regular', string $number = '0001'): MemberModel
     {
         return MemberModel::create([
             'id' => (string) Str::uuid(),
-            'member_number' => '0001',
+            'member_number' => $number,
             'first_name' => 'Ana',
             'last_name' => 'Pérez',
             'email' => 'ana@example.test',
-            'member_type' => 'regular',
+            'member_type' => $type,
             'status' => 'active',
             'joined_at' => now(),
+        ]);
+    }
+
+    private function membershipFor(MemberModel $member, \DateTimeInterface $end): MembershipModel
+    {
+        return MembershipModel::create([
+            'id' => (string) Str::uuid(),
+            'member_id' => $member->id,
+            'period_type' => 'calendar_year',
+            'start_date' => now()->startOfYear(),
+            'end_date' => $end,
+            'status' => 'active',
+        ]);
+    }
+
+    private function overdueFee(MembershipModel $membership): MembershipFeeModel
+    {
+        return MembershipFeeModel::create([
+            'id' => (string) Str::uuid(),
+            'membership_id' => $membership->id,
+            'amount' => 30,
+            'currency' => 'EUR',
+            'due_date' => now()->subDays(5),
         ]);
     }
 }

@@ -79,4 +79,31 @@ final class Member
     {
         return $this->userId !== null;
     }
+
+    /**
+     * Whether this member gives their linked user the association member role.
+     *
+     * @param  list<MemberType>  $permanentTypes  types that hold the role without a membership
+     */
+    public function holdsAssociationRole(bool $hasActiveMembership, array $permanentTypes): bool
+    {
+        return self::qualifiesForAssociationRole($this->status, $this->memberType, $hasActiveMembership, $permanentTypes);
+    }
+
+    /**
+     * The only rule deciding the association member role: the record must be active
+     * (inactive, suspended and expelled members never hold it) and the member must either
+     * be of a permanent type or have an active membership.
+     *
+     * @param  list<MemberType>  $permanentTypes
+     */
+    public static function qualifiesForAssociationRole(
+        MemberStatus $status,
+        MemberType $type,
+        bool $hasActiveMembership,
+        array $permanentTypes,
+    ): bool {
+        return $status === MemberStatus::Active
+            && ($hasActiveMembership || in_array($type, $permanentTypes, true));
+    }
 }

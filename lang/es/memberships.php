@@ -200,6 +200,7 @@ return [
         'sections' => [
             'membership_period' => 'Configuración de periodo de cuota',
             'role_integration' => 'Integración con roles',
+            'permanent_members' => 'Socios permanentes',
             'notifications' => 'Notificaciones',
         ],
         'fields' => [
@@ -208,10 +209,9 @@ return [
             'academic_start_month' => 'Mes de inicio del año académico',
             'academic_start_month_help' => 'Solo aplica si el tipo de periodo es año académico',
             'enable_role_assignment' => 'Asignar rol automáticamente',
-            'enable_role_assignment_help' => 'Asigna el rol al usuario vinculado mientras el socio tiene una cuota activa y lo retira cuando deja de tenerla',
-            'member_role_name' => 'Nombre del rol de socio',
-            'member_role_name_help' => 'El rol que se asignará a los socios activos. No puede ser un rol de administración (admin o editor)',
-            'member_role_name_not_privileged' => 'El rol de socio no puede ser admin ni editor',
+            'enable_role_assignment_help' => 'Asigna el rol de socio (se elige en Configuración del sitio → Autenticación) al usuario vinculado mientras su ficha está activa y tiene una cuota activa o es de un tipo permanente, y se lo retira cuando deja de cumplirlo',
+            'permanent_member_types' => 'Tipos de socio permanentes',
+            'permanent_member_types_help' => 'Con la ficha activa, los socios de estos tipos tienen el rol de socio sin necesitar una cuota y no aparecen en los avisos de caducidad ni en las cuotas vencidas. Tras cambiar la lista, ejecuta memberships:sync-roles para actualizar los roles',
             'expiration_warning_days' => 'Días de aviso antes de expiración',
             'expiration_warning_days_help' => 'Días antes de la expiración para enviar notificación',
         ],
@@ -230,6 +230,20 @@ return [
             '12' => 'Diciembre',
         ],
         'saved' => 'Configuración guardada correctamente',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Console Commands
+    |--------------------------------------------------------------------------
+    */
+    'commands' => [
+        'sync_roles' => [
+            'disabled' => 'La asignación del rol de socio está desactivada en la configuración del módulo: no se ha cambiado nada.',
+            'role_unavailable' => 'El rol de socio configurado en el core no existe o no se puede usar (Configuración del sitio → Autenticación): no se ha cambiado nada.',
+            'summary' => ':checked usuarios revisados, :added con rol añadido, :removed con rol retirado',
+            'dry_run' => 'Simulación: no se ha cambiado ningún rol.',
+        ],
     ],
 
     /*

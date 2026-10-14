@@ -9,6 +9,7 @@ use Filament\Schemas\Schema;
 use App\Application\Modules\Services\ModuleManagerServiceInterface;
 use App\Domain\Modules\ValueObjects\ModuleName;
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -16,7 +17,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
+use Modules\Memberships\Domain\Enums\MemberType;
 
 /**
  * @property \Filament\Schemas\Schema $form
@@ -114,21 +115,20 @@ final class MembershipSettings extends Page implements HasForms
                     Toggle::make('enable_role_assignment')
                         ->label(__('memberships::memberships.settings.fields.enable_role_assignment'))
                         ->helperText(__('memberships::memberships.settings.fields.enable_role_assignment_help'))
-                        ->default(false)
-                        ->live(),
-
-                    TextInput::make('member_role_name')
-                        ->label(__('memberships::memberships.settings.fields.member_role_name'))
-                        ->helperText(__('memberships::memberships.settings.fields.member_role_name_help'))
-                        ->default('member')
-                        ->maxLength(100)
-                        ->notIn(MembershipSettingsReader::PRIVILEGED_ROLES)
-                        ->validationMessages([
-                            'not_in' => __('memberships::memberships.settings.fields.member_role_name_not_privileged'),
-                        ])
-                        ->visible(fn (callable $get): bool => (bool) $get('enable_role_assignment')),
+                        ->default(false),
                 ])
-                ->columns(2),
+                ->columns(1),
+
+            Section::make(__('memberships::memberships.settings.sections.permanent_members'))
+                ->schema([
+                    CheckboxList::make('permanent_member_types')
+                        ->label(__('memberships::memberships.settings.fields.permanent_member_types'))
+                        ->helperText(__('memberships::memberships.settings.fields.permanent_member_types_help'))
+                        ->options(self::memberTypeOptions())
+                        ->default([MemberType::Honorary->value])
+                        ->columns(3),
+                ])
+                ->columns(1),
 
             Section::make(__('memberships::memberships.settings.sections.notifications'))
                 ->schema([
@@ -143,6 +143,20 @@ final class MembershipSettings extends Page implements HasForms
                 ])
                 ->columns(2),
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function memberTypeOptions(): array
+    {
+        $options = [];
+
+        foreach (MemberType::cases() as $type) {
+            $options[$type->value] = $type->label();
+        }
+
+        return $options;
     }
 
     public function form(Schema $schema): Schema

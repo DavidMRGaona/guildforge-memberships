@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Services;
 
-use App\Domain\Enums\UserRole;
+use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
 
 /**
@@ -13,12 +13,6 @@ use Modules\Memberships\Domain\Enums\MembershipPeriodType;
  */
 final readonly class MembershipSettingsReader
 {
-    /**
-     * Roles the module must never grant or revoke: granting them to whoever has an
-     * active membership would hand out the panel.
-     */
-    public const array PRIVILEGED_ROLES = [UserRole::Admin->value, UserRole::Editor->value];
-
     public function defaultPeriodType(): MembershipPeriodType
     {
         return MembershipPeriodType::tryFrom((string) $this->get('default_period_type', MembershipPeriodType::CalendarYear->value))
@@ -37,15 +31,32 @@ final readonly class MembershipSettingsReader
         return (bool) $this->get('enable_role_assignment', false);
     }
 
-    public function memberRoleName(): string
+    /**
+     * Member types that hold the association member role without a membership and are
+     * left out of expiry warnings and overdue fees. Unknown values are ignored; a saved
+     * empty list means no type is permanent.
+     *
+     * @return list<MemberType>
+     */
+    public function permanentMemberTypes(): array
     {
-        $roleName = trim((string) $this->get('member_role_name', UserRole::Member->value));
+        $values = $this->get('permanent_member_types', [MemberType::Honorary->value]);
 
-        if ($roleName === '' || in_array(strtolower($roleName), self::PRIVILEGED_ROLES, true)) {
-            return UserRole::Member->value;
+        if (! is_array($values)) {
+            return [];
         }
 
-        return $roleName;
+        $types = [];
+
+        foreach ($values as $value) {
+            $type = is_string($value) ? MemberType::tryFrom($value) : null;
+
+            if ($type !== null && ! in_array($type, $types, true)) {
+                $types[] = $type;
+            }
+        }
+
+        return $types;
     }
 
     public function expirationWarningDays(): int

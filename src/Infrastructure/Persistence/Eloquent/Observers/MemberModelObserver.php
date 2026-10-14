@@ -8,26 +8,40 @@ use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Services\MemberRoleSynchronizer;
 
 /**
- * Keeps the member role in line when a member is linked to another user,
- * unlinked, deleted (soft or for good) or restored.
+ * Keeps the association member role in line when a member is created, changes status,
+ * type or linked user, or is deleted (soft or for good) or restored, whatever saved it
+ * (the panel or the module services, through the repository).
+ *
+ * Mass updates (MemberModel::query()->update()) fire no model events; the module does
+ * not use them on members.
  */
 final readonly class MemberModelObserver
 {
+    private const array ROLE_FIELDS = ['status', 'member_type', 'user_id'];
+
     public function __construct(
         private MemberRoleSynchronizer $roles,
     ) {
     }
 
+    public function created(MemberModel $member): void
+    {
+        $this->syncLinkedUser($member);
+    }
+
     public function updated(MemberModel $member): void
     {
-        if (! $member->wasChanged('user_id')) {
+        if (! $member->wasChanged(self::ROLE_FIELDS)) {
             return;
         }
 
-        $previousUserId = $member->getRawOriginal('user_id');
+        if ($member->wasChanged('user_id')) {
+            // The user linked before this save, as loaded from the database
+            $previousUserId = $member->getOriginal('user_id');
 
-        if (is_string($previousUserId)) {
-            $this->roles->syncUser($previousUserId);
+            if (is_string($previousUserId) && $previousUserId !== '') {
+                $this->roles->syncUser($previousUserId);
+            }
         }
 
         $this->syncLinkedUser($member);

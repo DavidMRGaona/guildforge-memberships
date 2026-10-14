@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Domain\Repositories;
 
 use Modules\Memberships\Domain\Entities\MembershipFee;
+use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Exceptions\MembershipFeeNotFoundException;
 use Modules\Memberships\Domain\ValueObjects\MembershipFeeId;
 use Modules\Memberships\Domain\ValueObjects\MembershipId;
@@ -38,9 +39,10 @@ interface MembershipFeeRepositoryInterface
     /**
      * Get all overdue fees (unpaid and dueDate < today).
      *
+     * @param  list<MemberType>  $excludedMemberTypes  leave out the fees of members of these types
      * @return array<MembershipFee>
      */
-    public function getOverdueFees(): array;
+    public function getOverdueFees(array $excludedMemberTypes = []): array;
 
     /**
      * Get all unpaid fees.
@@ -63,6 +65,8 @@ interface MembershipFeeRepositoryInterface
 
     /**
      * Count unpaid fees.
+     *
+     * @param  list<MemberType>  $excludedMemberTypes  leave out the fees of members of these types
      */
-    public function countUnpaid(): int;
+    public function countUnpaid(array $excludedMemberTypes = []): int;
 }

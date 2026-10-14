@@ -200,6 +200,7 @@ return [
         'sections' => [
             'membership_period' => 'Membership period settings',
             'role_integration' => 'Role integration',
+            'permanent_members' => 'Permanent members',
             'notifications' => 'Notifications',
         ],
         'fields' => [
@@ -208,10 +209,9 @@ return [
             'academic_start_month' => 'Academic year start month',
             'academic_start_month_help' => 'Only applies if period type is academic year',
             'enable_role_assignment' => 'Assign role automatically',
-            'enable_role_assignment_help' => 'Grants the role to the linked user while the member has an active membership and removes it when they no longer do',
-            'member_role_name' => 'Member role name',
-            'member_role_name_help' => 'The role to be assigned to active members. It cannot be an administration role (admin or editor)',
-            'member_role_name_not_privileged' => 'The member role cannot be admin or editor',
+            'enable_role_assignment_help' => 'Grants the association member role (chosen in Site settings → Authentication) to the linked user while their record is active and they have an active membership or a permanent type, and removes it when they no longer qualify',
+            'permanent_member_types' => 'Permanent member types',
+            'permanent_member_types_help' => 'While their record is active, members of these types hold the association member role without a membership and are left out of expiry warnings and overdue fees. After changing the list, run memberships:sync-roles to update the roles',
             'expiration_warning_days' => 'Warning days before expiration',
             'expiration_warning_days_help' => 'Days before expiration to send notification',
         ],
@@ -230,6 +230,20 @@ return [
             '12' => 'December',
         ],
         'saved' => 'Settings saved successfully',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Console Commands
+    |--------------------------------------------------------------------------
+    */
+    'commands' => [
+        'sync_roles' => [
+            'disabled' => 'Association member role assignment is disabled in the module settings: nothing was changed.',
+            'role_unavailable' => 'The association member role set in the core does not exist or cannot be used (Site settings → Authentication): nothing was changed.',
+            'summary' => ':checked users checked, :added granted the role, :removed had the role removed',
+            'dry_run' => 'Dry run: no role was changed.',
+        ],
     ],
 
     /*

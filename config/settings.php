@@ -10,6 +10,6 @@ return [
     'default_period_type' => 'calendar_year',
     'academic_start_month' => 9,
     'enable_role_assignment' => false,
-    'member_role_name' => 'member',
+    'permanent_member_types' => ['honorary'],
     'expiration_warning_days' => 30,
 ];

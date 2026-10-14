@@ -10,12 +10,14 @@ use Illuminate\Support\Facades\Notification;
 use Modules\Memberships\Domain\Events\MembershipExpiring;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
 use Modules\Memberships\Domain\ValueObjects\MemberId;
+use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 use Modules\Memberships\Notifications\MembershipExpiringNotification;
 
 final readonly class NotifyMembershipExpiring
 {
     public function __construct(
         private MemberRepositoryInterface $memberRepository,
+        private MembershipSettingsReader $settings,
     ) {
     }
 
@@ -27,7 +29,8 @@ final readonly class NotifyMembershipExpiring
         // Get the member
         $member = $this->memberRepository->find(new MemberId($event->memberId));
 
-        if ($member === null) {
+        // Permanent members (honorary by default) are never warned about expiry
+        if ($member === null || in_array($member->memberType, $this->settings->permanentMemberTypes(), true)) {
             return;
         }
 

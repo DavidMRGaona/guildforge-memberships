@@ -6,6 +6,7 @@ namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories;
 
 use DateTimeImmutable;
 use Modules\Memberships\Domain\Entities\Membership;
+use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Exceptions\MembershipNotFoundException;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
@@ -72,9 +73,10 @@ final readonly class EloquentMembershipRepository implements MembershipRepositor
     }
 
     /**
+     * @param  list<MemberType>  $excludedMemberTypes
      * @return array<Membership>
      */
-    public function getExpiringMemberships(int $daysFromNow): array
+    public function getExpiringMemberships(int $daysFromNow, array $excludedMemberTypes = []): array
     {
         $today = new DateTimeImmutable();
         $futureDate = $today->modify("+{$daysFromNow} days");
@@ -82,6 +84,7 @@ final readonly class EloquentMembershipRepository implements MembershipRepositor
         return MembershipModel::query()
             ->where('status', MembershipStatus::Active->value)
             ->whereBetween('end_date', [$today->format('Y-m-d'), $futureDate->format('Y-m-d')])
+            ->excludingMemberTypes($excludedMemberTypes)
             ->get()
             ->map(fn (MembershipModel $model): Membership => $this->toEntity($model))
             ->all();

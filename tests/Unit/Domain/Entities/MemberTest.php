@@ -10,6 +10,7 @@ use Modules\Memberships\Domain\Enums\MemberStatus;
 use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\ValueObjects\MemberId;
 use Modules\Memberships\Domain\ValueObjects\MemberNumber;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class MemberTest extends TestCase
@@ -172,17 +173,75 @@ final class MemberTest extends TestCase
         $this->assertFalse($unlinkedMember->isLinkedToUser());
     }
 
+    public function test_an_active_member_with_an_active_membership_holds_the_association_role(): void
+    {
+        $member = $this->createMember('John', 'Doe');
+
+        $this->assertTrue($member->holdsAssociationRole(hasActiveMembership: true, permanentTypes: [MemberType::Honorary]));
+    }
+
+    public function test_an_active_member_without_a_membership_does_not_hold_the_association_role(): void
+    {
+        $member = $this->createMember('John', 'Doe');
+
+        $this->assertFalse($member->holdsAssociationRole(hasActiveMembership: false, permanentTypes: [MemberType::Honorary]));
+    }
+
+    public function test_an_active_member_of_a_permanent_type_holds_the_association_role_without_a_membership(): void
+    {
+        $member = $this->createMember('John', 'Doe', type: MemberType::Honorary);
+
+        $this->assertTrue($member->holdsAssociationRole(hasActiveMembership: false, permanentTypes: [MemberType::Honorary]));
+    }
+
+    public function test_a_type_left_out_of_the_permanent_types_needs_a_membership(): void
+    {
+        $member = $this->createMember('John', 'Doe', type: MemberType::Honorary);
+
+        $this->assertFalse($member->holdsAssociationRole(hasActiveMembership: false, permanentTypes: []));
+        $this->assertTrue($member->holdsAssociationRole(hasActiveMembership: true, permanentTypes: []));
+    }
+
+    #[DataProvider('nonActiveStatuses')]
+    public function test_a_member_whose_record_is_not_active_never_holds_the_association_role(MemberStatus $status): void
+    {
+        $regular = $this->createMember('John', 'Doe', $status);
+        $honorary = $this->createMember('Jane', 'Smith', $status, MemberType::Honorary);
+
+        $this->assertFalse($regular->holdsAssociationRole(hasActiveMembership: true, permanentTypes: [MemberType::Honorary]));
+        $this->assertFalse($honorary->holdsAssociationRole(hasActiveMembership: true, permanentTypes: [MemberType::Honorary]));
+    }
+
+    /**
+     * @return array<string, array{MemberStatus}>
+     */
+    public static function nonActiveStatuses(): array
+    {
+        return [
+            'inactive' => [MemberStatus::Inactive],
+            'suspended' => [MemberStatus::Suspended],
+            'expelled' => [MemberStatus::Expelled],
+        ];
+    }
+
+    public function test_the_rule_can_be_applied_without_building_the_entity(): void
+    {
+        $this->assertTrue(Member::qualifiesForAssociationRole(MemberStatus::Active, MemberType::Founder, false, [MemberType::Founder]));
+        $this->assertFalse(Member::qualifiesForAssociationRole(MemberStatus::Suspended, MemberType::Founder, true, [MemberType::Founder]));
+    }
+
     private function createMember(
         string $firstName,
         string $lastName,
         MemberStatus $status = MemberStatus::Active,
+        MemberType $type = MemberType::Regular,
     ): Member {
         return new Member(
             id: MemberId::generate(),
             memberNumber: MemberNumber::generate(2026, 1),
             firstName: $firstName,
             lastName: $lastName,
-            memberType: MemberType::Regular,
+            memberType: $type,
             status: $status,
             joinedAt: new DateTimeImmutable(),
         );

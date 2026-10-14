@@ -6,6 +6,7 @@ namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories;
 
 use DateTimeImmutable;
 use Modules\Memberships\Domain\Entities\MembershipFee;
+use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Exceptions\MembershipFeeNotFoundException;
 use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
 use Modules\Memberships\Domain\ValueObjects\MembershipFeeId;
@@ -58,15 +59,17 @@ final readonly class EloquentMembershipFeeRepository implements MembershipFeeRep
     }
 
     /**
+     * @param  list<MemberType>  $excludedMemberTypes
      * @return array<MembershipFee>
      */
-    public function getOverdueFees(): array
+    public function getOverdueFees(array $excludedMemberTypes = []): array
     {
         $today = new DateTimeImmutable();
 
         return MembershipFeeModel::query()
             ->whereNull('paid_at')
             ->where('due_date', '<', $today->format('Y-m-d'))
+            ->excludingMemberTypes($excludedMemberTypes)
             ->get()
             ->map(fn (MembershipFeeModel $model): MembershipFee => $this->toEntity($model))
             ->all();
@@ -100,10 +103,14 @@ final readonly class EloquentMembershipFeeRepository implements MembershipFeeRep
             ->all();
     }
 
-    public function countUnpaid(): int
+    /**
+     * @param  list<MemberType>  $excludedMemberTypes
+     */
+    public function countUnpaid(array $excludedMemberTypes = []): int
     {
         return MembershipFeeModel::query()
             ->whereNull('paid_at')
+            ->excludingMemberTypes($excludedMemberTypes)
             ->count();
     }
 

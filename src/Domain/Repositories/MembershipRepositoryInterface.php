@@ -6,6 +6,7 @@ namespace Modules\Memberships\Domain\Repositories;
 
 use DateTimeImmutable;
 use Modules\Memberships\Domain\Entities\Membership;
+use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Exceptions\MembershipNotFoundException;
 use Modules\Memberships\Domain\ValueObjects\MemberId;
 use Modules\Memberships\Domain\ValueObjects\MembershipId;
@@ -44,9 +45,10 @@ interface MembershipRepositoryInterface
     /**
      * Get memberships expiring within the given number of days.
      *
+     * @param  list<MemberType>  $excludedMemberTypes  leave out the memberships of members of these types
      * @return array<Membership>
      */
-    public function getExpiringMemberships(int $daysFromNow): array;
+    public function getExpiringMemberships(int $daysFromNow, array $excludedMemberTypes = []): array;
 
     /**
      * Get all expired memberships (status = expired or endDate < today).
