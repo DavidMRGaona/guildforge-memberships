@@ -73,6 +73,7 @@ final class ProcessExpiredMemberships extends Command
             // Get all active memberships that have expired (end_date < today)
             $memberships = $this->membershipRepository->findActiveExpiredBefore($today);
 
+            // Permanent members' memberships expire too: their role does not depend on them
             foreach ($memberships as $membership) {
                 // Mark as expired: MembershipModelObserver dispatches MembershipExpired
                 $membership->expire();
@@ -95,7 +96,11 @@ final class ProcessExpiredMemberships extends Command
             $warningDays = $this->settings->expirationWarningDays();
             $today = new DateTimeImmutable('today');
 
-            $expiringMemberships = $this->membershipRepository->getExpiringMemberships($warningDays);
+            // Permanent members (honorary by default) are never warned about expiry
+            $expiringMemberships = $this->membershipRepository->getExpiringMemberships(
+                $warningDays,
+                $this->settings->permanentMemberTypes(),
+            );
 
             foreach ($expiringMemberships as $membership) {
                 // Check if we've already notified (check notes field for notification marker)
@@ -129,7 +134,8 @@ final class ProcessExpiredMemberships extends Command
         $this->components->task('Processing overdue fees', function () use (&$count): void {
             $count = 0;
 
-            $overdueFees = $this->membershipFeeRepository->getOverdueFees();
+            // Fees of permanent members are never reported overdue
+            $overdueFees = $this->membershipFeeRepository->getOverdueFees($this->settings->permanentMemberTypes());
 
             foreach ($overdueFees as $fee) {
                 // Check if we've already dispatched an overdue event for this fee

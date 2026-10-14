@@ -10,6 +10,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\Memberships\Domain\Enums\MemberStatus;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
+use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 final class MembershipStatsWidget extends StatsOverviewWidget
 {
@@ -34,7 +35,8 @@ final class MembershipStatsWidget extends StatsOverviewWidget
 
         $membersWithActiveMembership = $memberRepository->countWithActiveMembership();
 
-        $pendingPayments = $feeRepository->countUnpaid();
+        // Permanent members (honorary by default) owe nothing
+        $pendingPayments = $feeRepository->countUnpaid(resolve(MembershipSettingsReader::class)->permanentMemberTypes());
 
         return [
             Stat::make(

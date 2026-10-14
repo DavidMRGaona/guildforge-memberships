@@ -11,6 +11,7 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Modules\Memberships\Filament\Resources\MemberResource;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipFeeModel;
+use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 final class OverdueFeesWidget extends BaseWidget
 {
@@ -31,6 +32,7 @@ final class OverdueFeesWidget extends BaseWidget
                 MembershipFeeModel::query()
                     ->whereNull('paid_at')
                     ->where('due_date', '<', now())
+                    ->excludingMemberTypes(app(MembershipSettingsReader::class)->permanentMemberTypes())
                     ->with(['membership.member'])
                     ->orderBy('due_date', 'asc')
             )

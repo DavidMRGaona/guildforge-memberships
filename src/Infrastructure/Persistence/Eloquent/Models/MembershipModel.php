@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 
@@ -107,5 +109,22 @@ final class MembershipModel extends Model
     public function fees(): HasMany
     {
         return $this->hasMany(MembershipFeeModel::class, 'membership_id');
+    }
+
+    /**
+     * Leave out the memberships of members of the given types, deleted members included.
+     *
+     * @param  Builder<MembershipModel>  $query
+     * @param  list<MemberType>  $types
+     */
+    public function scopeExcludingMemberTypes(Builder $query, array $types): void
+    {
+        if ($types === []) {
+            return;
+        }
+
+        $query->whereDoesntHave('member', fn (Builder $member): Builder => $member
+            ->withTrashed()
+            ->whereIn('member_type', array_map(fn (MemberType $type): string => $type->value, $types)));
     }
 }

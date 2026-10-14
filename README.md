@@ -9,12 +9,13 @@ Módulo para GuildForge que gestiona los socios de la asociación, sus cuotas (p
 - **Cuotas**: periodos con fecha de inicio y fin y estado (pendiente, activa, expirada, cancelada). La fecha de fin se calcula a partir del tipo de periodo.
 - **Tarifas**: importe por tipo de socio y tipo de periodo, con fechas de validez.
 - **Expiración diaria**: un comando programado marca las cuotas caducadas, avisa por correo de las que están a punto de caducar y detecta pagos vencidos.
-- **Rol de socio** (opcional): asigna un rol al usuario vinculado mientras tiene una cuota activa.
+- **Rol de socio** (opcional): asigna el rol de socio del core al usuario vinculado mientras su ficha está activa y tiene una cuota activa o es de un tipo permanente.
+- **Socios permanentes**: los tipos marcados (honorario por defecto) no necesitan cuota y quedan fuera de los avisos de caducidad y de las cuotas vencidas.
 - **Widgets del dashboard**: estadísticas de socios, cuotas próximas a expirar y cuotas vencidas sin pagar.
 
 ## Requisitos
 
-- GuildForge core `^3.6` (desde esta versión del core, la configuración guardada en el panel se conserva al actualizar los módulos)
+- GuildForge core `^3.8` (el rol de socio se elige en el core; desde la 3.6, la configuración guardada en el panel se conserva al actualizar los módulos)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).
@@ -49,7 +50,7 @@ Se configura en el panel, en **Módulos** → **Gestión de socios** → **Confi
 | `default_period_type` | Tipo de periodo que propone el formulario de una cuota nueva | `calendar_year` |
 | `academic_start_month` | Mes de inicio del año académico | `9` (septiembre) |
 | `enable_role_assignment` | Asignar y retirar el rol de socio automáticamente | `false` |
-| `member_role_name` | Nombre del rol que se asigna; no puede ser `admin` ni `editor` | `member` |
+| `permanent_member_types` | Tipos de socio permanentes: con la ficha activa tienen el rol sin cuota y no reciben avisos de caducidad ni de impago | `['honorary']` |
 | `expiration_warning_days` | Días antes del fin de una cuota en que se envía el aviso | `30` |
 
 ## Tipos de periodo
@@ -71,9 +72,9 @@ Cuotas:
 | Expirada | `expired` | Fecha de fin superada (la marca el comando diario) o puesta a mano |
 | Cancelada | `cancelled` | Cancelada a mano; se guarda `cancelled_at` |
 
-Socios: activo (`active`), inactivo (`inactive`), suspendido (`suspended`) y expulsado (`expelled`).
+Socios (estado de la ficha): activo (`active`), inactivo (`inactive`), suspendido (`suspended`) y expulsado (`expelled`). Solo una ficha activa da el rol de socio.
 
-Tipos de socio: regular, estudiante, senior, honorario y fundador.
+Tipos de socio: regular (`regular`), estudiante (`student`), senior (`senior`), honorario (`honorary`) y fundador (`founder`).
 
 Métodos de pago: efectivo (`cash`), transferencia (`bank_transfer`), tarjeta (`card`) y otro (`other`).
 
@@ -81,9 +82,9 @@ Métodos de pago: efectivo (`cash`), transferencia (`bank_transfer`), tarjeta (`
 
 El módulo programa `memberships:process-expired` cada día a medianoche. El comando:
 
-1. Marca como expiradas las cuotas activas cuya fecha de fin ya ha pasado.
-2. Envía un correo al socio (al usuario vinculado o, si no tiene, al email del socio) cuando a una cuota activa le quedan `expiration_warning_days` días o menos. El aviso se envía una vez al año por cuota y queda anotado en sus notas como `[EXPIRING_NOTIFIED:AAAA]`.
-3. Dispara `FeePaymentOverdue` una vez al mes por cada pago vencido sin pagar (anotado como `[OVERDUE_NOTIFIED:AAAA-MM]`). El módulo no incluye ninguna notificación para este evento.
+1. Marca como expiradas las cuotas activas cuya fecha de fin ya ha pasado, también las de los socios permanentes (su rol no depende de ellas).
+2. Envía un correo al socio (al usuario vinculado o, si no tiene, al email del socio) cuando a una cuota activa le quedan `expiration_warning_days` días o menos. El aviso se envía una vez al año por cuota y queda anotado en sus notas como `[EXPIRING_NOTIFIED:AAAA]`. Los socios permanentes no reciben este aviso.
+3. Dispara `FeePaymentOverdue` una vez al mes por cada pago vencido sin pagar (anotado como `[OVERDUE_NOTIFIED:AAAA-MM]`), salvo los de socios permanentes. El módulo no incluye ninguna notificación para este evento.
 
 Para lanzarlo a mano:
 
@@ -91,25 +92,41 @@ Para lanzarlo a mano:
 
 ## Rol de socio
 
-Con `enable_role_assignment` activado:
+El rol de socio no se configura en el módulo: es el que se elige en el core, en **Configuración del sitio** → **Autenticación** (por defecto `socio`). `member` es el rol de cualquier usuario registrado y el módulo nunca lo asigna ni lo retira, como tampoco `admin` ni `editor`.
 
-- Cuando una cuota se crea como activa o pasa a activa (desde la ficha del socio en el panel o por código), el usuario vinculado al socio recibe el rol `member_role_name`.
-- Cuando una cuota activa deja de estarlo (expira por el comando diario, se marca como expirada, cancelada o pendiente, se borra o pasa a otro socio), se retira el rol si el usuario no tiene otra cuota activa en ningún socio vinculado.
-- Si se cambia o se quita el usuario vinculado a un socio, el rol pasa al usuario nuevo (si hay cuota activa) y se retira al anterior. Borrar el socio retira el rol; restaurarlo lo devuelve si tiene una cuota activa.
+Con `enable_role_assignment` activado, el usuario vinculado a un socio tiene el rol de socio si alguna de sus fichas (sin borrar) cumple a la vez:
 
-Tras cada cambio en una cuota o un socio, el módulo vuelve a comprobar en la base de datos si el usuario tiene alguna cuota activa, y asigna o retira el rol según el resultado. Los cambios de rol se aplican al momento.
+- la ficha está activa (inactivo, suspendido y expulsado no dan el rol), y
+- el socio tiene una cuota activa o es de un tipo permanente (`permanent_member_types`).
 
-El rol debe existir; por defecto es `member`, el rol de socio del core. Si no existe, no se asigna nada. No puede ser `admin` ni `editor`: el formulario los rechaza y, si llegan por otra vía, el módulo usa `member`. Los socios sin usuario vinculado no reciben ningún rol.
+El módulo vuelve a comprobarlo en la base de datos y asigna o retira el rol en cuanto cambia algo que lo afecta, desde el panel o desde los servicios del módulo:
 
-El estado del socio (inactivo, suspendido, expulsado) no afecta al rol: solo cuentan sus cuotas. Para retirar el rol a un socio suspendido o expulsado, cancela su cuota activa.
+- Una cuota se crea, cambia de estado (activa, expirada por el comando diario o a mano, cancelada, pendiente), se borra o pasa a otro socio.
+- La ficha cambia de estado o de tipo, se crea, se borra (también definitivamente) o se restaura. Suspender o expulsar retira el rol aunque haya una cuota activa; reactivar la ficha lo devuelve si cumple lo demás.
+- La ficha cambia de usuario vinculado o se desvincula: se revisan el usuario anterior y el nuevo.
 
-Retirar el rol no distingue cómo se asignó: si un administrador dio el rol a mano a un usuario vinculado a un socio sin cuota activa, el siguiente cambio en sus cuotas o `memberships:sync-roles` se lo quitan.
+Un usuario con varias fichas conserva el rol mientras una de ellas cumpla (por ejemplo, una activa con cuota y otra suspendida). Los socios sin usuario vinculado no reciben ningún rol. Los cambios de rol se aplican al momento.
 
-Para empezar a usarlo, activa la opción en el panel y ejecuta después `php artisan memberships:sync-roles`: las cuotas que ya estaban activas no dan el rol por sí solas. El comando asigna el rol a los usuarios vinculados con una cuota activa y lo retira a los demás usuarios vinculados a un socio (los usuarios sin socio vinculado no se tocan).
+Si el ajuste del core no se puede usar (contiene un rol base) o el rol elegido no existe, el módulo no cambia ningún rol y deja un aviso en el log.
 
-Al desactivar la opción, el módulo deja de asignar y retirar el rol, pero no quita los roles ya asignados: retíralos desde el editor de roles si hace falta. `memberships:sync-roles` no hace nada mientras la opción esté desactivada.
+Retirar el rol no distingue cómo se asignó: si un administrador dio el rol de socio a mano a un usuario vinculado a una ficha que no cumple, el siguiente cambio en esa ficha o `memberships:sync-roles` se lo quitan.
 
-Cambiar `member_role_name` no retira el rol anterior a nadie: retíralo desde el editor de roles y ejecuta `memberships:sync-roles` para asignar el nuevo. Los módulos que deciden quién es socio por el rol `member` no siguen un cambio de `member_role_name`.
+### Sincronizar los roles
+
+    php artisan memberships:sync-roles
+    php artisan memberships:sync-roles --dry-run
+
+Revisa todos los usuarios vinculados a una ficha (también a fichas borradas), asigna el rol a los que cumplen y lo retira a los demás; los usuarios sin ficha vinculada no se tocan. Termina con «N usuarios revisados, A con rol añadido, R con rol retirado». Es idempotente: una segunda ejecución no cambia nada. Con `--dry-run` solo cuenta lo que haría, sin escribir. No hace nada (y lo indica) mientras `enable_role_assignment` esté desactivado o el rol de socio del core no se pueda usar.
+
+Ejecútalo:
+
+- al activar `enable_role_assignment`: las cuotas y fichas que ya existían no dan el rol por sí solas;
+- tras cambiar `permanent_member_types`: el cambio de ajuste no revisa los roles;
+- tras actualizar desde una versión que usaba `member_role_name`.
+
+Al desactivar `enable_role_assignment`, el módulo deja de asignar y retirar el rol, pero no quita los roles ya asignados: retíralos desde el editor de roles si hace falta.
+
+Cambiar el rol de socio en el core no retira el anterior a quien ya lo tenía, y `memberships:sync-roles` tampoco lo hace: solo gestiona el rol configurado en ese momento. Retira el anterior desde el editor de roles y ejecuta el comando para asignar el nuevo.
 
 ## Panel de administración
 
@@ -124,9 +141,9 @@ El panel no tiene todavía pantallas para registrar pagos.
 
 Solo los ven los usuarios que pueden ver el listado de socios (`memberships:members.view_any`). Se activan, ordenan y limitan en **Panel de control** (configuración del panel).
 
-- **Estadísticas**: total de socios, socios activos, socios con cuota activa y pagos pendientes.
-- **Cuotas próximas a expirar**: cuotas activas que terminan en los próximos 30 días.
-- **Cuotas vencidas sin pagar**: pagos con fecha de vencimiento pasada y sin pagar.
+- **Estadísticas**: total de socios, socios activos, socios con cuota activa y pagos pendientes (sin contar los de socios permanentes).
+- **Cuotas próximas a expirar**: cuotas activas que terminan en los próximos 30 días, salvo las de socios permanentes.
+- **Cuotas vencidas sin pagar**: pagos con fecha de vencimiento pasada y sin pagar, salvo los de socios permanentes.
 
 ## Permisos
 
@@ -152,8 +169,8 @@ Los permisos llevan el prefijo `memberships:` y se asignan a los roles en el edi
 | `MembershipActivated` | Al crear una cuota activa o pasarla a activa |
 | `MembershipDeactivated` | Cuando una cuota activa deja de estarlo (cambio de estado, borrado o cambio de socio) |
 | `MembershipExpired` | Al pasar una cuota a expirada |
-| `MembershipExpiring` | Cuando el comando diario envía el aviso de expiración |
-| `FeePaymentOverdue` | Cuando el comando diario detecta un pago vencido |
+| `MembershipExpiring` | Cuando el comando diario envía el aviso de expiración (nunca para socios permanentes) |
+| `FeePaymentOverdue` | Cuando el comando diario detecta un pago vencido (nunca para socios permanentes) |
 
 Las demás clases de `src/Domain/Events` (`MemberCreated`, `MemberStatusChanged`, `MembershipCreated`, `MembershipCancelled`, `FeePaymentRecorded`) no se disparan todavía.
 
@@ -173,8 +190,8 @@ src/modules/memberships/
 │   ├── Console/Commands/        # memberships:process-expired, memberships:sync-roles
 │   ├── Domain/                  # Entidades, value objects, enums, eventos
 │   ├── Filament/                # Resources, relation manager, widgets, formulario de configuración
-│   ├── Infrastructure/          # Modelos, observers, repositorios, servicios
-│   ├── Listeners/               # Rol de socio y aviso de expiración
+│   ├── Infrastructure/          # Modelos, observers (rol de socio), repositorios, servicios
+│   ├── Listeners/               # Aviso de expiración
 │   ├── Notifications/
 │   └── Policies/
 └── tests/

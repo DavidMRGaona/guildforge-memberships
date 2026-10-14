@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Filament\Resources\MemberResource;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 final class ExpiringMembershipsWidget extends BaseWidget
 {
@@ -34,6 +35,7 @@ final class ExpiringMembershipsWidget extends BaseWidget
                     ->where('status', MembershipStatus::Active->value)
                     ->where('end_date', '<=', now()->addDays(30))
                     ->where('end_date', '>=', now())
+                    ->excludingMemberTypes(app(MembershipSettingsReader::class)->permanentMemberTypes())
                     ->with('member')
                     ->orderBy('end_date', 'asc')
             )

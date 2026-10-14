@@ -13,12 +13,13 @@ final class SyncMemberRoles extends Command
     /**
      * @var string
      */
-    protected $signature = 'memberships:sync-roles';
+    protected $signature = 'memberships:sync-roles
+        {--dry-run : Report the changes without granting or removing any role}';
 
     /**
      * @var string
      */
-    protected $description = 'Grant the member role to users with an active membership and remove it from the other users linked to a member';
+    protected $description = 'Grant the association member role to the linked users that qualify and remove it from the other users linked to a member';
 
     public function __construct(
         private readonly MemberRoleSynchronizer $roles,
@@ -30,14 +31,29 @@ final class SyncMemberRoles extends Command
     public function handle(): int
     {
         if (! $this->settings->roleAssignmentEnabled()) {
-            $this->components->error('Role assignment is disabled in the module settings: nothing was changed.');
+            $this->components->error(__('memberships::memberships.commands.sync_roles.disabled'));
 
             return self::FAILURE;
         }
 
-        $count = $this->roles->syncAll();
+        $dryRun = (bool) $this->option('dry-run');
+        $summary = $this->roles->syncAll($dryRun);
 
-        $this->components->info("Member role synchronised for {$count} linked users.");
+        if ($summary === null) {
+            $this->components->error(__('memberships::memberships.commands.sync_roles.role_unavailable'));
+
+            return self::FAILURE;
+        }
+
+        $this->components->info(__('memberships::memberships.commands.sync_roles.summary', [
+            'checked' => $summary->checked,
+            'added' => $summary->added,
+            'removed' => $summary->removed,
+        ]));
+
+        if ($dryRun) {
+            $this->components->warn(__('memberships::memberships.commands.sync_roles.dry_run'));
+        }
 
         return self::SUCCESS;
     }

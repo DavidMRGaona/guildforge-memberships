@@ -21,11 +21,19 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    // Whether to grant the role when a membership is activated (and revoke it on expiry)
+    // Whether to grant the association member role (a core site setting, "socio" by default)
+    // to the users linked to members that qualify, and revoke it from the others
     'enable_role_assignment' => false,
 
-    // Name of the role to assign to active members
-    'member_role_name' => 'member',
+    /*
+    |--------------------------------------------------------------------------
+    | Permanent Member Types
+    |--------------------------------------------------------------------------
+    */
+
+    // Member types that hold the role without a membership while their record is active,
+    // and are left out of expiry warnings and overdue fees
+    'permanent_member_types' => ['honorary'],
 
     /*
     |--------------------------------------------------------------------------
