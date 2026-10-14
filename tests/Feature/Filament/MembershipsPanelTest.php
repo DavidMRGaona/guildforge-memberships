@@ -142,6 +142,19 @@ final class MembershipsPanelTest extends ModuleTestCase
             ->assertFormFieldDoesNotExist('default_currency');
     }
 
+    public function test_an_empty_list_of_permanent_member_types_saved_in_the_panel_is_kept(): void
+    {
+        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+            ->fillForm(['permanent_member_types' => []])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        // The shipped default (honorary) must not come back over the saved empty list
+        $this->assertSame([], $this->app->make(MembershipSettingsReader::class)->permanentMemberTypes());
+        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+            ->assertFormSet(['permanent_member_types' => []]);
+    }
+
     public function test_the_expiring_memberships_widget_leaves_permanent_members_out(): void
     {
         $regular = $this->membershipFor($this->member(), now()->addDays(10));

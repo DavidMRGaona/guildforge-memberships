@@ -168,9 +168,11 @@ Los permisos llevan el prefijo `memberships:` y se asignan a los roles en el edi
 |--------|-------------------|
 | `MembershipActivated` | Al crear una cuota activa o pasarla a activa |
 | `MembershipDeactivated` | Cuando una cuota activa deja de estarlo (cambio de estado, borrado o cambio de socio) |
-| `MembershipExpired` | Al pasar una cuota a expirada |
+| `MembershipExpired` | Al pasar una cuota a expirada, también las de socios permanentes |
 | `MembershipExpiring` | Cuando el comando diario envía el aviso de expiración (nunca para socios permanentes) |
 | `FeePaymentOverdue` | Cuando el comando diario detecta un pago vencido (nunca para socios permanentes) |
+
+El módulo no escucha `MembershipExpired`. Un listener que notifique al socio con este evento debe excluir los tipos permanentes (`permanent_member_types`), igual que hacen el aviso de caducidad y `FeePaymentOverdue`.
 
 Las demás clases de `src/Domain/Events` (`MemberCreated`, `MemberStatusChanged`, `MembershipCreated`, `MembershipCancelled`, `FeePaymentRecorded`) no se disparan todavía.
 

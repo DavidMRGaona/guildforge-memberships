@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Modules\Memberships\Console\Commands\SyncMemberRoles;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Infrastructure\Services\MemberRoleSynchronizer;
 use Tests\Support\Modules\ModuleTestCase;
 
 final class SyncMemberRolesTest extends ModuleTestCase
@@ -138,6 +139,33 @@ final class SyncMemberRolesTest extends ModuleTestCase
 
         $this->assertFalse($this->authorization()->hasRole($toGrant, 'socio'));
         $this->assertTrue($this->authorization()->hasRole($toRevoke, 'socio'));
+    }
+
+    public function test_it_revokes_the_role_from_a_user_linked_only_to_a_deleted_member(): void
+    {
+        $user = $this->user('socio');
+        $member = $this->member($user, 'honorary');
+        $member->delete();
+        $this->assertTrue($this->authorization()->hasRole($user, 'socio'));
+        $this->enable();
+
+        [$exitCode, $output] = $this->sync();
+        $this->assertSame(0, $exitCode, $output);
+        $this->assertStringContainsString($this->summary(1, 0, 1), $output);
+
+        $this->assertFalse($this->authorization()->hasRole($user, 'socio'));
+        $this->assertTrue($this->authorization()->hasRole($user, 'member'));
+    }
+
+    public function test_the_synchronizer_changes_nothing_on_its_own_while_role_assignment_is_disabled(): void
+    {
+        config()->set('modules.settings.memberships.enable_role_assignment', false);
+        $user = $this->user('socio');
+        $this->member($user);
+
+        $this->assertNull($this->app->make(MemberRoleSynchronizer::class)->syncAll());
+
+        $this->assertTrue($this->authorization()->hasRole($user, 'socio'));
     }
 
     public function test_it_changes_nothing_while_role_assignment_is_disabled(): void

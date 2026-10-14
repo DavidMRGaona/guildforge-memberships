@@ -64,10 +64,15 @@ final readonly class MemberRoleSynchronizer
     /**
      * Synchronise every user linked to a member, deleted members included.
      *
-     * @return RoleSyncSummaryDTO|null null when the core role cannot be used (nothing is checked)
+     * @return RoleSyncSummaryDTO|null null when role assignment is disabled or the core role
+     *                                 cannot be used (nothing is checked)
      */
     public function syncAll(bool $dryRun = false): ?RoleSyncSummaryDTO
     {
+        if (! $this->settings->roleAssignmentEnabled()) {
+            return null;
+        }
+
         $roleName = $this->usableRoleName();
 
         if ($roleName === null) {
