@@ -314,6 +314,31 @@ final class MemberRoleSyncTest extends ModuleTestCase
         $this->assertTrue($this->authorization()->hasRole($this->user, 'member'));
     }
 
+    public function test_an_administration_role_name_falls_back_to_the_member_role(): void
+    {
+        RoleModel::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin']);
+        config()->set('modules.settings.memberships.member_role_name', 'admin');
+
+        $this->membership('active');
+
+        $this->assertFalse($this->authorization()->hasRole($this->user, 'admin'));
+        $this->assertTrue($this->authorization()->hasRole($this->user, 'member'));
+    }
+
+    public function test_an_administration_role_name_never_revokes_that_role(): void
+    {
+        RoleModel::firstOrCreate(['name' => 'editor'], ['display_name' => 'Editor']);
+        $this->authorization()->assignRole($this->user, 'editor');
+        config()->set('modules.settings.memberships.member_role_name', 'editor');
+        $membership = $this->membership('active');
+
+        $membership->update(['status' => 'cancelled']);
+        $this->assertSame(0, $this->app->make(Kernel::class)->call('memberships:sync-roles'));
+
+        $this->assertTrue($this->authorization()->hasRole($this->user, 'editor'));
+        $this->assertFalse($this->authorization()->hasRole($this->user, 'member'));
+    }
+
     private function membership(string $status, ?\DateTimeInterface $start = null, ?\DateTimeInterface $end = null): MembershipModel
     {
         return MembershipModel::create([

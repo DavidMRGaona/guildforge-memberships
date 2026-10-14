@@ -16,6 +16,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 /**
  * @property \Filament\Schemas\Schema $form
@@ -121,6 +122,10 @@ final class MembershipSettings extends Page implements HasForms
                         ->helperText(__('memberships::memberships.settings.fields.member_role_name_help'))
                         ->default('member')
                         ->maxLength(100)
+                        ->notIn(MembershipSettingsReader::PRIVILEGED_ROLES)
+                        ->validationMessages([
+                            'not_in' => __('memberships::memberships.settings.fields.member_role_name_not_privileged'),
+                        ])
                         ->visible(fn (callable $get): bool => (bool) $get('enable_role_assignment')),
                 ])
                 ->columns(2),

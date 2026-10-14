@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Services;
 
+use App\Domain\Enums\UserRole;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
 
 /**
@@ -12,6 +13,12 @@ use Modules\Memberships\Domain\Enums\MembershipPeriodType;
  */
 final readonly class MembershipSettingsReader
 {
+    /**
+     * Roles the module must never grant or revoke: granting them to whoever has an
+     * active membership would hand out the panel.
+     */
+    public const array PRIVILEGED_ROLES = [UserRole::Admin->value, UserRole::Editor->value];
+
     public function defaultPeriodType(): MembershipPeriodType
     {
         return MembershipPeriodType::tryFrom((string) $this->get('default_period_type', MembershipPeriodType::CalendarYear->value))
@@ -32,9 +39,13 @@ final readonly class MembershipSettingsReader
 
     public function memberRoleName(): string
     {
-        $roleName = trim((string) $this->get('member_role_name', 'member'));
+        $roleName = trim((string) $this->get('member_role_name', UserRole::Member->value));
 
-        return $roleName !== '' ? $roleName : 'member';
+        if ($roleName === '' || in_array(strtolower($roleName), self::PRIVILEGED_ROLES, true)) {
+            return UserRole::Member->value;
+        }
+
+        return $roleName;
     }
 
     public function expirationWarningDays(): int

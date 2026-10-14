@@ -84,4 +84,20 @@ final class MembershipSettingsReaderTest extends TestCase
 
         $this->assertSame('member', $this->reader->memberRoleName());
     }
+
+    public function test_an_administration_role_falls_back_to_member(): void
+    {
+        foreach (['admin', 'editor', ' Admin ', 'EDITOR'] as $roleName) {
+            config()->set('modules.settings.memberships.member_role_name', $roleName);
+
+            $this->assertSame('member', $this->reader->memberRoleName(), $roleName);
+        }
+    }
+
+    public function test_an_administration_role_in_the_module_config_falls_back_to_member(): void
+    {
+        config()->set('memberships.member_role_name', 'admin');
+
+        $this->assertSame('member', $this->reader->memberRoleName());
+    }
 }

@@ -127,6 +127,27 @@ final class MembershipsPanelTest extends ModuleTestCase
             ->assertFormFieldDoesNotExist('default_currency');
     }
 
+    public function test_the_member_role_cannot_be_an_administration_role(): void
+    {
+        $settingsFile = dirname(__DIR__, 3).'/config/settings.php';
+        $shipped = (string) file_get_contents($settingsFile);
+
+        try {
+            foreach (['admin', 'editor'] as $roleName) {
+                Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+                    ->fillForm(['enable_role_assignment' => true, 'member_role_name' => $roleName])
+                    ->call('save')
+                    ->assertHasFormErrors(['member_role_name' => 'not_in'])
+                    ->assertSee(__('memberships::memberships.settings.fields.member_role_name_not_privileged'));
+            }
+        } finally {
+            // A save that slipped through validation would have rewritten the shipped defaults
+            file_put_contents($settingsFile, $shipped);
+        }
+
+        $this->assertSame($shipped, file_get_contents($settingsFile));
+    }
+
     public function test_new_memberships_default_to_the_period_type_saved_in_the_panel(): void
     {
         config()->set('modules.settings.memberships.default_period_type', 'rolling');
