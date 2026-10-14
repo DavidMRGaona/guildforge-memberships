@@ -1,14 +1,14 @@
 {
   "name": "memberships",
   "displayName": "Gestión de socios",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "repository": "DavidMRGaona/guildforge-memberships",
   "namespace": "Modules\\Memberships",
   "provider": "MembershipsServiceProvider",
   "description": "Módulo de gestión de socios, membresías y cuotas",
   "author": "GuildForge",
   "requires": {
-    "core": "^3.0",
+    "core": "^3.6",
     "filament": "^5.0",
     "php": ">=8.5",
     "laravel": ">=13.0"
@@ -21,11 +21,6 @@
       "members.create",
       "members.update",
       "members.delete",
-      "memberships.view_any",
-      "memberships.view",
-      "memberships.create",
-      "memberships.update",
-      "memberships.delete",
       "fee_structures.view_any",
       "fee_structures.view",
       "fee_structures.create",

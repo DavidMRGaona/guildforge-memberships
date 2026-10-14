@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace Modules\Memberships\Tests\Feature\Filament;
 
 use App\Filament\Pages\ModuleSettingsPage;
+use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use Filament\Actions\CreateAction;
+use Illuminate\Console\Scheduling\Event as ScheduledEvent;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Modules\Memberships\Filament\Pages\MembershipSettings;
@@ -23,6 +27,7 @@ use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\MembershipsServiceProvider;
 use Tests\Support\Modules\InteractsWithModulePanel;
 use Tests\Support\Modules\ModuleTestCase;
 
@@ -110,6 +115,83 @@ final class MembershipsPanelTest extends ModuleTestCase
         foreach ([MembershipStatsWidget::class, ExpiringMembershipsWidget::class, OverdueFeesWidget::class] as $widget) {
             Livewire::test($widget)->assertOk();
         }
+    }
+
+    public function test_the_settings_form_has_no_unused_fields(): void
+    {
+        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+            ->assertOk()
+            ->assertFormFieldExists('expiration_warning_days')
+            ->assertFormFieldDoesNotExist('grace_period_days')
+            ->assertFormFieldDoesNotExist('enable_proration')
+            ->assertFormFieldDoesNotExist('default_currency');
+    }
+
+    public function test_the_member_role_cannot_be_an_administration_role(): void
+    {
+        $settingsFile = dirname(__DIR__, 3).'/config/settings.php';
+        $shipped = (string) file_get_contents($settingsFile);
+
+        try {
+            foreach (['admin', 'editor'] as $roleName) {
+                Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+                    ->fillForm(['enable_role_assignment' => true, 'member_role_name' => $roleName])
+                    ->call('save')
+                    ->assertHasFormErrors(['member_role_name' => 'not_in'])
+                    ->assertSee(__('memberships::memberships.settings.fields.member_role_name_not_privileged'));
+            }
+        } finally {
+            // A save that slipped through validation would have rewritten the shipped defaults
+            file_put_contents($settingsFile, $shipped);
+        }
+
+        $this->assertSame($shipped, file_get_contents($settingsFile));
+    }
+
+    public function test_new_memberships_default_to_the_period_type_saved_in_the_panel(): void
+    {
+        config()->set('modules.settings.memberships.default_period_type', 'rolling');
+
+        Livewire::test(MembershipsRelationManager::class, ['ownerRecord' => $this->member(), 'pageClass' => EditMember::class])
+            ->mountTableAction(CreateAction::class)
+            ->assertTableActionDataSet(['period_type' => 'rolling']);
+    }
+
+    public function test_dashboard_widgets_are_registered(): void
+    {
+        $widgets = (new MembershipsServiceProvider($this->app))->registerFilamentWidgets();
+
+        $this->assertSame(
+            [MembershipStatsWidget::class, ExpiringMembershipsWidget::class, OverdueFeesWidget::class],
+            $widgets,
+        );
+    }
+
+    public function test_widgets_are_shown_to_users_who_can_list_members(): void
+    {
+        foreach ([MembershipStatsWidget::class, ExpiringMembershipsWidget::class, OverdueFeesWidget::class] as $widget) {
+            $this->assertTrue($widget::canView(), $widget);
+        }
+    }
+
+    public function test_widgets_are_hidden_without_permission_to_list_members(): void
+    {
+        $this->actingAs(UserModel::factory()->create());
+
+        foreach ([MembershipStatsWidget::class, ExpiringMembershipsWidget::class, OverdueFeesWidget::class] as $widget) {
+            $this->assertFalse($widget::canView(), $widget);
+        }
+    }
+
+    public function test_the_expiry_command_is_scheduled_daily(): void
+    {
+        $events = array_values(array_filter(
+            $this->app->make(Schedule::class)->events(),
+            fn (ScheduledEvent $event): bool => str_contains((string) $event->command, 'memberships:process-expired'),
+        ));
+
+        $this->assertCount(1, $events);
+        $this->assertSame('0 0 * * *', $events[0]->expression);
     }
 
     private function member(): MemberModel

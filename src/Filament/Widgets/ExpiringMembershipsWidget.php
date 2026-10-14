@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Widgets;
 
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use App\Application\Services\DashboardWidgetConfigServiceInterface;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -18,6 +19,11 @@ final class ExpiringMembershipsWidget extends BaseWidget
     protected int | string | array $columnSpan = 'full';
 
     protected static ?int $sort = 13;
+
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('viewAny', MemberModel::class) ?? false;
+    }
 
     public function table(Table $table): Table
     {

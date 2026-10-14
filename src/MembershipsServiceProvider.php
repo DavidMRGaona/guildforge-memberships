@@ -26,8 +26,7 @@ use Modules\Memberships\Application\Services\MembershipFeeServiceInterface;
 use Modules\Memberships\Application\Services\MembershipServiceInterface;
 use Modules\Memberships\Application\Services\ProrationCalculatorInterface;
 use Modules\Memberships\Console\Commands\ProcessExpiredMemberships;
-use Modules\Memberships\Domain\Events\MembershipActivated;
-use Modules\Memberships\Domain\Events\MembershipExpired;
+use Modules\Memberships\Console\Commands\SyncMemberRoles;
 use Modules\Memberships\Domain\Events\MembershipExpiring;
 use Modules\Memberships\Domain\Repositories\FeeStructureRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
@@ -42,10 +41,15 @@ use Modules\Memberships\Infrastructure\Services\MemberNumberGenerator;
 use Modules\Memberships\Infrastructure\Services\MemberService;
 use Modules\Memberships\Infrastructure\Services\MembershipFeeService;
 use Modules\Memberships\Infrastructure\Services\MembershipService;
+use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 use Modules\Memberships\Infrastructure\Services\ProrationCalculator;
-use Modules\Memberships\Listeners\AssignMemberRoleOnActivation;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MemberModelObserver;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MembershipModelObserver;
+use Modules\Memberships\Filament\Widgets\ExpiringMembershipsWidget;
+use Modules\Memberships\Filament\Widgets\MembershipStatsWidget;
+use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
 use Modules\Memberships\Listeners\NotifyMembershipExpiring;
-use Modules\Memberships\Listeners\RevokeMemberRoleOnExpiration;
 
 final class MembershipsServiceProvider extends ModuleServiceProvider
 {
@@ -68,8 +72,8 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
 
         // Service bindings
         $this->app->bind(MemberNumberGeneratorInterface::class, MemberNumberGenerator::class);
-        $this->app->bind(ProrationCalculatorInterface::class, fn () => new ProrationCalculator(
-            (int) config('memberships.academic_start_month', 9)
+        $this->app->bind(ProrationCalculatorInterface::class, fn (): ProrationCalculator => new ProrationCalculator(
+            $this->app->make(MembershipSettingsReader::class)->academicStartMonth()
         ));
         $this->app->bind(MemberServiceInterface::class, MemberService::class);
         $this->app->bind(MembershipServiceInterface::class, MembershipService::class);
@@ -85,6 +89,9 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         $this->registerSchedule();
         $this->registerEventListeners();
         $this->registerLivewireComponents();
+
+        MembershipModel::observe(MembershipModelObserver::class);
+        MemberModel::observe(MemberModelObserver::class);
     }
 
     /**
@@ -106,6 +113,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 ProcessExpiredMemberships::class,
+                SyncMemberRoles::class,
             ]);
         }
     }
@@ -115,10 +123,8 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
      */
     private function registerSchedule(): void
     {
-        $this->app->booted(function (): void {
-            /** @var Schedule $schedule */
-            $schedule = $this->app->make(Schedule::class);
-
+        // Only when the scheduler is resolved, so web requests do not build it
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             // Process expired memberships daily at midnight
             $schedule->command('memberships:process-expired')->daily();
         });
@@ -129,16 +135,6 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
      */
     private function registerEventListeners(): void
     {
-        Event::listen(
-            MembershipActivated::class,
-            [AssignMemberRoleOnActivation::class, 'handle']
-        );
-
-        Event::listen(
-            MembershipExpired::class,
-            [RevokeMemberRoleOnExpiration::class, 'handle']
-        );
-
         Event::listen(
             MembershipExpiring::class,
             [NotifyMembershipExpiring::class, 'handle']
@@ -165,6 +161,20 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         return [
             MemberResource::class,
             FeeStructureResource::class,
+        ];
+    }
+
+    /**
+     * Register dashboard widgets provided by this module.
+     *
+     * @return array<class-string<\Filament\Widgets\Widget>>
+     */
+    public function registerFilamentWidgets(): array
+    {
+        return [
+            MembershipStatsWidget::class,
+            ExpiringMembershipsWidget::class,
+            OverdueFeesWidget::class,
         ];
     }
 

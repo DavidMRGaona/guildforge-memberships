@@ -122,7 +122,8 @@ final readonly class EloquentMembershipRepository implements MembershipRepositor
 
     public function delete(MembershipId $id): void
     {
-        MembershipModel::query()->where('id', $id->value)->delete();
+        // Through the model, so MembershipModelObserver sees the deletion
+        MembershipModel::query()->find($id->value)?->delete();
     }
 
     public function hasOverlappingMembership(

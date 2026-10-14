@@ -86,7 +86,8 @@ final readonly class EloquentMemberRepository implements MemberRepositoryInterfa
 
     public function delete(MemberId $id): void
     {
-        MemberModel::query()->where('id', $id->value)->delete();
+        // Through the model, so MemberModelObserver sees the deletion
+        MemberModel::query()->find($id->value)?->delete();
     }
 
     /**

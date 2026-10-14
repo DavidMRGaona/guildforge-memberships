@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Widgets;
 
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\Memberships\Domain\Enums\MemberStatus;
@@ -13,6 +14,11 @@ use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
 final class MembershipStatsWidget extends StatsOverviewWidget
 {
     protected static ?int $sort = 4;
+
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('viewAny', MemberModel::class) ?? false;
+    }
 
     /**
      * @return array<Stat>

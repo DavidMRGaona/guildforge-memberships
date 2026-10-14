@@ -54,7 +54,11 @@ final readonly class MembershipFeeService implements MembershipFeeServiceInterfa
 
         $paymentMethod = PaymentMethod::from($dto->paymentMethod);
 
-        $fee->recordPayment($paidAt, $paymentMethod, $dto->transactionReference);
+        $fee->recordPayment(
+            paymentMethod: $paymentMethod,
+            transactionReference: $dto->transactionReference,
+            paidAt: $paidAt,
+        );
 
         $this->feeRepository->save($fee);
 
