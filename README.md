@@ -14,7 +14,7 @@ Módulo para GuildForge que gestiona los socios de la asociación, sus cuotas (p
 
 ## Requisitos
 
-- GuildForge core `^3.0`
+- GuildForge core `^3.6` (desde esta versión del core, la configuración guardada en el panel se conserva al actualizar los módulos)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).
@@ -49,7 +49,7 @@ Se configura en el panel, en **Módulos** → **Gestión de socios** → **Confi
 | `default_period_type` | Tipo de periodo que propone el formulario de una cuota nueva | `calendar_year` |
 | `academic_start_month` | Mes de inicio del año académico | `9` (septiembre) |
 | `enable_role_assignment` | Asignar y retirar el rol de socio automáticamente | `false` |
-| `member_role_name` | Nombre del rol que se asigna | `member` |
+| `member_role_name` | Nombre del rol que se asigna; no puede ser `admin` ni `editor` | `member` |
 | `expiration_warning_days` | Días antes del fin de una cuota en que se envía el aviso | `30` |
 
 ## Tipos de periodo
@@ -94,16 +94,22 @@ Para lanzarlo a mano:
 Con `enable_role_assignment` activado:
 
 - Cuando una cuota se crea como activa o pasa a activa (desde la ficha del socio en el panel o por código), el usuario vinculado al socio recibe el rol `member_role_name`.
-- Cuando una cuota activa deja de estarlo (expira por el comando diario, se marca como expirada, cancelada o pendiente, o se borra), se retira el rol si el usuario no tiene otra cuota activa en ningún socio vinculado.
+- Cuando una cuota activa deja de estarlo (expira por el comando diario, se marca como expirada, cancelada o pendiente, se borra o pasa a otro socio), se retira el rol si el usuario no tiene otra cuota activa en ningún socio vinculado.
 - Si se cambia o se quita el usuario vinculado a un socio, el rol pasa al usuario nuevo (si hay cuota activa) y se retira al anterior. Borrar el socio retira el rol; restaurarlo lo devuelve si tiene una cuota activa.
 
-El rol debe existir; por defecto es `member`, el rol de socio del core. Si no existe, no se asigna nada. Los socios sin usuario vinculado no reciben ningún rol. Los cambios de rol se aplican al momento.
+Tras cada cambio en una cuota o un socio, el módulo vuelve a comprobar en la base de datos si el usuario tiene alguna cuota activa, y asigna o retira el rol según el resultado. Los cambios de rol se aplican al momento.
+
+El rol debe existir; por defecto es `member`, el rol de socio del core. Si no existe, no se asigna nada. No puede ser `admin` ni `editor`: el formulario los rechaza y, si llegan por otra vía, el módulo usa `member`. Los socios sin usuario vinculado no reciben ningún rol.
+
+El estado del socio (inactivo, suspendido, expulsado) no afecta al rol: solo cuentan sus cuotas. Para retirar el rol a un socio suspendido o expulsado, cancela su cuota activa.
+
+Retirar el rol no distingue cómo se asignó: si un administrador dio el rol a mano a un usuario vinculado a un socio sin cuota activa, el siguiente cambio en sus cuotas o `memberships:sync-roles` se lo quitan.
 
 Para empezar a usarlo, activa la opción en el panel y ejecuta después `php artisan memberships:sync-roles`: las cuotas que ya estaban activas no dan el rol por sí solas. El comando asigna el rol a los usuarios vinculados con una cuota activa y lo retira a los demás usuarios vinculados a un socio (los usuarios sin socio vinculado no se tocan).
 
 Al desactivar la opción, el módulo deja de asignar y retirar el rol, pero no quita los roles ya asignados: retíralos desde el editor de roles si hace falta. `memberships:sync-roles` no hace nada mientras la opción esté desactivada.
 
-Los módulos que deciden quién es socio por el rol `member` no siguen un cambio de `member_role_name`.
+Cambiar `member_role_name` no retira el rol anterior a nadie: retíralo desde el editor de roles y ejecuta `memberships:sync-roles` para asignar el nuevo. Los módulos que deciden quién es socio por el rol `member` no siguen un cambio de `member_role_name`.
 
 ## Panel de administración
 
