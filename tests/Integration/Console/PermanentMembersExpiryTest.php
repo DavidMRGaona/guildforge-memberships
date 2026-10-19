@@ -170,8 +170,8 @@ final class PermanentMembersExpiryTest extends ModuleTestCase
         return MemberModel::create([
             'id' => (string) Str::uuid(),
             'member_number' => sprintf('2026-%04d', $this->memberCount),
-            'first_name' => 'Ana',
-            'last_name' => 'Pérez',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
             'email' => "ana{$this->memberCount}@example.test",
             'member_type' => $type->value,
             'status' => 'active',
