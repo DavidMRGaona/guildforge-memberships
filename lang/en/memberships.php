@@ -215,9 +215,9 @@ return [
             'expiration_warning_days' => 'Warning days before expiration',
             'expiration_warning_days_help' => 'Days before expiration to send notification',
             'send_expired_email' => 'Notify expired memberships',
-            'send_expired_email_help' => 'Emails the member when their membership becomes expired. Only memberships that expire after turning it on.',
+            'send_expired_email_help' => 'Emails the member when their membership expires, unless they already renewed. Only memberships that expire after turning it on.',
             'send_overdue_email' => 'Notify overdue fees',
-            'send_overdue_email_help' => 'Sends a monthly reminder for every unpaid overdue fee, old ones included. Before turning it on, check that paid fees are marked as paid.',
+            'send_overdue_email_help' => 'Sends a monthly reminder for every unpaid overdue fee, old ones included (fees already checked this month wait for the next one). Before turning it on, check that paid fees are marked as paid.',
         ],
         'months' => [
             '1' => 'January',

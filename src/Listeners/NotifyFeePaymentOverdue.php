@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Listeners;
 
 use DateTimeImmutable;
+use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Events\FeePaymentOverdue;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
@@ -35,9 +36,15 @@ final readonly class NotifyFeePaymentOverdue
         }
 
         $membership = $this->membershipRepository->find(new MembershipId($event->membershipId));
-        $member = $membership !== null ? $this->memberRepository->find($membership->memberId) : null;
 
-        if ($member === null || in_array($member->memberType, $this->settings->permanentMemberTypes(), true)) {
+        if ($membership === null || $membership->status === MembershipStatus::Cancelled) {
+            return;
+        }
+
+        $member = $this->memberRepository->find($membership->memberId);
+
+        // Only current members are chased: not those who left, were suspended or were expelled
+        if ($member === null || ! $member->isActive() || in_array($member->memberType, $this->settings->permanentMemberTypes(), true)) {
             return;
         }
 

@@ -94,6 +94,48 @@ final class MembershipEmailsTest extends ModuleTestCase
         Notification::assertNothingSent();
     }
 
+    public function test_expired_membership_of_a_member_who_already_renewed_sends_nothing(): void
+    {
+        config()->set('modules.settings.memberships.send_expired_email', true);
+        $old = $this->membership('active', start: now()->subYear(), end: now()->subDay());
+        $this->membership('pending', start: now(), end: now()->addYear());
+
+        $old->update(['status' => 'expired']);
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_expired_membership_of_an_inactive_member_sends_nothing(): void
+    {
+        config()->set('modules.settings.memberships.send_expired_email', true);
+        $member = $this->member('regular', null, 'baja@example.test', status: 'inactive');
+
+        $this->membership('active', $member)->update(['status' => 'expired']);
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_overdue_fee_of_an_expelled_member_sends_nothing(): void
+    {
+        config()->set('modules.settings.memberships.send_overdue_email', true);
+        $member = $this->member('regular', null, 'expulsado@example.test', status: 'expelled');
+        $this->fee($this->membership('active', $member), dueDaysAgo: 10);
+
+        $this->artisan('memberships:process-expired')->assertSuccessful();
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_overdue_fee_of_a_cancelled_membership_sends_nothing(): void
+    {
+        config()->set('modules.settings.memberships.send_overdue_email', true);
+        $this->fee($this->membership('cancelled'), dueDaysAgo: 10);
+
+        $this->artisan('memberships:process-expired')->assertSuccessful();
+
+        Notification::assertNotSentTo($this->user, PaymentOverdueNotification::class);
+    }
+
     public function test_overdue_fee_sends_nothing_while_the_setting_is_off(): void
     {
         $this->fee($this->membership('active'), dueDaysAgo: 10);
@@ -144,7 +186,7 @@ final class MembershipEmailsTest extends ModuleTestCase
         }
     }
 
-    private function member(string $type, ?string $userId, string $email = 'ana@example.test'): MemberModel
+    private function member(string $type, ?string $userId, string $email = 'ana@example.test', string $status = 'active'): MemberModel
     {
         static $number = 1;
 
@@ -155,19 +197,19 @@ final class MembershipEmailsTest extends ModuleTestCase
             'last_name' => 'Pérez',
             'email' => $email,
             'member_type' => $type,
-            'status' => 'active',
+            'status' => $status,
             'user_id' => $userId,
             'joined_at' => now(),
         ]);
     }
 
-    private function membership(string $status, ?MemberModel $member = null, ?\DateTimeInterface $end = null): MembershipModel
+    private function membership(string $status, ?MemberModel $member = null, ?\DateTimeInterface $end = null, ?\DateTimeInterface $start = null): MembershipModel
     {
         return MembershipModel::create([
             'id' => (string) Str::uuid(),
             'member_id' => ($member ?? $this->member)->id,
             'period_type' => 'calendar_year',
-            'start_date' => now()->subYear()->startOfYear(),
+            'start_date' => $start ?? now()->subYear()->startOfYear(),
             'end_date' => $end ?? now()->addYear()->endOfYear(),
             'status' => $status,
         ]);
