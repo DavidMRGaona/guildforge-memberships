@@ -27,6 +27,8 @@ use Modules\Memberships\Application\Services\MembershipServiceInterface;
 use Modules\Memberships\Application\Services\ProrationCalculatorInterface;
 use Modules\Memberships\Console\Commands\ProcessExpiredMemberships;
 use Modules\Memberships\Console\Commands\SyncMemberRoles;
+use Modules\Memberships\Domain\Events\FeePaymentOverdue;
+use Modules\Memberships\Domain\Events\MembershipExpired;
 use Modules\Memberships\Domain\Events\MembershipExpiring;
 use Modules\Memberships\Domain\Repositories\FeeStructureRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
@@ -49,6 +51,8 @@ use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\Membership
 use Modules\Memberships\Filament\Widgets\ExpiringMembershipsWidget;
 use Modules\Memberships\Filament\Widgets\MembershipStatsWidget;
 use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
+use Modules\Memberships\Listeners\NotifyFeePaymentOverdue;
+use Modules\Memberships\Listeners\NotifyMembershipExpired;
 use Modules\Memberships\Listeners\NotifyMembershipExpiring;
 
 final class MembershipsServiceProvider extends ModuleServiceProvider
@@ -138,6 +142,17 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         Event::listen(
             MembershipExpiring::class,
             [NotifyMembershipExpiring::class, 'handle']
+        );
+
+        // Both stay silent until enabled in the module settings
+        Event::listen(
+            MembershipExpired::class,
+            [NotifyMembershipExpired::class, 'handle']
+        );
+
+        Event::listen(
+            FeePaymentOverdue::class,
+            [NotifyFeePaymentOverdue::class, 'handle']
         );
     }
 

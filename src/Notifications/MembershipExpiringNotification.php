@@ -46,7 +46,7 @@ final class MembershipExpiringNotification extends Notification implements Shoul
                 'date' => $formattedDate,
             ]))
             ->line(__('memberships::notifications.membership_expiring.line2'))
-            ->action(__('memberships::notifications.membership_expiring.action'), url('/'))
+            ->action(__('memberships::notifications.membership_expiring.action'), route('about'))
             ->salutation(__('memberships::notifications.membership_expiring.salutation'));
     }
 

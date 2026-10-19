@@ -12,8 +12,8 @@ return [
         'subject' => 'Tu membresía está a punto de expirar',
         'greeting' => 'Hola :name,',
         'line1' => 'Tu membresía expirará en :days días (el :date).',
-        'line2' => 'Te recomendamos renovarla para seguir disfrutando de todos los beneficios.',
-        'action' => 'Renovar membresía',
+        'line2' => 'Para renovarla, ponte en contacto con la asociación.',
+        'action' => 'Contactar con la asociación',
         'salutation' => 'Gracias por ser parte de nuestra asociación.',
     ],
 
@@ -26,8 +26,8 @@ return [
         'subject' => 'Tu membresía ha expirado',
         'greeting' => 'Hola :name,',
         'line1' => 'Tu membresía ha expirado el :date.',
-        'line2' => 'Para seguir disfrutando de los beneficios de socio, te invitamos a renovarla.',
-        'action' => 'Renovar membresía',
+        'line2' => 'Para renovarla y seguir disfrutando de las ventajas de socio, ponte en contacto con la asociación.',
+        'action' => 'Contactar con la asociación',
         'salutation' => 'Esperamos verte pronto.',
     ],
 
@@ -41,7 +41,8 @@ return [
         'greeting' => 'Hola :name,',
         'line1' => 'Tienes una cuota de :amount con fecha de vencimiento :date que aún no ha sido abonada.',
         'line2' => 'El pago tiene :days días de retraso.',
-        'action' => 'Realizar pago',
+        'line3' => 'Si ya la has pagado, puedes ignorar este mensaje; si tienes dudas, ponte en contacto con la asociación.',
+        'action' => 'Contactar con la asociación',
         'salutation' => 'Gracias por tu colaboración.',
     ],
 

@@ -52,6 +52,8 @@ Se configura en el panel, en **Módulos** → **Gestión de socios** → **Confi
 | `enable_role_assignment` | Asignar y retirar el rol de socio automáticamente | `false` |
 | `permanent_member_types` | Tipos de socio permanentes: con la ficha activa tienen el rol sin cuota y no reciben avisos de caducidad ni de impago | `['honorary']` |
 | `expiration_warning_days` | Días antes del fin de una cuota en que se envía el aviso | `30` |
+| `send_expired_email` | Avisa al socio cuando su cuota pasa a expirada | `false` |
+| `send_overdue_email` | Recuerda al socio, una vez al mes, cada pago vencido sin pagar | `false` |
 
 ## Tipos de periodo
 
@@ -84,7 +86,7 @@ El módulo programa `memberships:process-expired` cada día a medianoche. El com
 
 1. Marca como expiradas las cuotas activas cuya fecha de fin ya ha pasado, también las de los socios permanentes (su rol no depende de ellas).
 2. Envía un correo al socio (al usuario vinculado o, si no tiene, al email del socio) cuando a una cuota activa le quedan `expiration_warning_days` días o menos. El aviso se envía una vez al año por cuota y queda anotado en sus notas como `[EXPIRING_NOTIFIED:AAAA]`. Los socios permanentes no reciben este aviso.
-3. Dispara `FeePaymentOverdue` una vez al mes por cada pago vencido sin pagar (anotado como `[OVERDUE_NOTIFIED:AAAA-MM]`), salvo los de socios permanentes. El módulo no incluye ninguna notificación para este evento.
+3. Dispara `FeePaymentOverdue` una vez al mes por cada pago vencido sin pagar (anotado como `[OVERDUE_NOTIFIED:AAAA-MM]`), salvo los de socios permanentes. Con `send_overdue_email` activado, el socio recibe un recordatorio con el importe y los días de retraso; no se envía a socios que no estén activos ni por cuotas canceladas.
 
 Para lanzarlo a mano:
 
@@ -172,7 +174,7 @@ Los permisos llevan el prefijo `memberships:` y se asignan a los roles en el edi
 | `MembershipExpiring` | Cuando el comando diario envía el aviso de expiración (nunca para socios permanentes) |
 | `FeePaymentOverdue` | Cuando el comando diario detecta un pago vencido (nunca para socios permanentes) |
 
-El módulo no escucha `MembershipExpired`. Un listener que notifique al socio con este evento debe excluir los tipos permanentes (`permanent_member_types`), igual que hacen el aviso de caducidad y `FeePaymentOverdue`.
+Con `send_expired_email` activado, `MembershipExpired` envía un correo al socio salvo que sea de un tipo permanente, no esté activo o ya tenga una cuota vigente o pendiente que termine hoy o después (ya ha renovado). Los dos avisos están desactivados por defecto; los correos del módulo enlazan con la página de contacto de la asociación.
 
 Las demás clases de `src/Domain/Events` (`MemberCreated`, `MemberStatusChanged`, `MembershipCreated`, `MembershipCancelled`, `FeePaymentRecorded`) no se disparan todavía.
 

@@ -64,6 +64,22 @@ final readonly class MembershipSettingsReader
         return max(0, (int) $this->get('expiration_warning_days', 30));
     }
 
+    /**
+     * Email the member when their membership expires (off until an admin enables it).
+     */
+    public function expiredEmailEnabled(): bool
+    {
+        return (bool) $this->get('send_expired_email', false);
+    }
+
+    /**
+     * Email the member about unpaid overdue fees (off until an admin enables it).
+     */
+    public function overdueEmailEnabled(): bool
+    {
+        return (bool) $this->get('send_overdue_email', false);
+    }
+
     private function get(string $key, mixed $default): mixed
     {
         return config("modules.settings.memberships.{$key}") ?? config("memberships.{$key}", $default);
