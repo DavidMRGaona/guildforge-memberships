@@ -41,9 +41,10 @@ final class PaymentOverdueNotification extends Notification implements ShouldQue
             ->line(__('memberships::notifications.payment_overdue.line2', [
                 'days' => $this->daysOverdue,
             ]))
+            ->line(__('memberships::notifications.payment_overdue.line3'))
             ->action(
                 __('memberships::notifications.payment_overdue.action'),
-                url('/')
+                route('about')
             )
             ->salutation(__('memberships::notifications.payment_overdue.salutation'));
     }

@@ -214,6 +214,10 @@ return [
             'permanent_member_types_help' => 'While their record is active, members of these types hold the association member role without a membership and are left out of expiry warnings and overdue fees. After changing the list, run memberships:sync-roles to update the roles',
             'expiration_warning_days' => 'Warning days before expiration',
             'expiration_warning_days_help' => 'Days before expiration to send notification',
+            'send_expired_email' => 'Notify expired memberships',
+            'send_expired_email_help' => 'Emails the member when their membership becomes expired. Only memberships that expire after turning it on.',
+            'send_overdue_email' => 'Notify overdue fees',
+            'send_overdue_email_help' => 'Sends a monthly reminder for every unpaid overdue fee, old ones included. Before turning it on, check that paid fees are marked as paid.',
         ],
         'months' => [
             '1' => 'January',

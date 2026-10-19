@@ -38,7 +38,7 @@ final class MembershipExpiredNotification extends Notification implements Should
             ->line(__('memberships::notifications.membership_expired.line2'))
             ->action(
                 __('memberships::notifications.membership_expired.action'),
-                url('/')
+                route('about')
             )
             ->salutation(__('memberships::notifications.membership_expired.salutation'));
     }

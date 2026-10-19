@@ -214,6 +214,10 @@ return [
             'permanent_member_types_help' => 'Con la ficha activa, los socios de estos tipos tienen el rol de socio sin necesitar una cuota y no aparecen en los avisos de caducidad ni en las cuotas vencidas. Tras cambiar la lista, ejecuta memberships:sync-roles para actualizar los roles',
             'expiration_warning_days' => 'Días de aviso antes de expiración',
             'expiration_warning_days_help' => 'Días antes de la expiración para enviar notificación',
+            'send_expired_email' => 'Avisar de la membresía caducada',
+            'send_expired_email_help' => 'Envía un correo al socio cuando su membresía pasa a caducada. Solo afecta a las que caduquen después de activarlo.',
+            'send_overdue_email' => 'Avisar de las cuotas atrasadas',
+            'send_overdue_email_help' => 'Envía un recordatorio al mes por cada cuota vencida sin pagar, también las antiguas. Antes de activarlo, comprueba que las cuotas pagadas estén marcadas como pagadas.',
         ],
         'months' => [
             '1' => 'Enero',

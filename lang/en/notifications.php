@@ -12,8 +12,8 @@ return [
         'subject' => 'Your membership is about to expire',
         'greeting' => 'Hello :name,',
         'line1' => 'Your membership will expire in :days days (on :date).',
-        'line2' => 'We recommend renewing it to continue enjoying all the benefits.',
-        'action' => 'Renew membership',
+        'line2' => 'To renew it, get in touch with the association.',
+        'action' => 'Contact the association',
         'salutation' => 'Thank you for being part of our association.',
     ],
 
@@ -26,8 +26,8 @@ return [
         'subject' => 'Your membership has expired',
         'greeting' => 'Hello :name,',
         'line1' => 'Your membership expired on :date.',
-        'line2' => 'To continue enjoying member benefits, we invite you to renew.',
-        'action' => 'Renew membership',
+        'line2' => 'To renew it and keep your member benefits, get in touch with the association.',
+        'action' => 'Contact the association',
         'salutation' => 'We hope to see you soon.',
     ],
 
@@ -41,7 +41,8 @@ return [
         'greeting' => 'Hello :name,',
         'line1' => 'You have a fee of :amount due on :date that has not been paid yet.',
         'line2' => 'The payment is :days days overdue.',
-        'action' => 'Make payment',
+        'line3' => 'If you have already paid it, you can ignore this message; if in doubt, get in touch with the association.',
+        'action' => 'Contact the association',
         'salutation' => 'Thank you for your cooperation.',
     ],
 

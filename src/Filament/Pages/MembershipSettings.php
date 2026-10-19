@@ -140,6 +140,16 @@ final class MembershipSettings extends Page implements HasForms
                         ->maxValue(365)
                         ->default(30)
                         ->required(),
+
+                    Toggle::make('send_expired_email')
+                        ->label(__('memberships::memberships.settings.fields.send_expired_email'))
+                        ->helperText(__('memberships::memberships.settings.fields.send_expired_email_help'))
+                        ->default(false),
+
+                    Toggle::make('send_overdue_email')
+                        ->label(__('memberships::memberships.settings.fields.send_overdue_email'))
+                        ->helperText(__('memberships::memberships.settings.fields.send_overdue_email_help'))
+                        ->default(false),
                 ])
                 ->columns(2),
         ];

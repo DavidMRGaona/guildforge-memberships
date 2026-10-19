@@ -12,4 +12,6 @@ return [
     'enable_role_assignment' => false,
     'permanent_member_types' => ['honorary'],
     'expiration_warning_days' => 30,
+    'send_expired_email' => false,
+    'send_overdue_email' => false,
 ];
