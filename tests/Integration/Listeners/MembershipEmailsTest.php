@@ -40,7 +40,7 @@ final class MembershipEmailsTest extends ModuleTestCase
         app()->setLocale('es');
         Notification::fake();
 
-        $this->user = UserModel::factory()->create(['email' => 'ana.cuenta@example.test']);
+        $this->user = UserModel::factory()->create(['email' => 'john.cuenta@example.test']);
         $this->member = $this->member('regular', $this->user->id);
 
         $this->app->make(Kernel::class)->registerCommand($this->app->make(ProcessExpiredMemberships::class));
@@ -173,9 +173,9 @@ final class MembershipEmailsTest extends ModuleTestCase
     {
         $date = new \DateTimeImmutable('2026-12-31');
         $notifications = [
-            new MembershipExpiringNotification('Ana', $date, 7),
-            new MembershipExpiredNotification('Ana', $date),
-            new PaymentOverdueNotification('Ana', '25,00 €', $date, 3),
+            new MembershipExpiringNotification('John', $date, 7),
+            new MembershipExpiredNotification('John', $date),
+            new PaymentOverdueNotification('John', '25,00 €', $date, 3),
         ];
 
         foreach ($notifications as $notification) {
@@ -186,15 +186,15 @@ final class MembershipEmailsTest extends ModuleTestCase
         }
     }
 
-    private function member(string $type, ?string $userId, string $email = 'ana@example.test', string $status = 'active'): MemberModel
+    private function member(string $type, ?string $userId, string $email = 'john@example.test', string $status = 'active'): MemberModel
     {
         static $number = 1;
 
         return MemberModel::create([
             'id' => (string) Str::uuid(),
             'member_number' => sprintf('2026-%04d', $number++),
-            'first_name' => 'Ana',
-            'last_name' => 'Pérez',
+            'first_name' => 'John',
+            'last_name' => 'Doe',
             'email' => $email,
             'member_type' => $type,
             'status' => $status,
