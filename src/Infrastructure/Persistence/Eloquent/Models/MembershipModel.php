@@ -25,7 +25,7 @@ use Modules\Memberships\Domain\Enums\MemberType;
  * @property Carbon|null $activated_at
  * @property Carbon|null $cancelled_at
  * @property string|null $notes
- * @property Carbon $created_at
+ * @property Carbon|null $created_at
  * @property Carbon $updated_at
  * @property-read MemberModel $member
  * @property-read Collection<int, MembershipFeeModel> $fees

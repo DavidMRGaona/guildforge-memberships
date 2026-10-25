@@ -57,17 +57,17 @@ final readonly class MemberService implements MemberServiceInterface
 
         if ($dto->firstName !== null || $dto->lastName !== null || $dto->birthDate !== null) {
             $member->updatePersonalInfo(
-                firstName: $dto->firstName ?? $member->firstName(),
-                lastName: $dto->lastName ?? $member->lastName(),
-                birthDate: $dto->birthDate !== null ? new DateTimeImmutable($dto->birthDate) : $member->birthDate(),
+                firstName: $dto->firstName ?? $member->firstName,
+                lastName: $dto->lastName ?? $member->lastName,
+                birthDate: $dto->birthDate !== null ? new DateTimeImmutable($dto->birthDate) : $member->birthDate,
             );
         }
 
         if ($dto->email !== null || $dto->phone !== null || $dto->address !== null) {
             $member->updateContactInfo(
-                email: $dto->email ?? $member->email(),
-                phone: $dto->phone ?? $member->phone(),
-                address: $dto->address ?? $member->address(),
+                email: $dto->email ?? $member->email,
+                phone: $dto->phone ?? $member->phone,
+                address: $dto->address ?? $member->address,
             );
         }
 
@@ -115,7 +115,7 @@ final readonly class MemberService implements MemberServiceInterface
     public function findByMemberNumber(string $memberNumber): ?MemberDTO
     {
         $member = $this->memberRepository->findByMemberNumber(
-            MemberNumber::fromString($memberNumber)
+            new MemberNumber($memberNumber)
         );
 
         if (! $member instanceof Member) {

@@ -8,6 +8,9 @@ use Modules\Memberships\Application\DTOs\FeeStructureDTO;
 
 interface FeeStructureServiceInterface
 {
+    /**
+     * @param  array<string, mixed>|null  $prorationRules
+     */
     public function create(
         string $memberType,
         string $periodType,
@@ -20,6 +23,9 @@ interface FeeStructureServiceInterface
         ?array $prorationRules = null
     ): FeeStructureDTO;
 
+    /**
+     * @param  array<string, mixed>|null  $prorationRules
+     */
     public function update(
         string $id,
         ?int $amountCents = null,

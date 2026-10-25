@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
@@ -25,7 +26,7 @@ class MembershipsRelationManager extends RelationManager
 {
     protected static string $relationship = 'memberships';
 
-    public static function getTitle($ownerRecord, $pageClass): string
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('memberships::memberships.sections.memberships');
     }
@@ -118,7 +119,7 @@ class MembershipsRelationManager extends RelationManager
         }
 
         // Academic year ends the day before the start month of the next academic year
-        return Carbon::create($endYear, $academicStartMonth, 1)->subDay();
+        return Carbon::createFromDate($endYear, $academicStartMonth, 1)->startOfDay()->subDay();
     }
 
     public function table(Table $table): Table
