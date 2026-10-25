@@ -16,8 +16,7 @@ final readonly class FeePaymentOverdue
         public string $currency,
         public DateTimeImmutable $dueDate,
         public DateTimeImmutable $occurredAt,
-    ) {
-    }
+    ) {}
 
     public static function create(MembershipFee $fee): self
     {
@@ -27,7 +26,7 @@ final readonly class FeePaymentOverdue
             amountCents: $fee->amount->toCents(),
             currency: $fee->amount->currency(),
             dueDate: $fee->dueDate,
-            occurredAt: new DateTimeImmutable(),
+            occurredAt: new DateTimeImmutable,
         );
     }
 }

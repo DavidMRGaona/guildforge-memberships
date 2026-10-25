@@ -36,8 +36,7 @@ final readonly class MemberRoleSynchronizer
         private AuthorizationServiceInterface $authorization,
         private AssociationMembershipServiceInterface $associationMembership,
         private MembershipSettingsReader $settings,
-    ) {
-    }
+    ) {}
 
     public function syncMember(string $memberId): void
     {

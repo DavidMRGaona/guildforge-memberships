@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Listeners;
 
 use DateTimeImmutable;
+use Modules\Memberships\Domain\Entities\Member;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Events\MembershipExpired;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
@@ -25,8 +26,7 @@ final readonly class NotifyMembershipExpired
         private MemberRepositoryInterface $memberRepository,
         private MembershipRepositoryInterface $membershipRepository,
         private MembershipSettingsReader $settings,
-    ) {
-    }
+    ) {}
 
     public function handle(MembershipExpired $event): void
     {
@@ -36,7 +36,7 @@ final readonly class NotifyMembershipExpired
 
         $member = $this->memberRepository->find(new MemberId($event->memberId));
 
-        if ($member === null || ! $member->isActive() || in_array($member->memberType, $this->settings->permanentMemberTypes(), true)) {
+        if (! $member instanceof Member || ! $member->isActive() || in_array($member->memberType, $this->settings->permanentMemberTypes(), true)) {
             return;
         }
 
@@ -55,15 +55,9 @@ final readonly class NotifyMembershipExpired
     {
         $today = new DateTimeImmutable('today');
 
-        foreach ($this->membershipRepository->findByMemberId($memberId) as $membership) {
-            if ($membership->id->value !== $expiredMembershipId
-                && $membership->status !== MembershipStatus::Cancelled
-                && $membership->status !== MembershipStatus::Expired
-                && $membership->endDate >= $today) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->membershipRepository->findByMemberId($memberId), fn ($membership) => $membership->id->value !== $expiredMembershipId
+            && $membership->status !== MembershipStatus::Cancelled
+            && $membership->status !== MembershipStatus::Expired
+            && $membership->endDate >= $today);
     }
 }

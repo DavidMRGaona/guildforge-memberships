@@ -13,6 +13,5 @@ final readonly class RoleSyncSummaryDTO
         public int $checked,
         public int $added,
         public int $removed,
-    ) {
-    }
+    ) {}
 }

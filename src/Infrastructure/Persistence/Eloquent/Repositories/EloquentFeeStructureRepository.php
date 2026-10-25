@@ -39,7 +39,7 @@ final readonly class EloquentFeeStructureRepository implements FeeStructureRepos
     {
         $feeStructure = $this->find($id);
 
-        if ($feeStructure === null) {
+        if (! $feeStructure instanceof FeeStructure) {
             throw FeeStructureNotFoundException::notFoundById($id->value);
         }
 
@@ -60,7 +60,7 @@ final readonly class EloquentFeeStructureRepository implements FeeStructureRepos
 
     public function getCurrentStructure(MemberType $memberType, MembershipPeriodType $periodType): ?FeeStructure
     {
-        $today = new DateTimeImmutable();
+        $today = new DateTimeImmutable;
 
         $model = FeeStructureModel::query()
             ->where('member_type', $memberType->value)

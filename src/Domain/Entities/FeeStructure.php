@@ -21,13 +21,12 @@ final class FeeStructure
         public MembershipPeriodType $periodType,
         public Money $amount,
         public ?array $prorationRules = null,
-        public DateTimeImmutable $validFrom = new DateTimeImmutable(),
+        public DateTimeImmutable $validFrom = new DateTimeImmutable,
         public ?DateTimeImmutable $validUntil = null,
         public ?string $description = null,
         public bool $isDefault = false,
         public readonly ?DateTimeImmutable $createdAt = null,
-    ) {
-    }
+    ) {}
 
     public function updateAmount(Money $amount): void
     {
@@ -41,17 +40,13 @@ final class FeeStructure
 
     public function isCurrentlyValid(?DateTimeImmutable $now = null): bool
     {
-        $now ??= new DateTimeImmutable();
+        $now ??= new DateTimeImmutable;
 
         if ($now < $this->validFrom) {
             return false;
         }
 
-        if ($this->validUntil !== null && $now > $this->validUntil) {
-            return false;
-        }
-
-        return true;
+        return ! $this->validUntil instanceof DateTimeImmutable || $now <= $this->validUntil;
     }
 
     public function setAsDefault(): void

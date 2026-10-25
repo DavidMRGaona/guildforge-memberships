@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Widgets;
 
-use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\Memberships\Domain\Enums\MemberStatus;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 final class MembershipStatsWidget extends StatsOverviewWidget

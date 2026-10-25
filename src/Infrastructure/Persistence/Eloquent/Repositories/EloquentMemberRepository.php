@@ -6,6 +6,7 @@ namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories;
 
 use DateTimeImmutable;
 use Modules\Memberships\Domain\Entities\Member;
+use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Enums\MemberStatus;
 use Modules\Memberships\Domain\Exceptions\MemberNotFoundException;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
@@ -38,7 +39,7 @@ final readonly class EloquentMemberRepository implements MemberRepositoryInterfa
     {
         $member = $this->find($id);
 
-        if ($member === null) {
+        if (! $member instanceof Member) {
             throw MemberNotFoundException::notFoundById($id->value);
         }
 
@@ -115,7 +116,7 @@ final readonly class EloquentMemberRepository implements MemberRepositoryInterfa
      */
     public function searchMembers(string $query): array
     {
-        $searchTerm = '%' . $query . '%';
+        $searchTerm = '%'.$query.'%';
 
         return MemberModel::query()
             ->where(function ($q) use ($searchTerm): void {
@@ -188,7 +189,7 @@ final readonly class EloquentMemberRepository implements MemberRepositoryInterfa
     {
         return MemberModel::query()
             ->whereHas('memberships', function ($query): void {
-                $query->where('status', \Modules\Memberships\Domain\Enums\MembershipStatus::Active->value);
+                $query->where('status', MembershipStatus::Active->value);
             })
             ->count();
     }

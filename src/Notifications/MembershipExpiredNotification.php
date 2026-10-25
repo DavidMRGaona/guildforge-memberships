@@ -29,7 +29,7 @@ final class MembershipExpiredNotification extends Notification implements Should
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage())
+        return (new MailMessage)
             ->subject(__('memberships::notifications.membership_expired.subject'))
             ->greeting(__('memberships::notifications.membership_expired.greeting', ['name' => $this->memberName]))
             ->line(__('memberships::notifications.membership_expired.line1', [

@@ -18,8 +18,7 @@ final readonly class UpdateMemberDTO
         public ?string $status = null,
         public ?string $userId = null,
         public ?string $notes = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{id: string, first_name?: string|null, last_name?: string|null, email?: string|null, phone?: string|null, birth_date?: string|null, address?: string|null, member_type?: string|null, status?: string|null, user_id?: string|null, notes?: string|null}  $data

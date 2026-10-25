@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\RelationManagers;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use Carbon\Carbon;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
@@ -45,7 +45,7 @@ class MembershipsRelationManager extends RelationManager
                     ->required()
                     ->native(false)
                     ->live()
-                    ->afterStateUpdated(fn (Get $get, Set $set) => self::calculateEndDate($get, $set)),
+                    ->afterStateUpdated(fn (Get $get, Set $set) => $this->calculateEndDate($get, $set)),
 
                 DatePicker::make('start_date')
                     ->label(__('memberships::memberships.fields.start_date'))
@@ -53,7 +53,7 @@ class MembershipsRelationManager extends RelationManager
                     ->displayFormat('d/m/Y')
                     ->required()
                     ->live()
-                    ->afterStateUpdated(fn (Get $get, Set $set) => self::calculateEndDate($get, $set)),
+                    ->afterStateUpdated(fn (Get $get, Set $set) => $this->calculateEndDate($get, $set)),
 
                 DatePicker::make('end_date')
                     ->label(__('memberships::memberships.fields.end_date'))
@@ -81,7 +81,7 @@ class MembershipsRelationManager extends RelationManager
             ]);
     }
 
-    private static function calculateEndDate(Get $get, Set $set): void
+    private function calculateEndDate(Get $get, Set $set): void
     {
         $periodType = $get('period_type');
         $startDate = $get('start_date');
@@ -95,7 +95,7 @@ class MembershipsRelationManager extends RelationManager
 
         $endDate = match ($periodType) {
             MembershipPeriodType::CalendarYear->value => $start->copy()->endOfYear(),
-            MembershipPeriodType::AcademicYear->value => self::calculateAcademicYearEnd($start, $academicStartMonth),
+            MembershipPeriodType::AcademicYear->value => $this->calculateAcademicYearEnd($start, $academicStartMonth),
             MembershipPeriodType::Rolling->value => $start->copy()->addYear()->subDay(),
             default => null,
         };
@@ -105,7 +105,7 @@ class MembershipsRelationManager extends RelationManager
         }
     }
 
-    private static function calculateAcademicYearEnd(Carbon $start, int $academicStartMonth): Carbon
+    private function calculateAcademicYearEnd(Carbon $start, int $academicStartMonth): Carbon
     {
         $year = $start->year;
 

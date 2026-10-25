@@ -39,7 +39,7 @@ final readonly class EloquentMembershipFeeRepository implements MembershipFeeRep
     {
         $fee = $this->find($id);
 
-        if ($fee === null) {
+        if (! $fee instanceof MembershipFee) {
             throw MembershipFeeNotFoundException::notFoundById($id->value);
         }
 
@@ -64,7 +64,7 @@ final readonly class EloquentMembershipFeeRepository implements MembershipFeeRep
      */
     public function getOverdueFees(array $excludedMemberTypes = []): array
     {
-        $today = new DateTimeImmutable();
+        $today = new DateTimeImmutable;
 
         return MembershipFeeModel::query()
             ->whereNull('paid_at')

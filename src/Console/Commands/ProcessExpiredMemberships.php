@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Events\Dispatcher;
 use Modules\Memberships\Domain\Entities\Membership;
+use Modules\Memberships\Domain\Entities\MembershipFee;
 use Modules\Memberships\Domain\Events\FeePaymentOverdue;
 use Modules\Memberships\Domain\Events\MembershipExpiring;
 use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
@@ -51,7 +52,7 @@ final class ProcessExpiredMemberships extends Command
         $overdueCount = $this->processOverdueFees();
 
         $this->newLine();
-        $this->components->info("Summary:");
+        $this->components->info('Summary:');
         $this->components->bulletList([
             "Memberships marked as expired: {$expiredCount}",
             "Expiring notifications sent: {$expiringCount}",
@@ -166,7 +167,7 @@ final class ProcessExpiredMemberships extends Command
         }
 
         // Check for notification marker in notes
-        $currentYear = (new DateTimeImmutable())->format('Y');
+        $currentYear = (new DateTimeImmutable)->format('Y');
 
         return str_contains($membership->notes, "[EXPIRING_NOTIFIED:{$currentYear}]");
     }
@@ -176,12 +177,12 @@ final class ProcessExpiredMemberships extends Command
      */
     private function markAsNotified(Membership $membership): void
     {
-        $currentYear = (new DateTimeImmutable())->format('Y');
+        $currentYear = (new DateTimeImmutable)->format('Y');
         $marker = "[EXPIRING_NOTIFIED:{$currentYear}]";
 
         $notes = $membership->notes ?? '';
-        if (!str_contains($notes, $marker)) {
-            $membership->notes = trim($notes . ' ' . $marker);
+        if (! str_contains($notes, $marker)) {
+            $membership->notes = trim($notes.' '.$marker);
             $this->membershipRepository->save($membership);
         }
     }
@@ -189,13 +190,13 @@ final class ProcessExpiredMemberships extends Command
     /**
      * Check if an overdue event has been dispatched for this fee.
      */
-    private function hasOverdueEventDispatched(\Modules\Memberships\Domain\Entities\MembershipFee $fee): bool
+    private function hasOverdueEventDispatched(MembershipFee $fee): bool
     {
         if ($fee->notes === null) {
             return false;
         }
 
-        $currentMonth = (new DateTimeImmutable())->format('Y-m');
+        $currentMonth = (new DateTimeImmutable)->format('Y-m');
 
         return str_contains($fee->notes, "[OVERDUE_NOTIFIED:{$currentMonth}]");
     }
@@ -203,14 +204,14 @@ final class ProcessExpiredMemberships extends Command
     /**
      * Mark fee as having had an overdue event dispatched.
      */
-    private function markFeeOverdueNotified(\Modules\Memberships\Domain\Entities\MembershipFee $fee): void
+    private function markFeeOverdueNotified(MembershipFee $fee): void
     {
-        $currentMonth = (new DateTimeImmutable())->format('Y-m');
+        $currentMonth = (new DateTimeImmutable)->format('Y-m');
         $marker = "[OVERDUE_NOTIFIED:{$currentMonth}]";
 
         $notes = $fee->notes ?? '';
-        if (!str_contains($notes, $marker)) {
-            $fee->notes = trim($notes . ' ' . $marker);
+        if (! str_contains($notes, $marker)) {
+            $fee->notes = trim($notes.' '.$marker);
             $this->membershipFeeRepository->save($fee);
         }
     }

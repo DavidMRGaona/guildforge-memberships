@@ -14,16 +14,15 @@ final readonly class MembershipCancelled
         public string $memberId,
         public DateTimeImmutable $cancelledAt,
         public DateTimeImmutable $occurredAt,
-    ) {
-    }
+    ) {}
 
     public static function create(Membership $membership): self
     {
         return new self(
             membershipId: $membership->id->value(),
             memberId: $membership->memberId->value(),
-            cancelledAt: $membership->cancelledAt ?? new DateTimeImmutable(),
-            occurredAt: new DateTimeImmutable(),
+            cancelledAt: $membership->cancelledAt ?? new DateTimeImmutable,
+            occurredAt: new DateTimeImmutable,
         );
     }
 }

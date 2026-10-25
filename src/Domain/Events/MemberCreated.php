@@ -16,8 +16,7 @@ final readonly class MemberCreated
         public string $lastName,
         public string $memberType,
         public DateTimeImmutable $occurredAt,
-    ) {
-    }
+    ) {}
 
     public static function create(Member $member): self
     {
@@ -27,7 +26,7 @@ final readonly class MemberCreated
             firstName: $member->firstName,
             lastName: $member->lastName,
             memberType: $member->memberType->value,
-            occurredAt: new DateTimeImmutable(),
+            occurredAt: new DateTimeImmutable,
         );
     }
 }

@@ -33,9 +33,6 @@ final readonly class MembershipFeeService implements MembershipFeeServiceInterfa
             membershipId: MembershipId::fromString($membershipId),
             amount: Money::fromCents($amountCents, $currency),
             dueDate: new DateTimeImmutable($dueDate),
-            paidAt: null,
-            paymentMethod: null,
-            transactionReference: null,
             notes: $notes,
         );
 
@@ -50,7 +47,7 @@ final readonly class MembershipFeeService implements MembershipFeeServiceInterfa
 
         $paidAt = $dto->paidAt !== null
             ? new DateTimeImmutable($dto->paidAt)
-            : new DateTimeImmutable();
+            : new DateTimeImmutable;
 
         $paymentMethod = PaymentMethod::from($dto->paymentMethod);
 
@@ -69,7 +66,7 @@ final readonly class MembershipFeeService implements MembershipFeeServiceInterfa
     {
         $fee = $this->feeRepository->find(MembershipFeeId::fromString($id));
 
-        return $fee !== null ? MembershipFeeDTO::fromEntity($fee) : null;
+        return $fee instanceof MembershipFee ? MembershipFeeDTO::fromEntity($fee) : null;
     }
 
     public function findOrFail(string $id): MembershipFeeDTO
@@ -87,7 +84,7 @@ final readonly class MembershipFeeService implements MembershipFeeServiceInterfa
         $fees = $this->feeRepository->findByMembershipId(MembershipId::fromString($membershipId));
 
         return array_map(
-            fn (MembershipFee $fee) => MembershipFeeDTO::fromEntity($fee),
+            MembershipFeeDTO::fromEntity(...),
             $fees
         );
     }
@@ -100,7 +97,7 @@ final readonly class MembershipFeeService implements MembershipFeeServiceInterfa
         $fees = $this->feeRepository->getOverdueFees();
 
         return array_map(
-            fn (MembershipFee $fee) => MembershipFeeDTO::fromEntity($fee),
+            MembershipFeeDTO::fromEntity(...),
             $fees
         );
     }
@@ -113,7 +110,7 @@ final readonly class MembershipFeeService implements MembershipFeeServiceInterfa
         $fees = $this->feeRepository->getUnpaidFees();
 
         return array_map(
-            fn (MembershipFee $fee) => MembershipFeeDTO::fromEntity($fee),
+            MembershipFeeDTO::fromEntity(...),
             $fees
         );
     }

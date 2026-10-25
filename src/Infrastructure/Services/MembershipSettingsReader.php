@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Services;
 
-use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
+use Modules\Memberships\Domain\Enums\MemberType;
 
 /**
  * Reads the module settings: values saved in the panel (modules.settings.memberships)

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Pages;
 
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
 use App\Application\Modules\Services\ModuleManagerServiceInterface;
 use App\Domain\Modules\ValueObjects\ModuleName;
 use Filament\Actions\Action;
@@ -17,16 +15,19 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Modules\Memberships\Domain\Enums\MemberType;
 
 /**
- * @property \Filament\Schemas\Schema $form
+ * @property Schema $form
  */
 final class MembershipSettings extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     protected static ?int $navigationSort = 99;
 
@@ -70,7 +71,7 @@ final class MembershipSettings extends Page implements HasForms
     /**
      * Get the form schema components for settings.
      *
-     * @return array<\Filament\Schemas\Components\Component>
+     * @return array<Component>
      */
     public static function getFormSchemaComponents(): array
     {

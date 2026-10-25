@@ -25,10 +25,9 @@ final class Member
         public MemberStatus $status = MemberStatus::Active,
         public ?string $userId = null,
         public ?string $notes = null,
-        public readonly DateTimeImmutable $joinedAt = new DateTimeImmutable(),
+        public readonly DateTimeImmutable $joinedAt = new DateTimeImmutable,
         public readonly ?DateTimeImmutable $createdAt = null,
-    ) {
-    }
+    ) {}
 
     public function fullName(): string
     {

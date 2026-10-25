@@ -12,8 +12,7 @@ final readonly class Money implements Stringable
     public function __construct(
         public int $amount,
         public string $currency = 'EUR',
-    ) {
-    }
+    ) {}
 
     public static function fromCents(int $cents, string $currency = 'EUR'): self
     {

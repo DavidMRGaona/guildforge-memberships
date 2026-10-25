@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Tests\Unit\Infrastructure\Services;
 
-use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
+use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 use Tests\TestCase;
 
@@ -19,7 +19,7 @@ final class MembershipSettingsReaderTest extends TestCase
 
         config()->set('modules.settings.memberships', []);
         config()->set('memberships', []);
-        $this->reader = new MembershipSettingsReader();
+        $this->reader = new MembershipSettingsReader;
     }
 
     public function test_defaults_apply_when_nothing_is_configured(): void

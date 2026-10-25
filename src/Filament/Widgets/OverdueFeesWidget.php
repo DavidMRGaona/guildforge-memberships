@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Widgets;
 
-use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use App\Application\Services\DashboardWidgetConfigServiceInterface;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Modules\Memberships\Filament\Resources\MemberResource;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipFeeModel;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 final class OverdueFeesWidget extends BaseWidget
 {
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected static ?int $sort = 14;
 
@@ -55,9 +55,7 @@ final class OverdueFeesWidget extends BaseWidget
 
                 TextColumn::make('days_overdue')
                     ->label(__('memberships::memberships.widgets.overdue_fees.days_overdue'))
-                    ->getStateUsing(function (MembershipFeeModel $record): int {
-                        return (int) $record->due_date->diffInDays(now(), false);
-                    })
+                    ->getStateUsing(fn (MembershipFeeModel $record): int => (int) $record->due_date->diffInDays(now(), false))
                     ->badge()
                     ->color(fn (int $state): string => match (true) {
                         $state > 60 => 'danger',
@@ -73,6 +71,6 @@ final class OverdueFeesWidget extends BaseWidget
     private function getConfiguredLimit(): int
     {
         return app(DashboardWidgetConfigServiceInterface::class)
-            ->getLimit(static::class, 5);
+            ->getLimit(self::class, 5);
     }
 }

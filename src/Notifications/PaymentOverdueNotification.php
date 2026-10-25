@@ -31,7 +31,7 @@ final class PaymentOverdueNotification extends Notification implements ShouldQue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage())
+        return (new MailMessage)
             ->subject(__('memberships::notifications.payment_overdue.subject'))
             ->greeting(__('memberships::notifications.payment_overdue.greeting', ['name' => $this->memberName]))
             ->line(__('memberships::notifications.payment_overdue.line1', [

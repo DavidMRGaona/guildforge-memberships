@@ -27,8 +27,7 @@ final readonly class MembershipModelObserver
     public function __construct(
         private Dispatcher $events,
         private MemberRoleSynchronizer $roles,
-    ) {
-    }
+    ) {}
 
     public function created(MembershipModel $membership): void
     {
@@ -97,8 +96,8 @@ final readonly class MembershipModelObserver
         $this->events->dispatch(new MembershipActivated(
             membershipId: $membership->id,
             memberId: $membership->member_id,
-            activatedAt: $membership->activated_at?->toDateTimeImmutable() ?? new DateTimeImmutable(),
-            occurredAt: new DateTimeImmutable(),
+            activatedAt: $membership->activated_at?->toDateTimeImmutable() ?? new DateTimeImmutable,
+            occurredAt: new DateTimeImmutable,
         ));
     }
 
@@ -107,7 +106,7 @@ final readonly class MembershipModelObserver
         $this->events->dispatch(new MembershipDeactivated(
             membershipId: $membership->id,
             memberId: $memberId,
-            occurredAt: new DateTimeImmutable(),
+            occurredAt: new DateTimeImmutable,
         ));
     }
 
@@ -117,7 +116,7 @@ final readonly class MembershipModelObserver
             membershipId: $membership->id,
             memberId: $membership->member_id,
             endDate: new DateTimeImmutable($membership->end_date->toDateString()),
-            occurredAt: new DateTimeImmutable(),
+            occurredAt: new DateTimeImmutable,
         ));
     }
 }

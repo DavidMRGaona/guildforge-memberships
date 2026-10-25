@@ -16,8 +16,7 @@ final readonly class MembershipCreated
         public DateTimeImmutable $startDate,
         public DateTimeImmutable $endDate,
         public DateTimeImmutable $occurredAt,
-    ) {
-    }
+    ) {}
 
     public static function create(Membership $membership): self
     {
@@ -27,7 +26,7 @@ final readonly class MembershipCreated
             periodType: $membership->periodType->value,
             startDate: $membership->startDate,
             endDate: $membership->endDate,
-            occurredAt: new DateTimeImmutable(),
+            occurredAt: new DateTimeImmutable,
         );
     }
 }

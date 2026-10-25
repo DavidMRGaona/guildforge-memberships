@@ -29,7 +29,7 @@ final readonly class MembershipService implements MembershipServiceInterface
         // Calculate period dates if not provided
         $startDate = $dto->startDate !== null
             ? new DateTimeImmutable($dto->startDate)
-            : new DateTimeImmutable();
+            : new DateTimeImmutable;
 
         $periodDates = $periodType->getPeriodDates($startDate);
 
@@ -44,8 +44,6 @@ final readonly class MembershipService implements MembershipServiceInterface
             startDate: $periodDates['start'],
             endDate: $endDate,
             status: MembershipStatus::Pending,
-            activatedAt: null,
-            cancelledAt: null,
             notes: $dto->notes,
         );
 
@@ -85,7 +83,7 @@ final readonly class MembershipService implements MembershipServiceInterface
     {
         $membership = $this->membershipRepository->find(MembershipId::fromString($id));
 
-        return $membership !== null ? MembershipDTO::fromEntity($membership) : null;
+        return $membership instanceof Membership ? MembershipDTO::fromEntity($membership) : null;
     }
 
     public function findOrFail(string $id): MembershipDTO
@@ -103,7 +101,7 @@ final readonly class MembershipService implements MembershipServiceInterface
         $memberships = $this->membershipRepository->findByMemberId(MemberId::fromString($memberId));
 
         return array_map(
-            fn (Membership $membership) => MembershipDTO::fromEntity($membership),
+            MembershipDTO::fromEntity(...),
             $memberships
         );
     }
@@ -112,7 +110,7 @@ final readonly class MembershipService implements MembershipServiceInterface
     {
         $membership = $this->membershipRepository->findActiveMembership(MemberId::fromString($memberId));
 
-        return $membership !== null ? MembershipDTO::fromEntity($membership) : null;
+        return $membership instanceof Membership ? MembershipDTO::fromEntity($membership) : null;
     }
 
     /**
@@ -123,7 +121,7 @@ final readonly class MembershipService implements MembershipServiceInterface
         $memberships = $this->membershipRepository->getExpiringMemberships($daysFromNow);
 
         return array_map(
-            fn (Membership $membership) => MembershipDTO::fromEntity($membership),
+            MembershipDTO::fromEntity(...),
             $memberships
         );
     }
