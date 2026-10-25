@@ -72,6 +72,14 @@ final readonly class FeeStructureService implements FeeStructureServiceInterface
             $feeStructure->setValidUntil(new DateTimeImmutable($validUntil));
         }
 
+        if ($description !== null) {
+            $feeStructure->updateDescription($description);
+        }
+
+        if ($prorationRules !== null) {
+            $feeStructure->updateProrationRules($prorationRules);
+        }
+
         if ($isDefault === true) {
             $feeStructure->setAsDefault();
         } elseif ($isDefault === false) {

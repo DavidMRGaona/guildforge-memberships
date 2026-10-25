@@ -31,6 +31,16 @@ class MembershipsRelationManager extends RelationManager
         return __('memberships::memberships.sections.memberships');
     }
 
+    protected static function getModelLabel(): string
+    {
+        return __('memberships::memberships.model.membership.singular');
+    }
+
+    protected static function getPluralModelLabel(): string
+    {
+        return __('memberships::memberships.model.membership.plural');
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -156,6 +166,7 @@ class MembershipsRelationManager extends RelationManager
                     ->toggleable(),
             ])
             ->defaultSort('start_date', 'desc')
+            ->emptyStateDescription(__('memberships::memberships.relation_managers.memberships.empty_state_description'))
             ->headerActions([
                 CreateAction::make()
                     ->label(__('memberships::memberships.pages.create_membership'))
