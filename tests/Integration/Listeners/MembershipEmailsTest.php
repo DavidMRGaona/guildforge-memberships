@@ -9,6 +9,7 @@ use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Illuminate\Testing\PendingCommand;
 use Modules\Memberships\Console\Commands\ProcessExpiredMemberships;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipFeeModel;
@@ -121,7 +122,7 @@ final class MembershipEmailsTest extends ModuleTestCase
         $member = $this->member('regular', null, 'expulsado@example.test', status: 'expelled');
         $this->fee($this->membership('active', $member), dueDaysAgo: 10);
 
-        $this->artisan('memberships:process-expired')->assertSuccessful();
+        $this->processExpired();
 
         Notification::assertNothingSent();
     }
@@ -131,7 +132,7 @@ final class MembershipEmailsTest extends ModuleTestCase
         config()->set('modules.settings.memberships.send_overdue_email', true);
         $this->fee($this->membership('cancelled'), dueDaysAgo: 10);
 
-        $this->artisan('memberships:process-expired')->assertSuccessful();
+        $this->processExpired();
 
         Notification::assertNotSentTo($this->user, PaymentOverdueNotification::class);
     }
@@ -140,7 +141,7 @@ final class MembershipEmailsTest extends ModuleTestCase
     {
         $this->fee($this->membership('active'), dueDaysAgo: 10);
 
-        $this->artisan('memberships:process-expired')->assertSuccessful();
+        $this->processExpired();
 
         Notification::assertNotSentTo($this->user, PaymentOverdueNotification::class);
     }
@@ -150,7 +151,7 @@ final class MembershipEmailsTest extends ModuleTestCase
         config()->set('modules.settings.memberships.send_overdue_email', true);
         $this->fee($this->membership('active'), dueDaysAgo: 10, amount: '25.00');
 
-        $this->artisan('memberships:process-expired')->assertSuccessful();
+        $this->processExpired();
 
         Notification::assertSentTo($this->user, PaymentOverdueNotification::class, function (PaymentOverdueNotification $n): bool {
             $text = implode(' ', $n->toMail($this->user)->introLines);
@@ -164,7 +165,7 @@ final class MembershipEmailsTest extends ModuleTestCase
         config()->set('modules.settings.memberships.send_overdue_email', true);
         $this->fee($this->membership('active'), dueDaysAgo: 10, paid: true);
 
-        $this->artisan('memberships:process-expired')->assertSuccessful();
+        $this->processExpired();
 
         Notification::assertNotSentTo($this->user, PaymentOverdueNotification::class);
     }
@@ -225,5 +226,12 @@ final class MembershipEmailsTest extends ModuleTestCase
             'due_date' => now()->subDays($dueDaysAgo)->startOfDay(),
             'paid_at' => $paid ? now()->subDays($dueDaysAgo + 1) : null,
         ]);
+    }
+
+    private function processExpired(): void
+    {
+        $command = $this->artisan('memberships:process-expired');
+        $this->assertInstanceOf(PendingCommand::class, $command);
+        $command->assertSuccessful();
     }
 }

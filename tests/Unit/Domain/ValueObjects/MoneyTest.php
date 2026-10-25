@@ -22,8 +22,7 @@ final class MoneyTest extends TestCase
     {
         $money = new Money(1050, 'EUR');
 
-        $this->assertIsInt($money->amount());
-        $this->assertEquals(1050, $money->amount());
+        $this->assertSame(1050, $money->amount());
     }
 
     public function test_it_returns_currency(): void
