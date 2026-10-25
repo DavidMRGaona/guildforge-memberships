@@ -38,6 +38,19 @@ final class FeeStructure
         $this->validUntil = $validUntil;
     }
 
+    public function updateDescription(?string $description): void
+    {
+        $this->description = $description;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $prorationRules
+     */
+    public function updateProrationRules(?array $prorationRules): void
+    {
+        $this->prorationRules = $prorationRules;
+    }
+
     public function isCurrentlyValid(?DateTimeImmutable $now = null): bool
     {
         $now ??= new DateTimeImmutable;

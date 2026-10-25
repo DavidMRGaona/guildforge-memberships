@@ -283,6 +283,7 @@ return [
         'memberships' => [
             'title' => 'Cuotas',
             'activated_at' => 'Activada',
+            'empty_state_description' => 'Cree una cuota para empezar.',
         ],
         'fees' => [
             'title' => 'Pagos',

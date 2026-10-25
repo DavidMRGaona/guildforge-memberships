@@ -71,12 +71,20 @@ final readonly class MemberService implements MemberServiceInterface
             );
         }
 
+        if ($dto->memberType !== null) {
+            $member->changeMemberType(MemberType::from($dto->memberType));
+        }
+
         if ($dto->status !== null) {
             $member->changeStatus(MemberStatus::from($dto->status));
         }
 
         if ($dto->userId !== null) {
             $member->linkToUser($dto->userId);
+        }
+
+        if ($dto->notes !== null) {
+            $member->updateNotes($dto->notes);
         }
 
         $this->memberRepository->save($member);

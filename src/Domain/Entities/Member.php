@@ -54,6 +54,16 @@ final class Member
         $this->address = $address;
     }
 
+    public function changeMemberType(MemberType $memberType): void
+    {
+        $this->memberType = $memberType;
+    }
+
+    public function updateNotes(?string $notes): void
+    {
+        $this->notes = $notes;
+    }
+
     public function changeStatus(MemberStatus $status): void
     {
         $this->status = $status;

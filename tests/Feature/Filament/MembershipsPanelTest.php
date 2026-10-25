@@ -81,6 +81,14 @@ final class MembershipsPanelTest extends ModuleTestCase
             ->assertCanSeeTableRecords([$membership]);
     }
 
+    public function test_the_memberships_relation_manager_names_its_records_in_spanish(): void
+    {
+        Livewire::test(MembershipsRelationManager::class, ['ownerRecord' => $this->member(), 'pageClass' => EditMember::class])
+            ->assertOk()
+            ->assertSee('Cree una cuota para empezar.')
+            ->assertDontSee('membership model');
+    }
+
     public function test_fee_structure_pages_render(): void
     {
         $feeStructure = FeeStructureModel::create([

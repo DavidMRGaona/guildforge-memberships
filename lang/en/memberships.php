@@ -283,6 +283,7 @@ return [
         'memberships' => [
             'title' => 'Memberships',
             'activated_at' => 'Activated',
+            'empty_state_description' => 'Create a membership to get started.',
         ],
         'fees' => [
             'title' => 'Payments',

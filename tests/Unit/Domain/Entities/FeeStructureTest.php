@@ -94,6 +94,25 @@ final class FeeStructureTest extends TestCase
         $this->assertEquals($validUntil, $feeStructure->validUntil);
     }
 
+    public function test_it_can_update_description(): void
+    {
+        $feeStructure = $this->createFeeStructure();
+
+        $feeStructure->updateDescription('Annual fee for regular members');
+
+        $this->assertEquals('Annual fee for regular members', $feeStructure->description);
+    }
+
+    public function test_it_can_update_proration_rules(): void
+    {
+        $feeStructure = $this->createFeeStructure();
+        $prorationRules = ['monthly' => 4.50, 'minimum' => 15.00];
+
+        $feeStructure->updateProrationRules($prorationRules);
+
+        $this->assertEquals($prorationRules, $feeStructure->prorationRules);
+    }
+
     public function test_it_checks_if_is_currently_valid(): void
     {
         $now = new DateTimeImmutable('2026-06-15');

@@ -125,6 +125,24 @@ final class MemberTest extends TestCase
         $this->assertEquals('Calle Nueva 5, Barcelona', $member->address);
     }
 
+    public function test_it_can_change_member_type(): void
+    {
+        $member = $this->createMember('John', 'Doe');
+
+        $member->changeMemberType(MemberType::Student);
+
+        $this->assertEquals(MemberType::Student, $member->memberType);
+    }
+
+    public function test_it_can_update_notes(): void
+    {
+        $member = $this->createMember('John', 'Doe');
+
+        $member->updateNotes('Prefers to be contacted by email');
+
+        $this->assertEquals('Prefers to be contacted by email', $member->notes);
+    }
+
     public function test_it_can_change_status(): void
     {
         $member = $this->createMember('John', 'Doe');
