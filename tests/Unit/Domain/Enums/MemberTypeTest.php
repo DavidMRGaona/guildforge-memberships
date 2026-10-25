@@ -41,26 +41,18 @@ final class MemberTypeTest extends TestCase
 
     public function test_it_returns_label(): void
     {
-        // This test will fail until the label() method is implemented
-        // The label() method should return translated strings from:
-        // memberships::memberships.enums.member_type.regular
-        // memberships::memberships.enums.member_type.student
-        // memberships::memberships.enums.member_type.senior
-        // memberships::memberships.enums.member_type.honorary
-        // memberships::memberships.enums.member_type.founder
-
-        $this->assertIsString(MemberType::Regular->label());
-        $this->assertIsString(MemberType::Student->label());
-        $this->assertIsString(MemberType::Senior->label());
-        $this->assertIsString(MemberType::Honorary->label());
-        $this->assertIsString(MemberType::Founder->label());
+        // Without a translator (plain PHPUnit) label() returns its translation key
+        $this->assertSame('memberships::memberships.enums.member_type.regular', MemberType::Regular->label());
+        $this->assertSame('memberships::memberships.enums.member_type.student', MemberType::Student->label());
+        $this->assertSame('memberships::memberships.enums.member_type.senior', MemberType::Senior->label());
+        $this->assertSame('memberships::memberships.enums.member_type.honorary', MemberType::Honorary->label());
+        $this->assertSame('memberships::memberships.enums.member_type.founder', MemberType::Founder->label());
     }
 
     public function test_values_returns_string_values(): void
     {
         $values = MemberType::values();
 
-        $this->assertIsArray($values);
         $this->assertContains('regular', $values);
         $this->assertContains('student', $values);
         $this->assertContains('senior', $values);

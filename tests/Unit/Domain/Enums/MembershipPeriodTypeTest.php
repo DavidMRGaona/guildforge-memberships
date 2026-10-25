@@ -92,22 +92,16 @@ final class MembershipPeriodTypeTest extends TestCase
 
     public function test_it_returns_label(): void
     {
-        // This test will fail until the label() method is implemented
-        // The label() method should return translated strings from:
-        // memberships::memberships.enums.membership_period_type.calendar_year
-        // memberships::memberships.enums.membership_period_type.academic_year
-        // memberships::memberships.enums.membership_period_type.rolling
-
-        $this->assertIsString(MembershipPeriodType::CalendarYear->label());
-        $this->assertIsString(MembershipPeriodType::AcademicYear->label());
-        $this->assertIsString(MembershipPeriodType::Rolling->label());
+        // Without a translator (plain PHPUnit) label() returns its translation key
+        $this->assertSame('memberships::memberships.enums.membership_period_type.calendar_year', MembershipPeriodType::CalendarYear->label());
+        $this->assertSame('memberships::memberships.enums.membership_period_type.academic_year', MembershipPeriodType::AcademicYear->label());
+        $this->assertSame('memberships::memberships.enums.membership_period_type.rolling', MembershipPeriodType::Rolling->label());
     }
 
     public function test_values_returns_string_values(): void
     {
         $values = MembershipPeriodType::values();
 
-        $this->assertIsArray($values);
         $this->assertContains('calendar_year', $values);
         $this->assertContains('academic_year', $values);
         $this->assertContains('rolling', $values);

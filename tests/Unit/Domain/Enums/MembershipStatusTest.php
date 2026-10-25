@@ -70,24 +70,17 @@ final class MembershipStatusTest extends TestCase
 
     public function test_it_returns_label(): void
     {
-        // This test will fail until the label() method is implemented
-        // The label() method should return translated strings from:
-        // memberships::memberships.enums.membership_status.pending
-        // memberships::memberships.enums.membership_status.active
-        // memberships::memberships.enums.membership_status.expired
-        // memberships::memberships.enums.membership_status.cancelled
-
-        $this->assertIsString(MembershipStatus::Pending->label());
-        $this->assertIsString(MembershipStatus::Active->label());
-        $this->assertIsString(MembershipStatus::Expired->label());
-        $this->assertIsString(MembershipStatus::Cancelled->label());
+        // Without a translator (plain PHPUnit) label() returns its translation key
+        $this->assertSame('memberships::memberships.enums.membership_status.pending', MembershipStatus::Pending->label());
+        $this->assertSame('memberships::memberships.enums.membership_status.active', MembershipStatus::Active->label());
+        $this->assertSame('memberships::memberships.enums.membership_status.expired', MembershipStatus::Expired->label());
+        $this->assertSame('memberships::memberships.enums.membership_status.cancelled', MembershipStatus::Cancelled->label());
     }
 
     public function test_values_returns_string_values(): void
     {
         $values = MembershipStatus::values();
 
-        $this->assertIsArray($values);
         $this->assertContains('pending', $values);
         $this->assertContains('active', $values);
         $this->assertContains('expired', $values);

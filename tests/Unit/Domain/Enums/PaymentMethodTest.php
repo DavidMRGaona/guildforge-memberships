@@ -30,24 +30,17 @@ final class PaymentMethodTest extends TestCase
 
     public function test_it_returns_label(): void
     {
-        // This test will fail until the label() method is implemented
-        // The label() method should return translated strings from:
-        // memberships::memberships.enums.payment_method.cash
-        // memberships::memberships.enums.payment_method.bank_transfer
-        // memberships::memberships.enums.payment_method.card
-        // memberships::memberships.enums.payment_method.other
-
-        $this->assertIsString(PaymentMethod::Cash->label());
-        $this->assertIsString(PaymentMethod::BankTransfer->label());
-        $this->assertIsString(PaymentMethod::Card->label());
-        $this->assertIsString(PaymentMethod::Other->label());
+        // Without a translator (plain PHPUnit) label() returns its translation key
+        $this->assertSame('memberships::memberships.enums.payment_method.cash', PaymentMethod::Cash->label());
+        $this->assertSame('memberships::memberships.enums.payment_method.bank_transfer', PaymentMethod::BankTransfer->label());
+        $this->assertSame('memberships::memberships.enums.payment_method.card', PaymentMethod::Card->label());
+        $this->assertSame('memberships::memberships.enums.payment_method.other', PaymentMethod::Other->label());
     }
 
     public function test_values_returns_string_values(): void
     {
         $values = PaymentMethod::values();
 
-        $this->assertIsArray($values);
         $this->assertContains('cash', $values);
         $this->assertContains('bank_transfer', $values);
         $this->assertContains('card', $values);

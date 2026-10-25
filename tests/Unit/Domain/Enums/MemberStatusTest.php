@@ -46,24 +46,17 @@ final class MemberStatusTest extends TestCase
 
     public function test_it_returns_label(): void
     {
-        // This test will fail until the label() method is implemented
-        // The label() method should return translated strings from:
-        // memberships::memberships.enums.member_status.active
-        // memberships::memberships.enums.member_status.inactive
-        // memberships::memberships.enums.member_status.suspended
-        // memberships::memberships.enums.member_status.expelled
-
-        $this->assertIsString(MemberStatus::Active->label());
-        $this->assertIsString(MemberStatus::Inactive->label());
-        $this->assertIsString(MemberStatus::Suspended->label());
-        $this->assertIsString(MemberStatus::Expelled->label());
+        // Without a translator (plain PHPUnit) label() returns its translation key
+        $this->assertSame('memberships::memberships.enums.member_status.active', MemberStatus::Active->label());
+        $this->assertSame('memberships::memberships.enums.member_status.inactive', MemberStatus::Inactive->label());
+        $this->assertSame('memberships::memberships.enums.member_status.suspended', MemberStatus::Suspended->label());
+        $this->assertSame('memberships::memberships.enums.member_status.expelled', MemberStatus::Expelled->label());
     }
 
     public function test_values_returns_string_values(): void
     {
         $values = MemberStatus::values();
 
-        $this->assertIsArray($values);
         $this->assertContains('active', $values);
         $this->assertContains('inactive', $values);
         $this->assertContains('suspended', $values);
