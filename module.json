@@ -1,7 +1,7 @@
 {
   "name": "memberships",
   "displayName": "Gestión de socios",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "repository": "DavidMRGaona/guildforge-memberships",
   "namespace": "Modules\\Memberships",
   "provider": "MembershipsServiceProvider",
