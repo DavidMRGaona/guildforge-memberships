@@ -19,7 +19,7 @@ use Modules\Memberships\Domain\Enums\MemberType;
 
 /**
  * @property string $id
- * @property string|null $member_number
+ * @property string $member_number
  * @property string $first_name
  * @property string $last_name
  * @property string|null $email
@@ -31,7 +31,7 @@ use Modules\Memberships\Domain\Enums\MemberType;
  * @property string|null $user_id
  * @property string|null $notes
  * @property Carbon $joined_at
- * @property Carbon $created_at
+ * @property Carbon|null $created_at
  * @property Carbon $updated_at
  * @property Carbon|null $deleted_at
  * @property-read string $full_name
@@ -52,7 +52,7 @@ final class MemberModel extends Model
     protected static function booted(): void
     {
         self::creating(function (MemberModel $member): void {
-            if ($member->member_number === null) {
+            if ($member->getAttribute('member_number') === null) {
                 /** @var MemberNumberGeneratorInterface $generator */
                 $generator = app(MemberNumberGeneratorInterface::class);
                 $member->member_number = $generator->generate()->value;

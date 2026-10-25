@@ -22,7 +22,7 @@ use Modules\Memberships\Domain\Enums\PaymentMethod;
  * @property PaymentMethod|null $payment_method
  * @property string|null $transaction_reference
  * @property string|null $notes
- * @property Carbon $created_at
+ * @property Carbon|null $created_at
  * @property Carbon $updated_at
  * @property-read MembershipModel $membership
  */

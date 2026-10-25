@@ -38,7 +38,7 @@ final class MembershipSettings extends Page implements HasForms
      */
     public ?array $data = [];
 
-    public static function getNavigationGroup(): ?string
+    public static function getNavigationGroup(): string
     {
         return __('memberships::memberships.navigation_group');
     }

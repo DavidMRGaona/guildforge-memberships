@@ -21,7 +21,7 @@ use Modules\Memberships\Domain\Enums\MemberType;
  * @property Carbon|null $valid_until
  * @property string|null $description
  * @property bool $is_default
- * @property Carbon $created_at
+ * @property Carbon|null $created_at
  * @property Carbon $updated_at
  */
 final class FeeStructureModel extends Model

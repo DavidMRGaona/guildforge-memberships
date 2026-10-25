@@ -42,6 +42,9 @@ final readonly class ProrationCalculator implements ProrationCalculatorInterface
         return Money::fromCents($proratedCents, $fullAmount->currency());
     }
 
+    /**
+     * @param  array<int|string, mixed>  $customRules  Month (1-12) => percentage of the full amount
+     */
     private function calculateWithCustomRules(Money $fullAmount, DateTimeImmutable $startDate, array $customRules): Money
     {
         $month = (int) $startDate->format('n');

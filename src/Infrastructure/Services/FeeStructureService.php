@@ -20,6 +20,9 @@ final readonly class FeeStructureService implements FeeStructureServiceInterface
         private FeeStructureRepositoryInterface $feeStructureRepository,
     ) {}
 
+    /**
+     * @param  array<string, mixed>|null  $prorationRules
+     */
     public function create(
         string $memberType,
         string $periodType,
@@ -48,6 +51,9 @@ final readonly class FeeStructureService implements FeeStructureServiceInterface
         return FeeStructureDTO::fromEntity($feeStructure);
     }
 
+    /**
+     * @param  array<string, mixed>|null  $prorationRules
+     */
     public function update(
         string $id,
         ?int $amountCents = null,
@@ -59,7 +65,7 @@ final readonly class FeeStructureService implements FeeStructureServiceInterface
         $feeStructure = $this->feeStructureRepository->findOrFail(FeeStructureId::fromString($id));
 
         if ($amountCents !== null) {
-            $feeStructure->updateAmount(Money::fromCents($amountCents, $feeStructure->amount()->currency()));
+            $feeStructure->updateAmount(Money::fromCents($amountCents, $feeStructure->amount->currency()));
         }
 
         if ($validUntil !== null) {
