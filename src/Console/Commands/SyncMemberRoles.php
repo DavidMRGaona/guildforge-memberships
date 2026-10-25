@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Console\Commands;
 
 use Illuminate\Console\Command;
+use Modules\Memberships\Application\DTOs\RoleSyncSummaryDTO;
 use Modules\Memberships\Infrastructure\Services\MemberRoleSynchronizer;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
@@ -39,7 +40,7 @@ final class SyncMemberRoles extends Command
         $dryRun = (bool) $this->option('dry-run');
         $summary = $this->roles->syncAll($dryRun);
 
-        if ($summary === null) {
+        if (! $summary instanceof RoleSyncSummaryDTO) {
             $this->components->error(__('memberships::memberships.commands.sync_roles.role_unavailable'));
 
             return self::FAILURE;

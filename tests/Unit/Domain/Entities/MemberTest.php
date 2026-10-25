@@ -243,7 +243,7 @@ final class MemberTest extends TestCase
             lastName: $lastName,
             memberType: $type,
             status: $status,
-            joinedAt: new DateTimeImmutable(),
+            joinedAt: new DateTimeImmutable,
         );
     }
 }

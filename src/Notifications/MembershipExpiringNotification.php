@@ -18,8 +18,7 @@ final class MembershipExpiringNotification extends Notification implements Shoul
         private readonly string $memberName,
         private readonly DateTimeImmutable $endDate,
         private readonly int $daysUntilExpiration,
-    ) {
-    }
+    ) {}
 
     /**
      * Get the notification's delivery channels.
@@ -38,7 +37,7 @@ final class MembershipExpiringNotification extends Notification implements Shoul
     {
         $formattedDate = $this->endDate->format('d/m/Y');
 
-        return (new MailMessage())
+        return (new MailMessage)
             ->subject(__('memberships::notifications.membership_expiring.subject'))
             ->greeting(__('memberships::notifications.membership_expiring.greeting', ['name' => $this->memberName]))
             ->line(__('memberships::notifications.membership_expiring.line1', [

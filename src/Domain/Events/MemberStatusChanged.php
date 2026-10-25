@@ -14,8 +14,7 @@ final readonly class MemberStatusChanged
         public string $previousStatus,
         public string $newStatus,
         public DateTimeImmutable $occurredAt,
-    ) {
-    }
+    ) {}
 
     public static function create(string $memberId, MemberStatus $previous, MemberStatus $new): self
     {
@@ -23,7 +22,7 @@ final readonly class MemberStatusChanged
             memberId: $memberId,
             previousStatus: $previous->value,
             newStatus: $new->value,
-            occurredAt: new DateTimeImmutable(),
+            occurredAt: new DateTimeImmutable,
         );
     }
 }

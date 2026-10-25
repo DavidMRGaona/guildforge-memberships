@@ -4,18 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Memberships;
 
-use Modules\Memberships\Filament\RelationManagers\MembershipsRelationManager;
-use Modules\Memberships\Filament\Resources\MemberResource;
-use Modules\Memberships\Filament\Resources\FeeStructureResource;
-use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
-use Modules\Memberships\Policies\MemberPolicy;
-use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
-use Modules\Memberships\Policies\FeeStructurePolicy;
-use App\Application\Modules\DTOs\PermissionDTO;
 use App\Application\Modules\DTOs\NavigationItemDTO;
-use Modules\Memberships\Filament\Pages\MembershipSettings;
-use Filament\Resources\Resource;
+use App\Application\Modules\DTOs\PermissionDTO;
 use App\Modules\ModuleServiceProvider;
+use Filament\Resources\Resource as FilamentResource;
+use Filament\Schemas\Components\Component;
+use Filament\Widgets\Widget;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
@@ -34,6 +28,18 @@ use Modules\Memberships\Domain\Repositories\FeeStructureRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
+use Modules\Memberships\Filament\Pages\MembershipSettings;
+use Modules\Memberships\Filament\RelationManagers\MembershipsRelationManager;
+use Modules\Memberships\Filament\Resources\FeeStructureResource;
+use Modules\Memberships\Filament\Resources\MemberResource;
+use Modules\Memberships\Filament\Widgets\ExpiringMembershipsWidget;
+use Modules\Memberships\Filament\Widgets\MembershipStatsWidget;
+use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MemberModelObserver;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MembershipModelObserver;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\EloquentFeeStructureRepository;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\EloquentMemberRepository;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\EloquentMembershipFeeRepository;
@@ -45,15 +51,11 @@ use Modules\Memberships\Infrastructure\Services\MembershipFeeService;
 use Modules\Memberships\Infrastructure\Services\MembershipService;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 use Modules\Memberships\Infrastructure\Services\ProrationCalculator;
-use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
-use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MemberModelObserver;
-use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MembershipModelObserver;
-use Modules\Memberships\Filament\Widgets\ExpiringMembershipsWidget;
-use Modules\Memberships\Filament\Widgets\MembershipStatsWidget;
-use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
 use Modules\Memberships\Listeners\NotifyFeePaymentOverdue;
 use Modules\Memberships\Listeners\NotifyMembershipExpired;
 use Modules\Memberships\Listeners\NotifyMembershipExpiring;
+use Modules\Memberships\Policies\FeeStructurePolicy;
+use Modules\Memberships\Policies\MemberPolicy;
 
 final class MembershipsServiceProvider extends ModuleServiceProvider
 {
@@ -169,7 +171,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     /**
      * Register Filament resources provided by this module.
      *
-     * @return array<class-string<Resource>>
+     * @return array<class-string<FilamentResource>>
      */
     public function registerFilamentResources(): array
     {
@@ -182,7 +184,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     /**
      * Register dashboard widgets provided by this module.
      *
-     * @return array<class-string<\Filament\Widgets\Widget>>
+     * @return array<class-string<Widget>>
      */
     public function registerFilamentWidgets(): array
     {
@@ -331,7 +333,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     /**
      * Get the Filament form schema for module settings.
      *
-     * @return array<\Filament\Schemas\Components\Component>
+     * @return array<Component>
      */
     public function getSettingsSchema(): array
     {

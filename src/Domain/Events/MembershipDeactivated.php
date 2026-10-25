@@ -16,6 +16,5 @@ final readonly class MembershipDeactivated
         public string $membershipId,
         public string $memberId,
         public DateTimeImmutable $occurredAt,
-    ) {
-    }
+    ) {}
 }

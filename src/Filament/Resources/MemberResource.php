@@ -4,35 +4,34 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
+use App\Filament\Resources\BaseResource;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Modules\Memberships\Filament\Resources\MemberResource\Pages\ListMembers;
-use Modules\Memberships\Filament\Resources\MemberResource\Pages\CreateMember;
-use Modules\Memberships\Filament\Resources\MemberResource\Pages\EditMember;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use App\Filament\Resources\BaseResource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Modules\Memberships\Domain\Enums\MemberStatus;
 use Modules\Memberships\Domain\Enums\MemberType;
-use Modules\Memberships\Filament\Resources\MemberResource\Pages;
+use Modules\Memberships\Filament\Resources\MemberResource\Pages\CreateMember;
+use Modules\Memberships\Filament\Resources\MemberResource\Pages\EditMember;
+use Modules\Memberships\Filament\Resources\MemberResource\Pages\ListMembers;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 
 class MemberResource extends BaseResource
 {
     protected static ?string $model = MemberModel::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
 
     protected static ?int $navigationSort = 1;
 
@@ -163,10 +162,8 @@ class MemberResource extends BaseResource
                 TextColumn::make('full_name')
                     ->label(__('memberships::memberships.fields.full_name'))
                     ->searchable(['first_name', 'last_name'])
-                    ->sortable(query: function ($query, $direction) {
-                        return $query->orderBy('first_name', $direction)
-                            ->orderBy('last_name', $direction);
-                    }),
+                    ->sortable(query: fn ($query, $direction) => $query->orderBy('first_name', $direction)
+                        ->orderBy('last_name', $direction)),
 
                 TextColumn::make('email')
                     ->label(__('memberships::memberships.fields.email'))

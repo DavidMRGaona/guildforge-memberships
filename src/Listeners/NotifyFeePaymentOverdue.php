@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\Memberships\Listeners;
 
 use DateTimeImmutable;
+use Modules\Memberships\Domain\Entities\Member;
+use Modules\Memberships\Domain\Entities\Membership;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Events\FeePaymentOverdue;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
@@ -26,8 +28,7 @@ final readonly class NotifyFeePaymentOverdue
         private MembershipRepositoryInterface $membershipRepository,
         private MemberRepositoryInterface $memberRepository,
         private MembershipSettingsReader $settings,
-    ) {
-    }
+    ) {}
 
     public function handle(FeePaymentOverdue $event): void
     {
@@ -37,33 +38,33 @@ final readonly class NotifyFeePaymentOverdue
 
         $membership = $this->membershipRepository->find(new MembershipId($event->membershipId));
 
-        if ($membership === null || $membership->status === MembershipStatus::Cancelled) {
+        if (! $membership instanceof Membership || $membership->status === MembershipStatus::Cancelled) {
             return;
         }
 
         $member = $this->memberRepository->find($membership->memberId);
 
         // Only current members are chased: not those who left, were suspended or were expelled
-        if ($member === null || ! $member->isActive() || in_array($member->memberType, $this->settings->permanentMemberTypes(), true)) {
+        if (! $member instanceof Member || ! $member->isActive() || in_array($member->memberType, $this->settings->permanentMemberTypes(), true)) {
             return;
         }
 
         $this->notifyMember($member, new PaymentOverdueNotification(
             memberName: $member->fullName(),
-            formattedAmount: self::formatAmount($event->amountCents, $event->currency),
+            formattedAmount: $this->formatAmount($event->amountCents, $event->currency),
             dueDate: $event->dueDate,
-            daysOverdue: self::daysSince($event->dueDate),
+            daysOverdue: $this->daysSince($event->dueDate),
         ));
     }
 
-    private static function formatAmount(int $cents, string $currency): string
+    private function formatAmount(int $cents, string $currency): string
     {
         $amount = number_format($cents / 100, 2, ',', '.');
 
         return $currency === 'EUR' ? "{$amount} €" : "{$amount} {$currency}";
     }
 
-    private static function daysSince(DateTimeImmutable $dueDate): int
+    private function daysSince(DateTimeImmutable $dueDate): int
     {
         $today = new DateTimeImmutable('today');
         $diff = $dueDate->setTime(0, 0)->diff($today);

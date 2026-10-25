@@ -14,16 +14,15 @@ final readonly class MembershipActivated
         public string $memberId,
         public DateTimeImmutable $activatedAt,
         public DateTimeImmutable $occurredAt,
-    ) {
-    }
+    ) {}
 
     public static function create(Membership $membership): self
     {
         return new self(
             membershipId: $membership->id->value(),
             memberId: $membership->memberId->value(),
-            activatedAt: $membership->activatedAt ?? new DateTimeImmutable(),
-            occurredAt: new DateTimeImmutable(),
+            activatedAt: $membership->activatedAt ?? new DateTimeImmutable,
+            occurredAt: new DateTimeImmutable,
         );
     }
 }

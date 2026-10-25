@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
-use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
+use Modules\Memberships\Domain\Enums\MemberType;
 
 /**
  * @property string $id
@@ -27,7 +28,7 @@ use Modules\Memberships\Domain\Enums\MembershipStatus;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read MemberModel $member
- * @property-read \Illuminate\Database\Eloquent\Collection<int, MembershipFeeModel> $fees
+ * @property-read Collection<int, MembershipFeeModel> $fees
  */
 final class MembershipModel extends Model
 {
@@ -41,10 +42,8 @@ final class MembershipModel extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (MembershipModel $membership): void {
-            if ($membership->status === null) {
-                $membership->status = MembershipStatus::Pending;
-            }
+        self::creating(function (MembershipModel $membership): void {
+            $membership->status ??= MembershipStatus::Pending;
 
             // Set activated_at if creating with Active status
             if ($membership->status === MembershipStatus::Active && $membership->activated_at === null) {
@@ -52,7 +51,7 @@ final class MembershipModel extends Model
             }
         });
 
-        static::updating(function (MembershipModel $membership): void {
+        self::updating(function (MembershipModel $membership): void {
             // Set activated_at when status changes to Active
             if ($membership->isDirty('status') && $membership->status === MembershipStatus::Active && $membership->activated_at === null) {
                 $membership->activated_at = now();

@@ -81,7 +81,7 @@ final readonly class FeeStructureService implements FeeStructureServiceInterface
     {
         $feeStructure = $this->feeStructureRepository->find(FeeStructureId::fromString($id));
 
-        return $feeStructure !== null ? FeeStructureDTO::fromEntity($feeStructure) : null;
+        return $feeStructure instanceof FeeStructure ? FeeStructureDTO::fromEntity($feeStructure) : null;
     }
 
     public function findOrFail(string $id): FeeStructureDTO
@@ -98,7 +98,7 @@ final readonly class FeeStructureService implements FeeStructureServiceInterface
             MembershipPeriodType::from($periodType)
         );
 
-        return $feeStructure !== null ? FeeStructureDTO::fromEntity($feeStructure) : null;
+        return $feeStructure instanceof FeeStructure ? FeeStructureDTO::fromEntity($feeStructure) : null;
     }
 
     public function getDefaultStructure(string $memberType, string $periodType): ?FeeStructureDTO
@@ -108,7 +108,7 @@ final readonly class FeeStructureService implements FeeStructureServiceInterface
             MembershipPeriodType::from($periodType)
         );
 
-        return $feeStructure !== null ? FeeStructureDTO::fromEntity($feeStructure) : null;
+        return $feeStructure instanceof FeeStructure ? FeeStructureDTO::fromEntity($feeStructure) : null;
     }
 
     public function delete(string $id): void
@@ -124,7 +124,7 @@ final readonly class FeeStructureService implements FeeStructureServiceInterface
         $feeStructures = $this->feeStructureRepository->all();
 
         return array_map(
-            fn (FeeStructure $feeStructure) => FeeStructureDTO::fromEntity($feeStructure),
+            FeeStructureDTO::fromEntity(...),
             $feeStructures
         );
     }

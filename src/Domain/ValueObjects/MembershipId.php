@@ -6,6 +6,4 @@ namespace Modules\Memberships\Domain\ValueObjects;
 
 use App\Domain\ValueObjects\EntityId;
 
-final readonly class MembershipId extends EntityId
-{
-}
+final readonly class MembershipId extends EntityId {}

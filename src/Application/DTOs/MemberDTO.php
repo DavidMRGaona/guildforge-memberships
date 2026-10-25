@@ -28,8 +28,7 @@ final readonly class MemberDTO
         public string $joinedAt,
         public ?string $createdAt,
         public ?MembershipDTO $activeMembership,
-    ) {
-    }
+    ) {}
 
     public static function fromEntity(Member $member, ?Membership $activeMembership = null): self
     {
@@ -51,7 +50,7 @@ final readonly class MemberDTO
             notes: $member->notes,
             joinedAt: $member->joinedAt->format('c'),
             createdAt: $member->createdAt?->format('c'),
-            activeMembership: $activeMembership !== null
+            activeMembership: $activeMembership instanceof Membership
                 ? MembershipDTO::fromEntity($activeMembership)
                 : null,
         );

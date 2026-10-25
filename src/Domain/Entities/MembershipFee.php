@@ -22,22 +22,21 @@ final class MembershipFee
         public ?string $transactionReference = null,
         public ?string $notes = null,
         public readonly ?DateTimeImmutable $createdAt = null,
-    ) {
-    }
+    ) {}
 
     public function recordPayment(
         ?PaymentMethod $paymentMethod = null,
         ?string $transactionReference = null,
         ?DateTimeImmutable $paidAt = null,
     ): void {
-        $this->paidAt = $paidAt ?? new DateTimeImmutable();
+        $this->paidAt = $paidAt ?? new DateTimeImmutable;
         $this->paymentMethod = $paymentMethod;
         $this->transactionReference = $transactionReference;
     }
 
     public function isPaid(): bool
     {
-        return $this->paidAt !== null;
+        return $this->paidAt instanceof DateTimeImmutable;
     }
 
     public function isOverdue(?DateTimeImmutable $now = null): bool
@@ -46,7 +45,7 @@ final class MembershipFee
             return false;
         }
 
-        $now ??= new DateTimeImmutable();
+        $now ??= new DateTimeImmutable;
 
         return $this->dueDate < $now;
     }

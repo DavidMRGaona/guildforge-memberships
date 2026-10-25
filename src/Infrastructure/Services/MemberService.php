@@ -16,6 +16,7 @@ use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
 use Modules\Memberships\Domain\ValueObjects\MemberId;
+use Modules\Memberships\Domain\ValueObjects\MemberNumber;
 
 final readonly class MemberService implements MemberServiceInterface
 {
@@ -42,7 +43,7 @@ final readonly class MemberService implements MemberServiceInterface
             status: MemberStatus::Active,
             userId: $dto->userId,
             notes: $dto->notes,
-            joinedAt: $dto->joinedAt !== null ? new DateTimeImmutable($dto->joinedAt) : new DateTimeImmutable(),
+            joinedAt: $dto->joinedAt !== null ? new DateTimeImmutable($dto->joinedAt) : new DateTimeImmutable,
         );
 
         $this->memberRepository->save($member);
@@ -94,7 +95,7 @@ final readonly class MemberService implements MemberServiceInterface
     {
         $member = $this->memberRepository->find(MemberId::fromString($id));
 
-        if ($member === null) {
+        if (! $member instanceof Member) {
             return null;
         }
 
@@ -114,10 +115,10 @@ final readonly class MemberService implements MemberServiceInterface
     public function findByMemberNumber(string $memberNumber): ?MemberDTO
     {
         $member = $this->memberRepository->findByMemberNumber(
-            \Modules\Memberships\Domain\ValueObjects\MemberNumber::fromString($memberNumber)
+            MemberNumber::fromString($memberNumber)
         );
 
-        if ($member === null) {
+        if (! $member instanceof Member) {
             return null;
         }
 
@@ -130,7 +131,7 @@ final readonly class MemberService implements MemberServiceInterface
     {
         $member = $this->memberRepository->findByEmail($email);
 
-        if ($member === null) {
+        if (! $member instanceof Member) {
             return null;
         }
 

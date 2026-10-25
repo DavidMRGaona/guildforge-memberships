@@ -4,35 +4,34 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
+use App\Filament\Resources\BaseResource;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\ListFeeStructures;
-use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\CreateFeeStructure;
-use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\EditFeeStructure;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use App\Filament\Resources\BaseResource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
 use Modules\Memberships\Domain\Enums\MemberType;
-use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages;
+use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\CreateFeeStructure;
+use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\EditFeeStructure;
+use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\ListFeeStructures;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
 
 class FeeStructureResource extends BaseResource
 {
     protected static ?string $model = FeeStructureModel::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-currency-euro';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-currency-euro';
 
     protected static ?int $navigationSort = 3;
 

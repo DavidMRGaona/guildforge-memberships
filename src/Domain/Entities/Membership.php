@@ -24,8 +24,7 @@ final class Membership
         public ?DateTimeImmutable $cancelledAt = null,
         public ?string $notes = null,
         public readonly ?DateTimeImmutable $createdAt = null,
-    ) {
-    }
+    ) {}
 
     public function activate(?DateTimeImmutable $at = null): void
     {
@@ -34,7 +33,7 @@ final class Membership
         }
 
         $this->status = MembershipStatus::Active;
-        $this->activatedAt = $at ?? new DateTimeImmutable();
+        $this->activatedAt = $at ?? new DateTimeImmutable;
     }
 
     public function expire(): void
@@ -45,7 +44,7 @@ final class Membership
     public function cancel(?DateTimeImmutable $at = null): void
     {
         $this->status = MembershipStatus::Cancelled;
-        $this->cancelledAt = $at ?? new DateTimeImmutable();
+        $this->cancelledAt = $at ?? new DateTimeImmutable;
     }
 
     public function isActive(): bool
@@ -55,14 +54,14 @@ final class Membership
 
     public function isWithinPeriod(?DateTimeImmutable $now = null): bool
     {
-        $now ??= new DateTimeImmutable();
+        $now ??= new DateTimeImmutable;
 
         return $now >= $this->startDate && $now <= $this->endDate;
     }
 
     public function isExpired(?DateTimeImmutable $now = null): bool
     {
-        $now ??= new DateTimeImmutable();
+        $now ??= new DateTimeImmutable;
 
         return $now > $this->endDate;
     }

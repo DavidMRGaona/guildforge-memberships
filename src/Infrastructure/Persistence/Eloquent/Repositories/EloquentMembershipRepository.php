@@ -6,8 +6,8 @@ namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories;
 
 use DateTimeImmutable;
 use Modules\Memberships\Domain\Entities\Membership;
-use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
+use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Exceptions\MembershipNotFoundException;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
 use Modules\Memberships\Domain\ValueObjects\MemberId;
@@ -39,7 +39,7 @@ final readonly class EloquentMembershipRepository implements MembershipRepositor
     {
         $membership = $this->find($id);
 
-        if ($membership === null) {
+        if (! $membership instanceof Membership) {
             throw MembershipNotFoundException::notFoundById($id->value);
         }
 
@@ -78,7 +78,7 @@ final readonly class EloquentMembershipRepository implements MembershipRepositor
      */
     public function getExpiringMemberships(int $daysFromNow, array $excludedMemberTypes = []): array
     {
-        $today = new DateTimeImmutable();
+        $today = new DateTimeImmutable;
         $futureDate = $today->modify("+{$daysFromNow} days");
 
         return MembershipModel::query()
@@ -95,7 +95,7 @@ final readonly class EloquentMembershipRepository implements MembershipRepositor
      */
     public function getExpiredMemberships(): array
     {
-        $today = new DateTimeImmutable();
+        $today = new DateTimeImmutable;
 
         return MembershipModel::query()
             ->where(function ($query) use ($today): void {
@@ -146,7 +146,7 @@ final readonly class EloquentMembershipRepository implements MembershipRepositor
                 });
             });
 
-        if ($excludeId !== null) {
+        if ($excludeId instanceof MembershipId) {
             $query->where('id', '!=', $excludeId->value);
         }
 

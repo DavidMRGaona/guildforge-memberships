@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Widgets;
 
-use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use App\Application\Services\DashboardWidgetConfigServiceInterface;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Support\Carbon;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Filament\Resources\MemberResource;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 final class ExpiringMembershipsWidget extends BaseWidget
 {
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected static ?int $sort = 13;
 
@@ -53,9 +52,7 @@ final class ExpiringMembershipsWidget extends BaseWidget
 
                 TextColumn::make('days_remaining')
                     ->label(__('memberships::memberships.widgets.expiring_memberships.days_remaining'))
-                    ->getStateUsing(function (MembershipModel $record): int {
-                        return (int) now()->diffInDays($record->end_date, false);
-                    })
+                    ->getStateUsing(fn (MembershipModel $record): int => (int) now()->diffInDays($record->end_date, false))
                     ->badge()
                     ->color(fn (int $state): string => match (true) {
                         $state <= 7 => 'danger',
@@ -71,6 +68,6 @@ final class ExpiringMembershipsWidget extends BaseWidget
     private function getConfiguredLimit(): int
     {
         return app(DashboardWidgetConfigServiceInterface::class)
-            ->getLimit(static::class, 5);
+            ->getLimit(self::class, 5);
     }
 }

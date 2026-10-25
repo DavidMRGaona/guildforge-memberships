@@ -17,8 +17,7 @@ final readonly class CreateMemberDTO
         public ?string $userId = null,
         public ?string $notes = null,
         public ?string $joinedAt = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{first_name: string, last_name: string, email?: string|null, phone?: string|null, birth_date?: string|null, address?: string|null, member_type?: string, user_id?: string|null, notes?: string|null, joined_at?: string|null}  $data

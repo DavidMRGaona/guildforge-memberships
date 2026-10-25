@@ -23,8 +23,7 @@ final readonly class MembershipFeeDTO
         public ?string $createdAt,
         public bool $isPaid,
         public bool $isOverdue,
-    ) {
-    }
+    ) {}
 
     public static function fromEntity(MembershipFee $fee): self
     {

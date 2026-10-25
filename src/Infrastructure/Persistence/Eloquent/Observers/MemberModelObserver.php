@@ -21,8 +21,7 @@ final readonly class MemberModelObserver
 
     public function __construct(
         private MemberRoleSynchronizer $roles,
-    ) {
-    }
+    ) {}
 
     public function created(MemberModel $member): void
     {

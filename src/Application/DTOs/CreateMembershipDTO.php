@@ -12,8 +12,7 @@ final readonly class CreateMembershipDTO
         public ?string $startDate = null,
         public ?string $endDate = null,
         public ?string $notes = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{member_id: string, period_type?: string, start_date?: string|null, end_date?: string|null, notes?: string|null}  $data

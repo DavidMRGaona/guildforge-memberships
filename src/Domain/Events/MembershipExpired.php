@@ -20,8 +20,7 @@ final readonly class MembershipExpired
         public string $memberId,
         public DateTimeImmutable $endDate,
         public DateTimeImmutable $occurredAt,
-    ) {
-    }
+    ) {}
 
     public static function create(Membership $membership): self
     {
@@ -29,7 +28,7 @@ final readonly class MembershipExpired
             membershipId: $membership->id->value(),
             memberId: $membership->memberId->value(),
             endDate: $membership->endDate,
-            occurredAt: new DateTimeImmutable(),
+            occurredAt: new DateTimeImmutable,
         );
     }
 }

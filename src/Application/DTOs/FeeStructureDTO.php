@@ -27,8 +27,7 @@ final readonly class FeeStructureDTO
         public bool $isDefault,
         public ?string $createdAt,
         public bool $isCurrentlyValid,
-    ) {
-    }
+    ) {}
 
     public static function fromEntity(FeeStructure $feeStructure): self
     {

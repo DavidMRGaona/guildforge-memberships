@@ -12,8 +12,7 @@ final readonly class RecordPaymentDTO
         public ?string $transactionReference = null,
         public ?string $paidAt = null,
         public ?string $notes = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{fee_id: string, payment_method: string, transaction_reference?: string|null, paid_at?: string|null, notes?: string|null}  $data

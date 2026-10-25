@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Listeners;
 
+use Modules\Memberships\Domain\Entities\Member;
 use Modules\Memberships\Domain\Events\MembershipExpiring;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
 use Modules\Memberships\Domain\ValueObjects\MemberId;
@@ -18,8 +19,7 @@ final readonly class NotifyMembershipExpiring
     public function __construct(
         private MemberRepositoryInterface $memberRepository,
         private MembershipSettingsReader $settings,
-    ) {
-    }
+    ) {}
 
     /**
      * Handle the MembershipExpiring event.
@@ -29,7 +29,7 @@ final readonly class NotifyMembershipExpiring
         $member = $this->memberRepository->find(new MemberId($event->memberId));
 
         // Permanent members (honorary by default) are never warned about expiry
-        if ($member === null || in_array($member->memberType, $this->settings->permanentMemberTypes(), true)) {
+        if (! $member instanceof Member || in_array($member->memberType, $this->settings->permanentMemberTypes(), true)) {
             return;
         }
 

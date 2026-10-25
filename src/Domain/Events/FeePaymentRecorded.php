@@ -17,8 +17,7 @@ final readonly class FeePaymentRecorded
         public ?string $paymentMethod,
         public DateTimeImmutable $paidAt,
         public DateTimeImmutable $occurredAt,
-    ) {
-    }
+    ) {}
 
     public static function create(MembershipFee $fee): self
     {
@@ -28,8 +27,8 @@ final readonly class FeePaymentRecorded
             amountCents: $fee->amount->toCents(),
             currency: $fee->amount->currency(),
             paymentMethod: $fee->paymentMethod?->value,
-            paidAt: $fee->paidAt ?? new DateTimeImmutable(),
-            occurredAt: new DateTimeImmutable(),
+            paidAt: $fee->paidAt ?? new DateTimeImmutable,
+            occurredAt: new DateTimeImmutable,
         );
     }
 }

@@ -6,6 +6,7 @@ namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Models;
 
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,7 +36,7 @@ use Modules\Memberships\Domain\Enums\MemberType;
  * @property Carbon|null $deleted_at
  * @property-read string $full_name
  * @property-read UserModel|null $user
- * @property-read \Illuminate\Database\Eloquent\Collection<int, MembershipModel> $memberships
+ * @property-read Collection<int, MembershipModel> $memberships
  */
 final class MemberModel extends Model
 {
@@ -50,7 +51,7 @@ final class MemberModel extends Model
 
     protected static function booted(): void
     {
-        static::creating(function (MemberModel $member): void {
+        self::creating(function (MemberModel $member): void {
             if ($member->member_number === null) {
                 /** @var MemberNumberGeneratorInterface $generator */
                 $generator = app(MemberNumberGeneratorInterface::class);

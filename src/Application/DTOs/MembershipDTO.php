@@ -23,8 +23,7 @@ final readonly class MembershipDTO
         public ?string $createdAt,
         public bool $isActive,
         public bool $isExpired,
-    ) {
-    }
+    ) {}
 
     public static function fromEntity(Membership $membership): self
     {
