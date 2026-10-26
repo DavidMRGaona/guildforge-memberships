@@ -315,9 +315,9 @@ final class MemberRoleSyncTest extends ModuleTestCase
     {
         RoleModel::firstOrCreate(['name' => $roleName], ['display_name' => ucfirst($roleName)]);
         $this->authorization()->assignRole($this->user, $roleName);
-        $this->app->instance(AssociationMembershipServiceInterface::class, new class($roleName) implements AssociationMembershipServiceInterface
+        $this->app->instance(AssociationMembershipServiceInterface::class, new readonly class($roleName) implements AssociationMembershipServiceInterface
         {
-            public function __construct(private readonly string $roleName) {}
+            public function __construct(private string $roleName) {}
 
             public function roleName(): string
             {

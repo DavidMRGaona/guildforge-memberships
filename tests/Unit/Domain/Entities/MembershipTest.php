@@ -64,7 +64,6 @@ final class MembershipTest extends TestCase
             endDate: $endDate,
             status: $status,
             activatedAt: $activatedAt,
-            cancelledAt: null,
             notes: 'Academic year membership',
             createdAt: $createdAt,
         );
