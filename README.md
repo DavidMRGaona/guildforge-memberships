@@ -150,17 +150,17 @@ Solo los ven los usuarios que pueden ver el listado de socios (`memberships:memb
 
 ## Permisos
 
-Los permisos llevan el prefijo `memberships:` y se asignan a los roles en el editor de roles del panel. Los administradores tienen todos.
+Los permisos llevan el prefijo `memberships:` y se asignan a los roles en el editor de roles del panel. Los administradores tienen todos. Ninguno se propone a `editor`, que es el rol de contenido: se dan a los roles de función que cree la asociación (por ejemplo, tesorería o secretaría).
 
 | Permiso | Descripción | Rol por defecto |
 |---------|-------------|-----------------|
-| `members.view_any` | Ver listado de socios | editor |
-| `members.view` | Ver socio | editor |
-| `members.create` | Crear socio | editor |
-| `members.update` | Editar socio | editor |
+| `members.view_any` | Ver listado de socios | — |
+| `members.view` | Ver socio | — |
+| `members.create` | Crear socio | — |
+| `members.update` | Editar socio | — |
 | `members.delete` | Eliminar socio | — |
-| `fee_structures.view_any` | Ver listado de tarifas | editor |
-| `fee_structures.view` | Ver tarifa | editor |
+| `fee_structures.view_any` | Ver listado de tarifas | — |
+| `fee_structures.view` | Ver tarifa | — |
 | `fee_structures.create` | Crear tarifa | — |
 | `fee_structures.update` | Editar tarifa | — |
 | `fee_structures.delete` | Eliminar tarifa | — |

@@ -247,28 +247,24 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
                 label: __('memberships::memberships.permissions.members.view_any'),
                 group: __('memberships::memberships.navigation.members'),
                 module: 'memberships',
-                roles: ['editor'],
             ),
             new PermissionDTO(
                 name: 'members.view',
                 label: __('memberships::memberships.permissions.members.view'),
                 group: __('memberships::memberships.navigation.members'),
                 module: 'memberships',
-                roles: ['editor'],
             ),
             new PermissionDTO(
                 name: 'members.create',
                 label: __('memberships::memberships.permissions.members.create'),
                 group: __('memberships::memberships.navigation.members'),
                 module: 'memberships',
-                roles: ['editor'],
             ),
             new PermissionDTO(
                 name: 'members.update',
                 label: __('memberships::memberships.permissions.members.update'),
                 group: __('memberships::memberships.navigation.members'),
                 module: 'memberships',
-                roles: ['editor'],
             ),
             new PermissionDTO(
                 name: 'members.delete',
@@ -283,14 +279,12 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
                 label: __('memberships::memberships.permissions.fee_structures.view_any'),
                 group: __('memberships::memberships.navigation.fee_structures'),
                 module: 'memberships',
-                roles: ['editor'],
             ),
             new PermissionDTO(
                 name: 'fee_structures.view',
                 label: __('memberships::memberships.permissions.fee_structures.view'),
                 group: __('memberships::memberships.navigation.fee_structures'),
                 module: 'memberships',
-                roles: ['editor'],
             ),
             new PermissionDTO(
                 name: 'fee_structures.create',
