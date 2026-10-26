@@ -11,6 +11,7 @@ use Modules\Memberships\Domain\Events\MembershipActivated;
 use Modules\Memberships\Domain\Events\MembershipDeactivated;
 use Modules\Memberships\Domain\Events\MembershipExpired;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 use Modules\Memberships\Infrastructure\Services\MemberRoleSynchronizer;
 
 /**
@@ -115,7 +116,7 @@ final readonly class MembershipModelObserver
         $this->events->dispatch(new MembershipExpired(
             membershipId: $membership->id,
             memberId: $membership->member_id,
-            endDate: new DateTimeImmutable($membership->end_date->toDateString()),
+            endDate: CalendarDate::parse($membership->end_date->toDateString()),
             occurredAt: new DateTimeImmutable,
         ));
     }

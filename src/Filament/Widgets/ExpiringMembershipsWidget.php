@@ -12,6 +12,7 @@ use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Filament\Resources\MemberResource;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 final class ExpiringMembershipsWidget extends BaseWidget
@@ -32,8 +33,8 @@ final class ExpiringMembershipsWidget extends BaseWidget
             ->query(
                 MembershipModel::query()
                     ->where('status', MembershipStatus::Active->value)
-                    ->where('end_date', '<=', now()->addDays(30))
-                    ->where('end_date', '>=', now())
+                    ->where('end_date', '<=', CalendarDate::today()->modify('+30 days')->format('Y-m-d'))
+                    ->where('end_date', '>=', CalendarDate::today()->format('Y-m-d'))
                     ->excludingMemberTypes(app(MembershipSettingsReader::class)->permanentMemberTypes())
                     ->with('member')
                     ->orderBy('end_date', 'asc')
@@ -52,7 +53,7 @@ final class ExpiringMembershipsWidget extends BaseWidget
 
                 TextColumn::make('days_remaining')
                     ->label(__('memberships::memberships.widgets.expiring_memberships.days_remaining'))
-                    ->getStateUsing(fn (MembershipModel $record): int => (int) now()->diffInDays($record->end_date, false))
+                    ->getStateUsing(fn (MembershipModel $record): int => (int) CalendarDate::today()->diff(CalendarDate::parse($record->end_date->toDateString()))->format('%r%a'))
                     ->badge()
                     ->color(fn (int $state): string => match (true) {
                         $state <= 7 => 'danger',

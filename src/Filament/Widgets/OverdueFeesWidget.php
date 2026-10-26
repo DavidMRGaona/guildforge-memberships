@@ -11,6 +11,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 use Modules\Memberships\Filament\Resources\MemberResource;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipFeeModel;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 final class OverdueFeesWidget extends BaseWidget
@@ -31,7 +32,7 @@ final class OverdueFeesWidget extends BaseWidget
             ->query(
                 MembershipFeeModel::query()
                     ->whereNull('paid_at')
-                    ->where('due_date', '<', now())
+                    ->where('due_date', '<', CalendarDate::today()->format('Y-m-d'))
                     ->excludingMemberTypes(app(MembershipSettingsReader::class)->permanentMemberTypes())
                     ->with(['membership.member'])
                     ->orderBy('due_date', 'asc')
@@ -55,7 +56,7 @@ final class OverdueFeesWidget extends BaseWidget
 
                 TextColumn::make('days_overdue')
                     ->label(__('memberships::memberships.widgets.overdue_fees.days_overdue'))
-                    ->getStateUsing(fn (MembershipFeeModel $record): int => (int) $record->due_date->diffInDays(now(), false))
+                    ->getStateUsing(fn (MembershipFeeModel $record): int => (int) CalendarDate::parse($record->due_date->toDateString())->diff(CalendarDate::today())->format('%r%a'))
                     ->badge()
                     ->color(fn (int $state): string => match (true) {
                         $state > 60 => 'danger',

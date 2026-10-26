@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Listeners;
 
-use DateTimeImmutable;
 use Modules\Memberships\Domain\Entities\Member;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Events\MembershipExpired;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
 use Modules\Memberships\Domain\ValueObjects\MemberId;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 use Modules\Memberships\Listeners\Concerns\NotifiesMember;
 use Modules\Memberships\Notifications\MembershipExpiredNotification;
@@ -53,7 +53,7 @@ final readonly class NotifyMembershipExpired
 
     private function hasCurrentOrUpcomingMembership(MemberId $memberId, string $expiredMembershipId): bool
     {
-        $today = new DateTimeImmutable('today');
+        $today = CalendarDate::today();
 
         return array_any($this->membershipRepository->findByMemberId($memberId), fn ($membership) => $membership->id->value !== $expiredMembershipId
             && $membership->status !== MembershipStatus::Cancelled

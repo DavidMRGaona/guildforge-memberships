@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Models;
 
+use App\Infrastructure\Persistence\Eloquent\Concerns\StoresInstantsInStorageTimezone;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -42,6 +43,7 @@ final class MemberModel extends Model
 {
     use HasUuids;
     use SoftDeletes;
+    use StoresInstantsInStorageTimezone;
 
     protected $table = 'memberships_members';
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Application\DTOs;
 
+use App\Application\Services\TimezoneServiceInterface;
 use Modules\Memberships\Domain\Entities\Member;
 use Modules\Memberships\Domain\Entities\Membership;
 
@@ -32,6 +33,8 @@ final readonly class MemberDTO
 
     public static function fromEntity(Member $member, ?Membership $activeMembership = null): self
     {
+        $timezone = app(TimezoneServiceInterface::class);
+
         return new self(
             id: $member->id->value,
             memberNumber: $member->memberNumber->value,
@@ -48,8 +51,8 @@ final readonly class MemberDTO
             statusLabel: $member->status->label(),
             userId: $member->userId,
             notes: $member->notes,
-            joinedAt: $member->joinedAt->format('c'),
-            createdAt: $member->createdAt?->format('c'),
+            joinedAt: (string) $timezone->iso($member->joinedAt),
+            createdAt: $timezone->iso($member->createdAt),
             activeMembership: $activeMembership instanceof Membership
                 ? MembershipDTO::fromEntity($activeMembership)
                 : null,

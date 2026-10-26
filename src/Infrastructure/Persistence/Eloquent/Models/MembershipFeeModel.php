@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Models;
 
+use App\Infrastructure\Persistence\Eloquent\Concerns\StoresInstantsInStorageTimezone;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -29,6 +30,7 @@ use Modules\Memberships\Domain\Enums\PaymentMethod;
 final class MembershipFeeModel extends Model
 {
     use HasUuids;
+    use StoresInstantsInStorageTimezone;
 
     protected $table = 'memberships_fees';
 

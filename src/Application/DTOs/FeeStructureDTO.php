@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Application\DTOs;
 
+use App\Application\Services\TimezoneServiceInterface;
 use Modules\Memberships\Domain\Entities\FeeStructure;
 
 final readonly class FeeStructureDTO
@@ -31,6 +32,8 @@ final readonly class FeeStructureDTO
 
     public static function fromEntity(FeeStructure $feeStructure): self
     {
+        $timezone = app(TimezoneServiceInterface::class);
+
         return new self(
             id: $feeStructure->id->value,
             memberType: $feeStructure->memberType->value,
@@ -45,8 +48,8 @@ final readonly class FeeStructureDTO
             validUntil: $feeStructure->validUntil?->format('Y-m-d'),
             description: $feeStructure->description,
             isDefault: $feeStructure->isDefault,
-            createdAt: $feeStructure->createdAt?->format('c'),
-            isCurrentlyValid: $feeStructure->isCurrentlyValid(),
+            createdAt: $timezone->iso($feeStructure->createdAt),
+            isCurrentlyValid: $feeStructure->isCurrentlyValid($timezone->today()),
         );
     }
 
