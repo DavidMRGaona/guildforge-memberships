@@ -26,7 +26,8 @@
       "fee_structures.view",
       "fee_structures.create",
       "fee_structures.update",
-      "fee_structures.delete"
+      "fee_structures.delete",
+      "settings.manage"
     ],
     "routes": [
       "api",

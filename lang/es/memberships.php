@@ -319,5 +319,9 @@ return [
             'update' => 'Editar tarifa',
             'delete' => 'Eliminar tarifa',
         ],
+        'settings' => [
+            'manage' => 'Gestionar la configuración del módulo',
+            'manage_help' => 'Incluye la asignación automática del rol de socio y los tipos de socio permanentes: decide quién recibe el rol de socio.',
+        ],
     ],
 ];

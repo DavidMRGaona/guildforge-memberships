@@ -7,6 +7,7 @@ namespace Modules\Memberships;
 use App\Application\Modules\DTOs\NavigationItemDTO;
 use App\Application\Modules\DTOs\PermissionDTO;
 use App\Modules\ModuleServiceProvider;
+use Filament\Pages\Page;
 use Filament\Resources\Resource as FilamentResource;
 use Filament\Schemas\Components\Component;
 use Filament\Widgets\Widget;
@@ -182,6 +183,18 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     }
 
     /**
+     * Register Filament pages provided by this module.
+     *
+     * @return array<class-string<Page>>
+     */
+    public function registerFilamentPages(): array
+    {
+        return [
+            MembershipSettings::class,
+        ];
+    }
+
+    /**
      * Register dashboard widgets provided by this module.
      *
      * @return array<class-string<Widget>>
@@ -297,6 +310,15 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
                 name: 'fee_structures.delete',
                 label: __('memberships::memberships.permissions.fee_structures.delete'),
                 group: __('memberships::memberships.navigation.fee_structures'),
+                module: 'memberships',
+                roles: [],
+            ),
+            // Settings permission: decides who gets the association member role
+            new PermissionDTO(
+                name: 'settings.manage',
+                label: __('memberships::memberships.permissions.settings.manage'),
+                group: __('memberships::memberships.navigation.settings'),
+                description: __('memberships::memberships.permissions.settings.manage_help'),
                 module: 'memberships',
                 roles: [],
             ),
