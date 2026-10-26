@@ -118,8 +118,8 @@ final readonly class EloquentFeeStructureRepository implements FeeStructureRepos
             memberType: $model->member_type,
             periodType: $model->period_type,
             amount: Money::fromAmount((string) $model->amount, $model->currency),
-            prorationRules: $model->proration_rules,
             validFrom: CalendarDate::parse($model->valid_from->toDateString()),
+            prorationRules: $model->proration_rules,
             validUntil: $model->valid_until !== null
                 ? CalendarDate::parse($model->valid_until->toDateString())
                 : null,

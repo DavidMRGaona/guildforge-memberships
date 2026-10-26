@@ -35,6 +35,7 @@ final class MembershipExpiringNotification extends Notification implements Shoul
      */
     public function toMail(object $notifiable): MailMessage
     {
+        // A calendar date built in the display zone (CalendarDate), so this is the site's day
         $formattedDate = $this->endDate->format('d/m/Y');
 
         return (new MailMessage)
