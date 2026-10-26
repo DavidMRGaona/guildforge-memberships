@@ -98,8 +98,8 @@ final class MembershipEmailsTest extends ModuleTestCase
     public function test_expired_membership_of_a_member_who_already_renewed_sends_nothing(): void
     {
         config()->set('modules.settings.memberships.send_expired_email', true);
-        $old = $this->membership('active', start: now()->subYear(), end: now()->subDay());
-        $this->membership('pending', start: now(), end: now()->addYear());
+        $old = $this->membership('active', end: now()->subDay(), start: now()->subYear());
+        $this->membership('pending', end: now()->addYear(), start: now());
 
         $old->update(['status' => 'expired']);
 
