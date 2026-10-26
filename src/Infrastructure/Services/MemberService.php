@@ -37,13 +37,13 @@ final readonly class MemberService implements MemberServiceInterface
             lastName: $dto->lastName,
             email: $dto->email,
             phone: $dto->phone,
-            birthDate: $dto->birthDate !== null ? new DateTimeImmutable($dto->birthDate) : null,
+            birthDate: $dto->birthDate !== null ? CalendarDate::parse($dto->birthDate) : null,
             address: $dto->address,
             memberType: MemberType::from($dto->memberType),
             status: MemberStatus::Active,
             userId: $dto->userId,
             notes: $dto->notes,
-            joinedAt: $dto->joinedAt !== null ? new DateTimeImmutable($dto->joinedAt) : new DateTimeImmutable,
+            joinedAt: $dto->joinedAt !== null ? CalendarDate::instant($dto->joinedAt) : new DateTimeImmutable,
         );
 
         $this->memberRepository->save($member);
@@ -59,7 +59,7 @@ final readonly class MemberService implements MemberServiceInterface
             $member->updatePersonalInfo(
                 firstName: $dto->firstName ?? $member->firstName,
                 lastName: $dto->lastName ?? $member->lastName,
-                birthDate: $dto->birthDate !== null ? new DateTimeImmutable($dto->birthDate) : $member->birthDate,
+                birthDate: $dto->birthDate !== null ? CalendarDate::parse($dto->birthDate) : $member->birthDate,
             );
         }
 

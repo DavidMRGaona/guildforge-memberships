@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories;
 
-use DateTimeImmutable;
 use Modules\Memberships\Domain\Entities\MembershipFee;
 use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Domain\Exceptions\MembershipFeeNotFoundException;
@@ -13,6 +12,7 @@ use Modules\Memberships\Domain\ValueObjects\MembershipFeeId;
 use Modules\Memberships\Domain\ValueObjects\MembershipId;
 use Modules\Memberships\Domain\ValueObjects\Money;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipFeeModel;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 
 final readonly class EloquentMembershipFeeRepository implements MembershipFeeRepositoryInterface
 {
@@ -64,7 +64,7 @@ final readonly class EloquentMembershipFeeRepository implements MembershipFeeRep
      */
     public function getOverdueFees(array $excludedMemberTypes = []): array
     {
-        $today = new DateTimeImmutable;
+        $today = CalendarDate::today();
 
         return MembershipFeeModel::query()
             ->whereNull('paid_at')
@@ -120,15 +120,15 @@ final readonly class EloquentMembershipFeeRepository implements MembershipFeeRep
             id: new MembershipFeeId($model->id),
             membershipId: new MembershipId($model->membership_id),
             amount: Money::fromAmount((string) $model->amount, $model->currency),
-            dueDate: new DateTimeImmutable($model->due_date->toDateString()),
+            dueDate: CalendarDate::parse($model->due_date->toDateString()),
             paidAt: $model->paid_at !== null
-                ? new DateTimeImmutable($model->paid_at->toDateTimeString())
+                ? $model->paid_at->toDateTimeImmutable()
                 : null,
             paymentMethod: $model->payment_method,
             transactionReference: $model->transaction_reference,
             notes: $model->notes,
             createdAt: $model->created_at !== null
-                ? new DateTimeImmutable($model->created_at->toDateTimeString())
+                ? $model->created_at->toDateTimeImmutable()
                 : null,
         );
     }
@@ -144,7 +144,7 @@ final readonly class EloquentMembershipFeeRepository implements MembershipFeeRep
             'amount' => $fee->amount->toAmount(),
             'currency' => $fee->amount->currency,
             'due_date' => $fee->dueDate->format('Y-m-d'),
-            'paid_at' => $fee->paidAt?->format('Y-m-d H:i:s'),
+            'paid_at' => $fee->paidAt,
             'payment_method' => $fee->paymentMethod?->value,
             'transaction_reference' => $fee->transactionReference,
             'notes' => $fee->notes,

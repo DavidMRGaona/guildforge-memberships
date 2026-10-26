@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Application\DTOs;
 
+use App\Application\Services\TimezoneServiceInterface;
 use Modules\Memberships\Domain\Entities\MembershipFee;
 
 final readonly class MembershipFeeDTO
@@ -27,6 +28,8 @@ final readonly class MembershipFeeDTO
 
     public static function fromEntity(MembershipFee $fee): self
     {
+        $timezone = app(TimezoneServiceInterface::class);
+
         return new self(
             id: $fee->id->value,
             membershipId: $fee->membershipId->value,
@@ -34,14 +37,14 @@ final readonly class MembershipFeeDTO
             currency: $fee->amount->currency,
             formattedAmount: (string) $fee->amount,
             dueDate: $fee->dueDate->format('Y-m-d'),
-            paidAt: $fee->paidAt?->format('c'),
+            paidAt: $timezone->iso($fee->paidAt),
             paymentMethod: $fee->paymentMethod?->value,
             paymentMethodLabel: $fee->paymentMethod?->label(),
             transactionReference: $fee->transactionReference,
             notes: $fee->notes,
-            createdAt: $fee->createdAt?->format('c'),
+            createdAt: $timezone->iso($fee->createdAt),
             isPaid: $fee->isPaid(),
-            isOverdue: $fee->isOverdue(),
+            isOverdue: $fee->isOverdue($timezone->today()),
         );
     }
 

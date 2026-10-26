@@ -20,8 +20,8 @@ final class FeeStructure
         public MemberType $memberType,
         public MembershipPeriodType $periodType,
         public Money $amount,
+        public DateTimeImmutable $validFrom,
         public ?array $prorationRules = null,
-        public DateTimeImmutable $validFrom = new DateTimeImmutable,
         public ?DateTimeImmutable $validUntil = null,
         public ?string $description = null,
         public bool $isDefault = false,
@@ -51,15 +51,20 @@ final class FeeStructure
         $this->prorationRules = $prorationRules;
     }
 
-    public function isCurrentlyValid(?DateTimeImmutable $now = null): bool
+    /**
+     * The validity is made of calendar days: the instant is read in the zone the dates carry
+     * (the display zone), so the last day lasts until its midnight there.
+     */
+    public function isCurrentlyValid(DateTimeImmutable $now): bool
     {
-        $now ??= new DateTimeImmutable;
+        $day = $now->setTimezone($this->validFrom->getTimezone())->format('Y-m-d');
 
-        if ($now < $this->validFrom) {
+        if ($day < $this->validFrom->format('Y-m-d')) {
             return false;
         }
 
-        return ! $this->validUntil instanceof DateTimeImmutable || $now <= $this->validUntil;
+        return ! $this->validUntil instanceof DateTimeImmutable
+            || $day <= $this->validUntil->format('Y-m-d');
     }
 
     public function setAsDefault(): void

@@ -13,6 +13,7 @@ use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
 use Modules\Memberships\Domain\ValueObjects\MemberId;
 use Modules\Memberships\Domain\ValueObjects\MembershipId;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 
 final readonly class EloquentMembershipRepository implements MembershipRepositoryInterface
 {
@@ -78,7 +79,7 @@ final readonly class EloquentMembershipRepository implements MembershipRepositor
      */
     public function getExpiringMemberships(int $daysFromNow, array $excludedMemberTypes = []): array
     {
-        $today = new DateTimeImmutable;
+        $today = CalendarDate::today();
         $futureDate = $today->modify("+{$daysFromNow} days");
 
         return MembershipModel::query()
@@ -95,7 +96,7 @@ final readonly class EloquentMembershipRepository implements MembershipRepositor
      */
     public function getExpiredMemberships(): array
     {
-        $today = new DateTimeImmutable;
+        $today = CalendarDate::today();
 
         return MembershipModel::query()
             ->where(function ($query) use ($today): void {
@@ -170,18 +171,18 @@ final readonly class EloquentMembershipRepository implements MembershipRepositor
             id: new MembershipId($model->id),
             memberId: new MemberId($model->member_id),
             periodType: $model->period_type,
-            startDate: new DateTimeImmutable($model->start_date->toDateString()),
-            endDate: new DateTimeImmutable($model->end_date->toDateString()),
+            startDate: CalendarDate::parse($model->start_date->toDateString()),
+            endDate: CalendarDate::parse($model->end_date->toDateString()),
             status: $model->status,
             activatedAt: $model->activated_at !== null
-                ? new DateTimeImmutable($model->activated_at->toDateTimeString())
+                ? $model->activated_at->toDateTimeImmutable()
                 : null,
             cancelledAt: $model->cancelled_at !== null
-                ? new DateTimeImmutable($model->cancelled_at->toDateTimeString())
+                ? $model->cancelled_at->toDateTimeImmutable()
                 : null,
             notes: $model->notes,
             createdAt: $model->created_at !== null
-                ? new DateTimeImmutable($model->created_at->toDateTimeString())
+                ? $model->created_at->toDateTimeImmutable()
                 : null,
         );
     }
@@ -198,8 +199,8 @@ final readonly class EloquentMembershipRepository implements MembershipRepositor
             'start_date' => $membership->startDate->format('Y-m-d'),
             'end_date' => $membership->endDate->format('Y-m-d'),
             'status' => $membership->status->value,
-            'activated_at' => $membership->activatedAt?->format('Y-m-d H:i:s'),
-            'cancelled_at' => $membership->cancelledAt?->format('Y-m-d H:i:s'),
+            'activated_at' => $membership->activatedAt,
+            'cancelled_at' => $membership->cancelledAt,
             'notes' => $membership->notes,
         ];
     }

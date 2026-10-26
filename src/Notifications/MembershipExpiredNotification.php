@@ -33,6 +33,7 @@ final class MembershipExpiredNotification extends Notification implements Should
             ->subject(__('memberships::notifications.membership_expired.subject'))
             ->greeting(__('memberships::notifications.membership_expired.greeting', ['name' => $this->memberName]))
             ->line(__('memberships::notifications.membership_expired.line1', [
+                // A calendar date built in the display zone (CalendarDate), so this is the site's day
                 'date' => $this->endDate->format('d/m/Y'),
             ]))
             ->line(__('memberships::notifications.membership_expired.line2'))

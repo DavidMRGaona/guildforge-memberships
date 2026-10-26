@@ -36,6 +36,7 @@ final class PaymentOverdueNotification extends Notification implements ShouldQue
             ->greeting(__('memberships::notifications.payment_overdue.greeting', ['name' => $this->memberName]))
             ->line(__('memberships::notifications.payment_overdue.line1', [
                 'amount' => $this->formattedAmount,
+                // A calendar date built in the display zone (CalendarDate), so this is the site's day
                 'date' => $this->dueDate->format('d/m/Y'),
             ]))
             ->line(__('memberships::notifications.payment_overdue.line2', [

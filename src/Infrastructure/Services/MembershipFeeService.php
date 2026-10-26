@@ -32,7 +32,7 @@ final readonly class MembershipFeeService implements MembershipFeeServiceInterfa
             id: MembershipFeeId::generate(),
             membershipId: MembershipId::fromString($membershipId),
             amount: Money::fromCents($amountCents, $currency),
-            dueDate: new DateTimeImmutable($dueDate),
+            dueDate: CalendarDate::parse($dueDate),
             notes: $notes,
         );
 
@@ -46,7 +46,7 @@ final readonly class MembershipFeeService implements MembershipFeeServiceInterfa
         $fee = $this->feeRepository->findOrFail(MembershipFeeId::fromString($dto->feeId));
 
         $paidAt = $dto->paidAt !== null
-            ? new DateTimeImmutable($dto->paidAt)
+            ? CalendarDate::instant($dto->paidAt)
             : new DateTimeImmutable;
 
         $paymentMethod = PaymentMethod::from($dto->paymentMethod);

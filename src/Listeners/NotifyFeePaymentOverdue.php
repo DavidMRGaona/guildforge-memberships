@@ -12,6 +12,7 @@ use Modules\Memberships\Domain\Events\FeePaymentOverdue;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
 use Modules\Memberships\Domain\ValueObjects\MembershipId;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 use Modules\Memberships\Listeners\Concerns\NotifiesMember;
 use Modules\Memberships\Notifications\PaymentOverdueNotification;
@@ -66,7 +67,7 @@ final readonly class NotifyFeePaymentOverdue
 
     private function daysSince(DateTimeImmutable $dueDate): int
     {
-        $today = new DateTimeImmutable('today');
+        $today = CalendarDate::today();
         $diff = $dueDate->setTime(0, 0)->diff($today);
 
         return $diff->invert === 1 ? 0 : (int) $diff->days;

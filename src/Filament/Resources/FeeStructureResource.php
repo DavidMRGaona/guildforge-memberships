@@ -26,6 +26,7 @@ use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\CreateFeeS
 use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\EditFeeStructure;
 use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\ListFeeStructures;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 
 class FeeStructureResource extends BaseResource
 {
@@ -108,7 +109,7 @@ class FeeStructureResource extends BaseResource
                             ->native(false)
                             ->displayFormat('d/m/Y')
                             ->required()
-                            ->default(now()),
+                            ->default(fn (): string => CalendarDate::today()->format('Y-m-d')),
 
                         DatePicker::make('valid_until')
                             ->label(__('memberships::memberships.fields.valid_until'))

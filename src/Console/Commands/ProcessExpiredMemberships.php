@@ -13,6 +13,7 @@ use Modules\Memberships\Domain\Events\FeePaymentOverdue;
 use Modules\Memberships\Domain\Events\MembershipExpiring;
 use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 final class ProcessExpiredMemberships extends Command
@@ -69,7 +70,7 @@ final class ProcessExpiredMemberships extends Command
     {
         $this->components->task('Processing expired memberships', function () use (&$count): void {
             $count = 0;
-            $today = new DateTimeImmutable('today');
+            $today = CalendarDate::today();
 
             // Get all active memberships that have expired (end_date < today)
             $memberships = $this->membershipRepository->findActiveExpiredBefore($today);
@@ -95,7 +96,7 @@ final class ProcessExpiredMemberships extends Command
         $this->components->task('Processing expiring memberships', function () use (&$count): void {
             $count = 0;
             $warningDays = $this->settings->expirationWarningDays();
-            $today = new DateTimeImmutable('today');
+            $today = CalendarDate::today();
 
             // Permanent members (honorary by default) are never warned about expiry
             $expiringMemberships = $this->membershipRepository->getExpiringMemberships(
@@ -167,7 +168,7 @@ final class ProcessExpiredMemberships extends Command
         }
 
         // Check for notification marker in notes
-        $currentYear = (new DateTimeImmutable)->format('Y');
+        $currentYear = CalendarDate::today()->format('Y');
 
         return str_contains($membership->notes, "[EXPIRING_NOTIFIED:{$currentYear}]");
     }
@@ -177,7 +178,7 @@ final class ProcessExpiredMemberships extends Command
      */
     private function markAsNotified(Membership $membership): void
     {
-        $currentYear = (new DateTimeImmutable)->format('Y');
+        $currentYear = CalendarDate::today()->format('Y');
         $marker = "[EXPIRING_NOTIFIED:{$currentYear}]";
 
         $notes = $membership->notes ?? '';
@@ -196,7 +197,7 @@ final class ProcessExpiredMemberships extends Command
             return false;
         }
 
-        $currentMonth = (new DateTimeImmutable)->format('Y-m');
+        $currentMonth = CalendarDate::today()->format('Y-m');
 
         return str_contains($fee->notes, "[OVERDUE_NOTIFIED:{$currentMonth}]");
     }
@@ -206,7 +207,7 @@ final class ProcessExpiredMemberships extends Command
      */
     private function markFeeOverdueNotified(MembershipFee $fee): void
     {
-        $currentMonth = (new DateTimeImmutable)->format('Y-m');
+        $currentMonth = CalendarDate::today()->format('Y-m');
         $marker = "[OVERDUE_NOTIFIED:{$currentMonth}]";
 
         $notes = $fee->notes ?? '';

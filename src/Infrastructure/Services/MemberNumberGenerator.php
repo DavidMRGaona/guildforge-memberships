@@ -16,7 +16,7 @@ final readonly class MemberNumberGenerator implements MemberNumberGeneratorInter
 
     public function generate(): MemberNumber
     {
-        return $this->generateForYear((int) date('Y'));
+        return $this->generateForYear((int) CalendarDate::today()->format('Y'));
     }
 
     public function generateForYear(int $year): MemberNumber

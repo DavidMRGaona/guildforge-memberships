@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories;
 
-use DateTimeImmutable;
 use Modules\Memberships\Domain\Entities\FeeStructure;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
 use Modules\Memberships\Domain\Enums\MemberType;
@@ -13,6 +12,7 @@ use Modules\Memberships\Domain\Repositories\FeeStructureRepositoryInterface;
 use Modules\Memberships\Domain\ValueObjects\FeeStructureId;
 use Modules\Memberships\Domain\ValueObjects\Money;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 
 final readonly class EloquentFeeStructureRepository implements FeeStructureRepositoryInterface
 {
@@ -60,7 +60,7 @@ final readonly class EloquentFeeStructureRepository implements FeeStructureRepos
 
     public function getCurrentStructure(MemberType $memberType, MembershipPeriodType $periodType): ?FeeStructure
     {
-        $today = new DateTimeImmutable;
+        $today = CalendarDate::today();
 
         $model = FeeStructureModel::query()
             ->where('member_type', $memberType->value)
@@ -118,15 +118,15 @@ final readonly class EloquentFeeStructureRepository implements FeeStructureRepos
             memberType: $model->member_type,
             periodType: $model->period_type,
             amount: Money::fromAmount((string) $model->amount, $model->currency),
+            validFrom: CalendarDate::parse($model->valid_from->toDateString()),
             prorationRules: $model->proration_rules,
-            validFrom: new DateTimeImmutable($model->valid_from->toDateString()),
             validUntil: $model->valid_until !== null
-                ? new DateTimeImmutable($model->valid_until->toDateString())
+                ? CalendarDate::parse($model->valid_until->toDateString())
                 : null,
             description: $model->description,
             isDefault: $model->is_default,
             createdAt: $model->created_at !== null
-                ? new DateTimeImmutable($model->created_at->toDateTimeString())
+                ? $model->created_at->toDateTimeImmutable()
                 : null,
         );
     }

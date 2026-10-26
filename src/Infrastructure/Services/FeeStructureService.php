@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Services;
 
-use DateTimeImmutable;
 use Modules\Memberships\Application\DTOs\FeeStructureDTO;
 use Modules\Memberships\Application\Services\FeeStructureServiceInterface;
 use Modules\Memberships\Domain\Entities\FeeStructure;
@@ -39,9 +38,9 @@ final readonly class FeeStructureService implements FeeStructureServiceInterface
             memberType: MemberType::from($memberType),
             periodType: MembershipPeriodType::from($periodType),
             amount: Money::fromCents($amountCents, $currency),
+            validFrom: CalendarDate::parse($validFrom),
             prorationRules: $prorationRules,
-            validFrom: new DateTimeImmutable($validFrom),
-            validUntil: $validUntil !== null ? new DateTimeImmutable($validUntil) : null,
+            validUntil: $validUntil !== null ? CalendarDate::parse($validUntil) : null,
             description: $description,
             isDefault: $isDefault,
         );
@@ -69,7 +68,7 @@ final readonly class FeeStructureService implements FeeStructureServiceInterface
         }
 
         if ($validUntil !== null) {
-            $feeStructure->setValidUntil(new DateTimeImmutable($validUntil));
+            $feeStructure->setValidUntil(CalendarDate::parse($validUntil));
         }
 
         if ($description !== null) {

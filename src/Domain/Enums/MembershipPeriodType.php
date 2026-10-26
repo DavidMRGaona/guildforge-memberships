@@ -65,8 +65,8 @@ enum MembershipPeriodType: string
         $year = (int) $referenceDate->format('Y');
 
         return [
-            'start' => new DateTimeImmutable("{$year}-01-01"),
-            'end' => new DateTimeImmutable("{$year}-12-31"),
+            'start' => new DateTimeImmutable("{$year}-01-01", $referenceDate->getTimezone()),
+            'end' => new DateTimeImmutable("{$year}-12-31", $referenceDate->getTimezone()),
         ];
     }
 
@@ -93,8 +93,8 @@ enum MembershipPeriodType: string
 
         // Academic year ends in June (month 6) of the following year
         return [
-            'start' => new DateTimeImmutable("{$startYear}-{$startMonth}-01"),
-            'end' => new DateTimeImmutable("{$endYear}-06-30"),
+            'start' => new DateTimeImmutable("{$startYear}-{$startMonth}-01", $referenceDate->getTimezone()),
+            'end' => new DateTimeImmutable("{$endYear}-06-30", $referenceDate->getTimezone()),
         ];
     }
 

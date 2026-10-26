@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories;
 
-use DateTimeImmutable;
 use Modules\Memberships\Domain\Entities\Member;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Enums\MemberStatus;
@@ -13,6 +12,7 @@ use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
 use Modules\Memberships\Domain\ValueObjects\MemberId;
 use Modules\Memberships\Domain\ValueObjects\MemberNumber;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 
 final readonly class EloquentMemberRepository implements MemberRepositoryInterface
 {
@@ -204,16 +204,16 @@ final readonly class EloquentMemberRepository implements MemberRepositoryInterfa
             email: $model->email,
             phone: $model->phone,
             birthDate: $model->birth_date !== null
-                ? new DateTimeImmutable($model->birth_date->toDateString())
+                ? CalendarDate::parse($model->birth_date->toDateString())
                 : null,
             address: $model->address,
             memberType: $model->member_type,
             status: $model->status,
             userId: $model->user_id,
             notes: $model->notes,
-            joinedAt: new DateTimeImmutable($model->joined_at->toDateTimeString()),
+            joinedAt: $model->joined_at->toDateTimeImmutable(),
             createdAt: $model->created_at !== null
-                ? new DateTimeImmutable($model->created_at->toDateTimeString())
+                ? $model->created_at->toDateTimeImmutable()
                 : null,
         );
     }
@@ -236,7 +236,7 @@ final readonly class EloquentMemberRepository implements MemberRepositoryInterfa
             'status' => $member->status->value,
             'user_id' => $member->userId,
             'notes' => $member->notes,
-            'joined_at' => $member->joinedAt->format('Y-m-d H:i:s'),
+            'joined_at' => $member->joinedAt,
         ];
     }
 }

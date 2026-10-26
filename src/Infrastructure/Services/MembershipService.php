@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Services;
 
-use DateTimeImmutable;
 use Modules\Memberships\Application\DTOs\CreateMembershipDTO;
 use Modules\Memberships\Application\DTOs\MembershipDTO;
 use Modules\Memberships\Application\Services\MembershipServiceInterface;
@@ -28,13 +27,13 @@ final readonly class MembershipService implements MembershipServiceInterface
 
         // Calculate period dates if not provided
         $startDate = $dto->startDate !== null
-            ? new DateTimeImmutable($dto->startDate)
-            : new DateTimeImmutable;
+            ? CalendarDate::parse($dto->startDate)
+            : CalendarDate::today();
 
         $periodDates = $periodType->getPeriodDates($startDate);
 
         $endDate = $dto->endDate !== null
-            ? new DateTimeImmutable($dto->endDate)
+            ? CalendarDate::parse($dto->endDate)
             : $periodDates['end'];
 
         $membership = new Membership(

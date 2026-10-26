@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Tests\Integration\Services;
 
+use App\Application\Services\TimezoneServiceInterface;
 use Illuminate\Support\Str;
 use Modules\Memberships\Application\DTOs\RecordPaymentDTO;
 use Modules\Memberships\Application\Services\MembershipFeeServiceInterface;
@@ -41,7 +42,9 @@ final class MembershipFeeServiceTest extends ModuleTestCase
         $stored = MembershipFeeModel::query()->findOrFail($fee->id);
         $this->assertSame(PaymentMethod::BankTransfer, $stored->payment_method);
         $this->assertSame('TRF-2026-001', $stored->transaction_reference);
-        $this->assertSame('2026-01-15 10:30:00', $stored->paid_at?->format('Y-m-d H:i:s'));
+        // A typed payment time is a wall time of the display zone, whatever zone the table stores in
+        $this->assertNotNull($stored->paid_at);
+        $this->assertSame('2026-01-15 10:30:00', app(TimezoneServiceInterface::class)->format($stored->paid_at, 'Y-m-d H:i:s'));
         $this->assertSame('30.00', (string) $stored->amount);
         $this->assertSame('2026-01-31', $stored->due_date->format('Y-m-d'));
 

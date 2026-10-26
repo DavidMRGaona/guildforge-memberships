@@ -52,17 +52,19 @@ final class Membership
         return $this->status === MembershipStatus::Active;
     }
 
-    public function isWithinPeriod(?DateTimeImmutable $now = null): bool
+    /**
+     * The period is made of calendar days: the instant is read in the zone the dates carry
+     * (the display zone), so the last day lasts until its midnight there.
+     */
+    public function isWithinPeriod(DateTimeImmutable $now): bool
     {
-        $now ??= new DateTimeImmutable;
+        $day = $now->setTimezone($this->endDate->getTimezone())->format('Y-m-d');
 
-        return $now >= $this->startDate && $now <= $this->endDate;
+        return $day >= $this->startDate->format('Y-m-d') && $day <= $this->endDate->format('Y-m-d');
     }
 
-    public function isExpired(?DateTimeImmutable $now = null): bool
+    public function isExpired(DateTimeImmutable $now): bool
     {
-        $now ??= new DateTimeImmutable;
-
-        return $now > $this->endDate;
+        return $now->setTimezone($this->endDate->getTimezone())->format('Y-m-d') > $this->endDate->format('Y-m-d');
     }
 }

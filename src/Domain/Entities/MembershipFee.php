@@ -39,14 +39,16 @@ final class MembershipFee
         return $this->paidAt instanceof DateTimeImmutable;
     }
 
-    public function isOverdue(?DateTimeImmutable $now = null): bool
+    /**
+     * The due date is a calendar day: the fee is overdue from the day after it, reading the
+     * instant in the zone the date carries (the display zone).
+     */
+    public function isOverdue(DateTimeImmutable $now): bool
     {
         if ($this->isPaid()) {
             return false;
         }
 
-        $now ??= new DateTimeImmutable;
-
-        return $this->dueDate < $now;
+        return $now->setTimezone($this->dueDate->getTimezone())->format('Y-m-d') > $this->dueDate->format('Y-m-d');
     }
 }
