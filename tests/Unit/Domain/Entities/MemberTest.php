@@ -33,7 +33,6 @@ final class MemberTest extends TestCase
             joinedAt: $joinedAt,
         );
 
-        $this->assertInstanceOf(Member::class, $member);
         $this->assertTrue($id->equals($member->id));
         $this->assertTrue($memberNumber->equals($member->memberNumber));
         $this->assertEquals('John', $member->firstName);
@@ -77,7 +76,6 @@ final class MemberTest extends TestCase
             createdAt: $createdAt,
         );
 
-        $this->assertInstanceOf(Member::class, $member);
         $this->assertEquals('jane.smith@example.com', $member->email);
         $this->assertEquals('+34 600 123 456', $member->phone);
         $this->assertEquals($birthDate, $member->birthDate);

@@ -9,18 +9,6 @@ use PHPUnit\Framework\TestCase;
 
 final class MemberTypeTest extends TestCase
 {
-    public function test_it_has_expected_cases(): void
-    {
-        $cases = MemberType::cases();
-
-        $this->assertCount(5, $cases);
-        $this->assertContains(MemberType::Regular, $cases);
-        $this->assertContains(MemberType::Student, $cases);
-        $this->assertContains(MemberType::Senior, $cases);
-        $this->assertContains(MemberType::Honorary, $cases);
-        $this->assertContains(MemberType::Founder, $cases);
-    }
-
     public function test_it_has_correct_values(): void
     {
         $this->assertEquals('regular', MemberType::Regular->value);

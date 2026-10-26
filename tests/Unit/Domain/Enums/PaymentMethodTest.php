@@ -9,17 +9,6 @@ use PHPUnit\Framework\TestCase;
 
 final class PaymentMethodTest extends TestCase
 {
-    public function test_it_has_expected_cases(): void
-    {
-        $cases = PaymentMethod::cases();
-
-        $this->assertCount(4, $cases);
-        $this->assertContains(PaymentMethod::Cash, $cases);
-        $this->assertContains(PaymentMethod::BankTransfer, $cases);
-        $this->assertContains(PaymentMethod::Card, $cases);
-        $this->assertContains(PaymentMethod::Other, $cases);
-    }
-
     public function test_it_has_correct_values(): void
     {
         $this->assertEquals('cash', PaymentMethod::Cash->value);

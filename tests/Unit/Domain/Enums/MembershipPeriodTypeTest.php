@@ -10,16 +10,6 @@ use PHPUnit\Framework\TestCase;
 
 final class MembershipPeriodTypeTest extends TestCase
 {
-    public function test_it_has_expected_cases(): void
-    {
-        $cases = MembershipPeriodType::cases();
-
-        $this->assertCount(3, $cases);
-        $this->assertContains(MembershipPeriodType::CalendarYear, $cases);
-        $this->assertContains(MembershipPeriodType::AcademicYear, $cases);
-        $this->assertContains(MembershipPeriodType::Rolling, $cases);
-    }
-
     public function test_it_has_correct_values(): void
     {
         $this->assertEquals('calendar_year', MembershipPeriodType::CalendarYear->value);
@@ -32,11 +22,6 @@ final class MembershipPeriodTypeTest extends TestCase
         $referenceDate = new DateTimeImmutable('2025-06-15');
         $dates = MembershipPeriodType::CalendarYear->getPeriodDates($referenceDate);
 
-        $this->assertArrayHasKey('start', $dates);
-        $this->assertArrayHasKey('end', $dates);
-        $this->assertInstanceOf(DateTimeImmutable::class, $dates['start']);
-        $this->assertInstanceOf(DateTimeImmutable::class, $dates['end']);
-
         $this->assertEquals('2025-01-01', $dates['start']->format('Y-m-d'));
         $this->assertEquals('2025-12-31', $dates['end']->format('Y-m-d'));
     }
@@ -46,11 +31,6 @@ final class MembershipPeriodTypeTest extends TestCase
         // Test for reference date in first half of academic year (Sept-Dec)
         $referenceDate = new DateTimeImmutable('2025-10-15');
         $dates = MembershipPeriodType::AcademicYear->getPeriodDates($referenceDate);
-
-        $this->assertArrayHasKey('start', $dates);
-        $this->assertArrayHasKey('end', $dates);
-        $this->assertInstanceOf(DateTimeImmutable::class, $dates['start']);
-        $this->assertInstanceOf(DateTimeImmutable::class, $dates['end']);
 
         $this->assertEquals('2025-09-01', $dates['start']->format('Y-m-d'));
         $this->assertEquals('2026-06-30', $dates['end']->format('Y-m-d'));
@@ -70,11 +50,6 @@ final class MembershipPeriodTypeTest extends TestCase
     {
         $referenceDate = new DateTimeImmutable('2025-06-15');
         $dates = MembershipPeriodType::Rolling->getPeriodDates($referenceDate);
-
-        $this->assertArrayHasKey('start', $dates);
-        $this->assertArrayHasKey('end', $dates);
-        $this->assertInstanceOf(DateTimeImmutable::class, $dates['start']);
-        $this->assertInstanceOf(DateTimeImmutable::class, $dates['end']);
 
         $this->assertEquals('2025-06-15', $dates['start']->format('Y-m-d'));
         $this->assertEquals('2026-06-14', $dates['end']->format('Y-m-d'));

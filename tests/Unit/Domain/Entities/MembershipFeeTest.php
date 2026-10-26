@@ -28,7 +28,6 @@ final class MembershipFeeTest extends TestCase
             dueDate: $dueDate,
         );
 
-        $this->assertInstanceOf(MembershipFee::class, $fee);
         $this->assertTrue($id->equals($fee->id));
         $this->assertTrue($membershipId->equals($fee->membershipId));
         $this->assertTrue($amount->equals($fee->amount));

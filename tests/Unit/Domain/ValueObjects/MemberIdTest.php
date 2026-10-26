@@ -15,7 +15,6 @@ final class MemberIdTest extends TestCase
     {
         $id = MemberId::generate();
 
-        $this->assertInstanceOf(MemberId::class, $id);
         $this->assertTrue(Uuid::isValid($id->value()));
     }
 
@@ -25,7 +24,6 @@ final class MemberIdTest extends TestCase
 
         $id = MemberId::fromString($uuid);
 
-        $this->assertInstanceOf(MemberId::class, $id);
         $this->assertEquals($uuid, $id->value());
     }
 

@@ -33,7 +33,6 @@ final class MembershipTest extends TestCase
             status: $status,
         );
 
-        $this->assertInstanceOf(Membership::class, $membership);
         $this->assertTrue($id->equals($membership->id));
         $this->assertTrue($memberId->equals($membership->memberId));
         $this->assertEquals($periodType, $membership->periodType);

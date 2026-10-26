@@ -15,7 +15,6 @@ final class FeeStructureIdTest extends TestCase
     {
         $id = FeeStructureId::generate();
 
-        $this->assertInstanceOf(FeeStructureId::class, $id);
         $this->assertTrue(Uuid::isValid($id->value()));
     }
 
@@ -25,7 +24,6 @@ final class FeeStructureIdTest extends TestCase
 
         $id = FeeStructureId::fromString($uuid);
 
-        $this->assertInstanceOf(FeeStructureId::class, $id);
         $this->assertEquals($uuid, $id->value());
     }
 

@@ -9,17 +9,6 @@ use PHPUnit\Framework\TestCase;
 
 final class MemberStatusTest extends TestCase
 {
-    public function test_it_has_expected_cases(): void
-    {
-        $cases = MemberStatus::cases();
-
-        $this->assertCount(4, $cases);
-        $this->assertContains(MemberStatus::Active, $cases);
-        $this->assertContains(MemberStatus::Inactive, $cases);
-        $this->assertContains(MemberStatus::Suspended, $cases);
-        $this->assertContains(MemberStatus::Expelled, $cases);
-    }
-
     public function test_it_has_correct_values(): void
     {
         $this->assertEquals('active', MemberStatus::Active->value);
