@@ -30,7 +30,6 @@ final class FeeStructureTest extends TestCase
             validFrom: $validFrom,
         );
 
-        $this->assertInstanceOf(FeeStructure::class, $feeStructure);
         $this->assertTrue($id->equals($feeStructure->id));
         $this->assertEquals($memberType, $feeStructure->memberType);
         $this->assertEquals($periodType, $feeStructure->periodType);
