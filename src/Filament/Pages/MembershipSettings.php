@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Pages;
 
+use App\Application\Modules\Services\ModuleContextServiceInterface;
 use App\Application\Modules\Services\ModuleManagerServiceInterface;
+use App\Application\Modules\Services\ModuleSettingsStoreInterface;
 use App\Domain\Modules\ValueObjects\ModuleName;
+use App\Filament\Concerns\ChecksPermissions;
+use App\Filament\Concerns\SafeModuleNavigation;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
@@ -25,7 +29,9 @@ use Modules\Memberships\Domain\Enums\MemberType;
  */
 final class MembershipSettings extends Page implements HasForms
 {
+    use ChecksPermissions;
     use InteractsWithForms;
+    use SafeModuleNavigation;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
@@ -55,17 +61,15 @@ final class MembershipSettings extends Page implements HasForms
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->isAdmin() ?? false;
+        // Granted in Roles; admins hold every permission
+        return self::userCan('memberships:settings.manage');
     }
 
-    public function mount(ModuleManagerServiceInterface $moduleManager): void
+    public function mount(ModuleSettingsStoreInterface $settingsStore, ModuleContextServiceInterface $moduleContext): void
     {
-        $settings = $moduleManager->getSettings(new ModuleName('memberships'));
-
-        // Load settings with defaults from config
-        $defaults = config('memberships');
-
-        $this->form->fill(array_merge($defaults, $settings));
+        // The shipped defaults (config/settings.php) with the saved values on top, so keys
+        // added by a release show their defaults instead of loading empty and being saved off
+        $this->form->fill($settingsStore->effective('memberships', $moduleContext->modulePath('memberships')));
     }
 
     /**
@@ -179,6 +183,9 @@ final class MembershipSettings extends Page implements HasForms
 
     public function save(ModuleManagerServiceInterface $moduleManager): void
     {
+        // Livewire methods can be called without the page's button
+        abort_unless(self::canAccess(), 403);
+
         $formData = $this->form->getState();
 
         $moduleManager->updateSettings(new ModuleName('memberships'), $formData);

@@ -44,7 +44,7 @@ El módulo no tiene componentes Vue, así que no necesita `module:build`.
 
 ## Configuración
 
-Se configura en el panel, en **Módulos** → **Gestión de socios** → **Configurar**. Los valores guardados ahí tienen prioridad sobre `config/memberships.php`, que solo aporta los valores por defecto. `config/settings.php` contiene los valores por defecto con los que se publica el módulo: no lo edites a mano.
+Se configura en el panel, en **Gestión de socios** → **Configuración** o en **Módulos** → **Gestión de socios** → **Configurar** (el mismo formulario). La primera entrada la ve quien tiene el permiso `memberships:settings.manage`, para delegar estos ajustes (por ejemplo, a tesorería) sin hacer administrador a nadie; la cuenta también tiene que poder entrar en el panel. La segunda es solo para administradores. Los valores guardados ahí tienen prioridad sobre `config/memberships.php`, que solo aporta los valores por defecto. `config/settings.php` contiene los valores por defecto con los que se publica el módulo: no lo edites a mano.
 
 | Opción | Descripción | Por defecto |
 |--------|-------------|-------------|
@@ -164,6 +164,7 @@ Los permisos llevan el prefijo `memberships:` y se asignan a los roles en el edi
 | `fee_structures.create` | Crear tarifa | — |
 | `fee_structures.update` | Editar tarifa | — |
 | `fee_structures.delete` | Eliminar tarifa | — |
+| `settings.manage` | Gestionar la configuración del módulo. Incluye la asignación automática del rol de socio y los tipos permanentes, así que decide quién recibe el rol de socio | — |
 
 ## Eventos
 

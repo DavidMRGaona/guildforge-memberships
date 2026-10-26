@@ -319,5 +319,9 @@ return [
             'update' => 'Edit fee structure',
             'delete' => 'Delete fee structure',
         ],
+        'settings' => [
+            'manage' => 'Manage the module settings',
+            'manage_help' => 'Includes the automatic association member role and the permanent member types: it decides who gets the association member role.',
+        ],
     ],
 ];
