@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships;
 
+use App\Application\Knowledge\Contracts\KnowledgeCapabilityInterface;
 use App\Application\Modules\DTOs\NavigationItemDTO;
 use App\Application\Modules\DTOs\PermissionDTO;
 use App\Modules\ModuleServiceProvider;
@@ -36,6 +37,7 @@ use Modules\Memberships\Filament\Resources\MemberResource;
 use Modules\Memberships\Filament\Widgets\ExpiringMembershipsWidget;
 use Modules\Memberships\Filament\Widgets\MembershipStatsWidget;
 use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
+use Modules\Memberships\Infrastructure\Knowledge\HasMemberRecordCapability;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
@@ -218,6 +220,18 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         return [
             MemberModel::class => MemberPolicy::class,
             FeeStructureModel::class => FeeStructurePolicy::class,
+        ];
+    }
+
+    /**
+     * Capabilities the module's help guides use to show only to whom they apply.
+     *
+     * @return array<class-string<KnowledgeCapabilityInterface>>
+     */
+    public function registerKnowledgeCapabilities(): array
+    {
+        return [
+            HasMemberRecordCapability::class,
         ];
     }
 

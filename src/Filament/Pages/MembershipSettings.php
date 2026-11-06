@@ -9,6 +9,7 @@ use App\Application\Modules\Services\ModuleManagerServiceInterface;
 use App\Application\Modules\Services\ModuleSettingsStoreInterface;
 use App\Domain\Modules\ValueObjects\ModuleName;
 use App\Filament\Concerns\ChecksPermissions;
+use App\Filament\Concerns\HasKnowledgeGuideAction;
 use App\Filament\Concerns\SafeModuleNavigation;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
@@ -30,6 +31,7 @@ use Modules\Memberships\Domain\Enums\MemberType;
 final class MembershipSettings extends Page implements HasForms
 {
     use ChecksPermissions;
+    use HasKnowledgeGuideAction;
     use InteractsWithForms;
     use SafeModuleNavigation;
 
@@ -194,6 +196,16 @@ final class MembershipSettings extends Page implements HasForms
             ->title(__('memberships::memberships.settings.saved'))
             ->success()
             ->send();
+    }
+
+    /**
+     * @return array<Action>
+     */
+    protected function getHeaderActions(): array
+    {
+        return array_filter([
+            $this->knowledgeGuideAction('memberships.panel.settings'),
+        ]);
     }
 
     /**

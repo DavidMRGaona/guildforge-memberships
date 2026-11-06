@@ -12,11 +12,12 @@ Módulo para GuildForge que gestiona los socios de la asociación, sus cuotas (p
 - **Rol de socio** (opcional): asigna el rol de socio del core al usuario vinculado mientras su ficha está activa y tiene una cuota activa o es de un tipo permanente.
 - **Socios permanentes**: los tipos marcados (honorario por defecto) no necesitan cuota y quedan fuera de los avisos de caducidad y de las cuotas vencidas.
 - **Widgets del dashboard**: estadísticas de socios, cuotas próximas a expirar y cuotas vencidas sin pagar.
+- **Guías de ayuda**: guías del panel (categoría propia «Socios y cuotas») y del sitio (categoría «Socios y cuotas» del core, solo para cuentas vinculadas a una ficha, capacidad `memberships.has_member_record`) en `resources/knowledge/es/`, con el botón de ayuda en las páginas del panel del módulo.
 - **Zonas horarias**: los instantes (alta, pagos, activación) se guardan en la zona de almacenamiento del sitio (UTC cuando el sitio lo usa) y se muestran en la zona de visualización (por defecto Europe/Madrid); las fechas de las cuotas, las tarifas y los vencimientos son días naturales de la zona de visualización, y la cuota de un socio dura hasta el final de su último día allí.
 
 ## Requisitos
 
-- GuildForge core `^3.22` (almacenamiento de fechas en UTC y zona horaria de visualización; el rol de socio se elige en el core)
+- GuildForge core `^3.35` (almacenamiento de fechas en UTC y zona horaria de visualización; el rol de socio se elige en el core; base de conocimiento)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).
