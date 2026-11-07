@@ -60,7 +60,7 @@ En los dos casos, si era la cuota activa, se revisa el rol de socio de la cuenta
 
 ## Las marcas de las notas
 
-Cuando el módulo avisa a un socio de que su cuota está a punto de expirar, lo anota en las **Notas** de la cuota con una marca como `[EXPIRING_NOTIFIED:2026]`. No la borres: si la quitas, el aviso puede volver a enviarse.
+Cuando el módulo avisa a un socio de que su cuota está a punto de expirar, lo anota en las **Notas** de la cuota con una marca como `[EXPIRING_NOTIFIED:2026-12-31]`, que lleva la fecha de caducidad. No la borres: si la quitas, el aviso puede volver a enviarse.
 
 ## Si algo no sale bien
 

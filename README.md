@@ -87,7 +87,7 @@ Métodos de pago: efectivo (`cash`), transferencia (`bank_transfer`), tarjeta (`
 El módulo programa `memberships:process-expired` cada día a medianoche. El comando:
 
 1. Marca como expiradas las cuotas activas cuya fecha de fin ya ha pasado, también las de los socios permanentes (su rol no depende de ellas).
-2. Envía un correo al socio (al usuario vinculado o, si no tiene, al email del socio) cuando a una cuota activa le quedan `expiration_warning_days` días o menos. El aviso se envía una vez al año por cuota y queda anotado en sus notas como `[EXPIRING_NOTIFIED:AAAA]`. Los socios permanentes no reciben este aviso.
+2. Envía un correo al socio (al usuario vinculado o, si no tiene, al email del socio) cuando a una cuota activa le quedan `expiration_warning_days` días o menos. El aviso se envía una sola vez por cuota y fecha de caducidad (aunque la ventana cruce el 1 de enero) y queda anotado en sus notas como `[EXPIRING_NOTIFIED:AAAA-MM-DD]`, con la fecha de caducidad; al renovar, la nueva fecha vuelve a avisar. Las marcas antiguas por año se siguen respetando. Los socios permanentes no reciben este aviso.
 3. Dispara `FeePaymentOverdue` una vez al mes por cada pago vencido sin pagar (anotado como `[OVERDUE_NOTIFIED:AAAA-MM]`), salvo los de socios permanentes. Con `send_overdue_email` activado, el socio recibe un recordatorio con el importe y los días de retraso; no se envía a socios que no estén activos ni por cuotas canceladas.
 
 Para lanzarlo a mano:
