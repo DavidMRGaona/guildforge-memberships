@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Models;
 
 use App\Infrastructure\Persistence\Eloquent\Concerns\StoresInstantsInStorageTimezone;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -51,6 +52,22 @@ final class FeeStructureModel extends Model
         'description',
         'is_default',
     ];
+
+    /**
+     * The fee structures marked as the default of a member type and period type, leaving out
+     * the one with the given id (the one being saved). There is one at most: the observer moves
+     * the mark and a partial unique index backs it.
+     *
+     * @return Builder<self>
+     */
+    public static function defaultsFor(MemberType|string $memberType, MembershipPeriodType|string $periodType, ?string $exceptId = null): Builder
+    {
+        return self::query()
+            ->where('member_type', $memberType instanceof MemberType ? $memberType->value : $memberType)
+            ->where('period_type', $periodType instanceof MembershipPeriodType ? $periodType->value : $periodType)
+            ->where('is_default', true)
+            ->when($exceptId !== null, fn (Builder $query): Builder => $query->whereKeyNot($exceptId));
+    }
 
     /**
      * @return array<string, string>

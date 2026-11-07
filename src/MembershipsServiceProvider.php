@@ -15,12 +15,10 @@ use Filament\Widgets\Widget;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
-use Modules\Memberships\Application\Services\FeeStructureServiceInterface;
 use Modules\Memberships\Application\Services\MemberNumberGeneratorInterface;
 use Modules\Memberships\Application\Services\MemberServiceInterface;
 use Modules\Memberships\Application\Services\MembershipFeeServiceInterface;
 use Modules\Memberships\Application\Services\MembershipServiceInterface;
-use Modules\Memberships\Application\Services\ProrationCalculatorInterface;
 use Modules\Memberships\Console\Commands\ProcessExpiredMemberships;
 use Modules\Memberships\Console\Commands\SyncMemberRoles;
 use Modules\Memberships\Domain\Events\FeePaymentOverdue;
@@ -41,19 +39,17 @@ use Modules\Memberships\Infrastructure\Knowledge\HasMemberRecordCapability;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\FeeStructureModelObserver;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MemberModelObserver;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MembershipModelObserver;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\EloquentFeeStructureRepository;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\EloquentMemberRepository;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\EloquentMembershipFeeRepository;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\EloquentMembershipRepository;
-use Modules\Memberships\Infrastructure\Services\FeeStructureService;
 use Modules\Memberships\Infrastructure\Services\MemberNumberGenerator;
 use Modules\Memberships\Infrastructure\Services\MemberService;
 use Modules\Memberships\Infrastructure\Services\MembershipFeeService;
 use Modules\Memberships\Infrastructure\Services\MembershipService;
-use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
-use Modules\Memberships\Infrastructure\Services\ProrationCalculator;
 use Modules\Memberships\Listeners\NotifyFeePaymentOverdue;
 use Modules\Memberships\Listeners\NotifyMembershipExpired;
 use Modules\Memberships\Listeners\NotifyMembershipExpiring;
@@ -81,13 +77,9 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
 
         // Service bindings
         $this->app->bind(MemberNumberGeneratorInterface::class, MemberNumberGenerator::class);
-        $this->app->bind(ProrationCalculatorInterface::class, fn (): ProrationCalculator => new ProrationCalculator(
-            $this->app->make(MembershipSettingsReader::class)->academicStartMonth()
-        ));
         $this->app->bind(MemberServiceInterface::class, MemberService::class);
         $this->app->bind(MembershipServiceInterface::class, MembershipService::class);
         $this->app->bind(MembershipFeeServiceInterface::class, MembershipFeeService::class);
-        $this->app->bind(FeeStructureServiceInterface::class, FeeStructureService::class);
     }
 
     public function boot(): void
@@ -101,6 +93,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
 
         MembershipModel::observe(MembershipModelObserver::class);
         MemberModel::observe(MemberModelObserver::class);
+        FeeStructureModel::observe(FeeStructureModelObserver::class);
     }
 
     /**

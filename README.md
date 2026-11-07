@@ -7,7 +7,7 @@ Módulo para GuildForge que gestiona los socios de la asociación, sus cuotas (p
 - **Socios**: alta, edición y baja con datos personales, de contacto, tipo, estado y usuario vinculado.
 - **Número de socio**: se genera al crear el socio, con el formato `YYYY-NNNN`.
 - **Cuotas**: periodos con fecha de inicio y fin y estado (pendiente, activa, expirada, cancelada). La fecha de fin se calcula a partir del tipo de periodo.
-- **Tarifas**: importe por tipo de socio y tipo de periodo, con fechas de validez.
+- **Tarifas**: importe por tipo de socio y tipo de periodo, con fechas de validez y una sola tarifa por defecto para cada combinación (marcar otra le quita la marca a la anterior). Son de referencia: las cuotas no guardan importe.
 - **Expiración diaria**: un comando programado marca las cuotas caducadas, avisa por correo de las que están a punto de caducar y detecta pagos vencidos.
 - **Rol de socio** (opcional): asigna el rol de socio del core al usuario vinculado mientras su ficha está activa y tiene una cuota activa o es de un tipo permanente.
 - **Socios permanentes**: los tipos marcados (honorario por defecto) no necesitan cuota y quedan fuera de los avisos de caducidad y de las cuotas vencidas.
