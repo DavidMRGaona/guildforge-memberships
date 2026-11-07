@@ -106,7 +106,7 @@ final class ProcessExpiredMemberships extends Command
 
             foreach ($expiringMemberships as $membership) {
                 // Check if we've already notified (check notes field for notification marker)
-                if ($this->hasBeenNotified($membership)) {
+                if ($this->hasBeenNotified($membership, $warningDays)) {
                     continue;
                 }
 
@@ -159,18 +159,30 @@ final class ProcessExpiredMemberships extends Command
     }
 
     /**
-     * Check if a membership expiring notification has been sent.
+     * Check if the expiring notification has been sent for this expiry date.
+     *
+     * The mark carries the expiry date, so a warning window that crosses new year is still
+     * one warning, and a renewal (new expiry date) is warned again. Marks saved before this
+     * (`[EXPIRING_NOTIFIED:YYYY]`, the year the warning went out) count for the current
+     * expiry when that year is not before the year the warning window opened.
      */
-    private function hasBeenNotified(Membership $membership): bool
+    private function hasBeenNotified(Membership $membership, int $warningDays): bool
     {
         if ($membership->notes === null) {
             return false;
         }
 
-        // Check for notification marker in notes
-        $currentYear = CalendarDate::today()->format('Y');
+        if (str_contains($membership->notes, $this->expiringMarker($membership))) {
+            return true;
+        }
 
-        return str_contains($membership->notes, "[EXPIRING_NOTIFIED:{$currentYear}]");
+        $windowOpenedIn = (int) $membership->endDate->modify("-{$warningDays} days")->format('Y');
+
+        if (preg_match_all('/\[EXPIRING_NOTIFIED:(\d{4})\]/', $membership->notes, $matches) < 1) {
+            return false;
+        }
+
+        return array_any($matches[1], fn ($year) => (int) $year >= $windowOpenedIn);
     }
 
     /**
@@ -178,14 +190,18 @@ final class ProcessExpiredMemberships extends Command
      */
     private function markAsNotified(Membership $membership): void
     {
-        $currentYear = CalendarDate::today()->format('Y');
-        $marker = "[EXPIRING_NOTIFIED:{$currentYear}]";
+        $marker = $this->expiringMarker($membership);
 
         $notes = $membership->notes ?? '';
         if (! str_contains($notes, $marker)) {
             $membership->notes = trim($notes.' '.$marker);
             $this->membershipRepository->save($membership);
         }
+    }
+
+    private function expiringMarker(Membership $membership): string
+    {
+        return '[EXPIRING_NOTIFIED:'.$membership->endDate->format('Y-m-d').']';
     }
 
     /**
