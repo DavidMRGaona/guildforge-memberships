@@ -153,7 +153,7 @@ return [
         'payment_method' => [
             'cash' => 'Cash',
             'bank_transfer' => 'Bank transfer',
-            'credit_card' => 'Credit card',
+            'card' => 'Card',
             'other' => 'Other',
         ],
     ],

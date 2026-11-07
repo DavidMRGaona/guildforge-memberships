@@ -153,7 +153,7 @@ return [
         'payment_method' => [
             'cash' => 'Efectivo',
             'bank_transfer' => 'Transferencia bancaria',
-            'credit_card' => 'Tarjeta de crédito',
+            'card' => 'Tarjeta',
             'other' => 'Otro',
         ],
     ],
