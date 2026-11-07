@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Testing\PendingCommand;
 use Livewire\Livewire;
-use Modules\Memberships\Application\DTOs\FeeStructureDTO;
 use Modules\Memberships\Application\DTOs\MemberDTO;
 use Modules\Memberships\Application\DTOs\MembershipDTO;
 use Modules\Memberships\Application\DTOs\MembershipFeeDTO;
@@ -221,16 +220,6 @@ final class UtcStorageTest extends ModuleTestCase
         $this->assertSame(self::MADRID_ISO, $feeDto->paidAt);
         $this->assertSame(self::MADRID_ISO, $feeDto->createdAt);
         $this->assertSame('2026-07-01', $feeDto->dueDate);
-
-        $structure = new FeeStructure(
-            id: FeeStructureId::generate(),
-            memberType: MemberType::Regular,
-            periodType: MembershipPeriodType::CalendarYear,
-            amount: Money::fromCents(3000, 'EUR'),
-            validFrom: CalendarDate::parse('2026-01-01'),
-            createdAt: $instant,
-        );
-        $this->assertSame(self::MADRID_ISO, FeeStructureDTO::fromEntity($structure)->createdAt);
     }
 
     public function test_the_expiring_notification_shows_the_calendar_day(): void

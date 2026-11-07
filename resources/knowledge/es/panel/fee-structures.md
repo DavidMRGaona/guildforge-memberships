@@ -5,7 +5,7 @@ summary: Anota cuánto cuesta la cuota de cada tipo de socio y periodo, y desde 
 category: memberships
 audience: panel
 order: 40
-keywords: [tarifa, tarifas, precio, precios, importe, cuánto cuesta, cuota anual, coste, euros, moneda, por defecto, validez, válido desde, válido hasta, subir la cuota, cambiar el precio, estudiante, senior]
+keywords: [tarifa, tarifas, precio, precios, importe, cuánto cuesta, cuota anual, coste, euros, moneda, por defecto, predeterminada, tarifa habitual, validez, válido desde, válido hasta, subir la cuota, cambiar el precio, estudiante, senior]
 related: [memberships.panel.overview, memberships.panel.memberships]
 conditions:
   permissions:
@@ -28,13 +28,17 @@ Necesitas el permiso **Crear tarifa**.
 2. En **Datos de la tarifa**, elige el **Tipo de socio** y el **Tipo de periodo**, y escribe el **Importe**, con dos decimales como mucho.
 3. Deja **Moneda** en «EUR» o escribe otro código de tres letras (por ejemplo, «USD»).
 4. En **Validez**, elige **Válido desde** (empieza en hoy). Deja **Válido hasta** vacío si la tarifa no tiene fecha de fin.
-5. Marca **Por defecto** si es la tarifa habitual de ese tipo de socio.
+5. Marca **Por defecto** si es la tarifa habitual de ese tipo de socio y tipo de periodo.
 6. Si quieres, escribe una **Descripción**.
 7. Pulsa **Crear**.
 
+## La tarifa por defecto
+
+Cada tipo de socio y tipo de periodo tiene como mucho una tarifa **Por defecto**. Si marcas otra, la anterior pierde la marca al guardar, y un aviso te dice cuál era. Las tarifas de otros tipos de socio o de otros periodos no cambian.
+
 ## Cambiar el precio
 
-Para que se vea qué importe valía en cada momento, no cambies el importe de una tarifa antigua: pon su **Válido hasta** en el último día del precio viejo y crea otra con el precio nuevo desde el día siguiente.
+Para que se vea qué importe valía en cada momento, no cambies el importe de una tarifa antigua: pon su **Válido hasta** en el último día del precio viejo y crea otra con el precio nuevo desde el día siguiente. Si marcas la nueva como **Por defecto**, la antigua deja de serlo.
 
 Para editar una tarifa, pulsa **Editar** en su fila, cambia lo que necesites y pulsa **Guardar cambios** (permiso **Editar tarifa**). Para borrarla, pulsa **Borrar** y confirma (permiso **Eliminar tarifa**). Borrar una tarifa no cambia ninguna cuota.
 

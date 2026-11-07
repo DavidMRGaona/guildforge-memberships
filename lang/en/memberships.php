@@ -76,7 +76,7 @@ return [
         'valid_until' => 'Valid until',
         'valid_until_help' => 'Leave empty for indefinite validity',
         'is_default' => 'Default',
-        'is_default_help' => 'Use this fee as default for this member type',
+        'is_default_help' => 'The usual fee for this member type and period. There can only be one per member type and period type: marking this one unmarks the previous one.',
         'description' => 'Description',
         'activated_at' => 'Activated at',
     ],
@@ -267,6 +267,8 @@ return [
             'is_default' => 'Default',
             'proration_rules' => 'Proration rules',
         ],
+        'default_moved_title' => 'Default fee changed',
+        'default_moved' => 'The :amount fee valid from :date is no longer the default for “:member_type” in “:period_type”.',
         'sections' => [
             'fee_data' => 'Fee data',
             'validity' => 'Validity',

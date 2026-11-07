@@ -76,7 +76,7 @@ return [
         'valid_until' => 'Válido hasta',
         'valid_until_help' => 'Dejar vacío para validez indefinida',
         'is_default' => 'Por defecto',
-        'is_default_help' => 'Usar esta tarifa como predeterminada para este tipo de socio',
+        'is_default_help' => 'La tarifa habitual de este tipo de socio y periodo. Solo puede haber una por tipo de socio y tipo de periodo: al marcar esta, la anterior deja de serlo.',
         'description' => 'Descripción',
         'activated_at' => 'Fecha de activación',
     ],
@@ -267,6 +267,8 @@ return [
             'is_default' => 'Por defecto',
             'proration_rules' => 'Reglas de prorrateo',
         ],
+        'default_moved_title' => 'Tarifa por defecto cambiada',
+        'default_moved' => 'La tarifa de :amount válida desde el :date ha dejado de ser la tarifa por defecto de «:member_type» en «:period_type».',
         'sections' => [
             'fee_data' => 'Datos de la tarifa',
             'validity' => 'Validez',

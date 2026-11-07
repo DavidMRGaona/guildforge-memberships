@@ -8,9 +8,11 @@ use App\Filament\Concerns\HasKnowledgeGuideAction;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Modules\Memberships\Filament\Resources\FeeStructureResource;
+use Modules\Memberships\Filament\Resources\FeeStructureResource\Concerns\AnnouncesTheMovedDefault;
 
 class EditFeeStructure extends EditRecord
 {
+    use AnnouncesTheMovedDefault;
     use HasKnowledgeGuideAction;
 
     protected static string $resource = FeeStructureResource::class;
@@ -26,6 +28,22 @@ class EditFeeStructure extends EditRecord
             DeleteAction::make(),
             $this->knowledgeGuideAction('memberships.panel.fee-structures'),
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $this->rememberTheReplacedDefault($data, (string) $this->getRecord()->getKey());
+
+        return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        $this->announceTheReplacedDefault();
     }
 
     protected function getRedirectUrl(): string
