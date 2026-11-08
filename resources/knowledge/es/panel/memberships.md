@@ -15,7 +15,7 @@ Una cuota es un periodo de pertenencia de un socio. Cada socio tiene las suyas e
 
 ## Crear una cuota
 
-1. En el menú lateral, abre **Gestión de socios** y elige **Socios**.
+1. En el menú lateral, abre **Personas** y elige **Socios**.
 2. Abre el menú **⋯** de la fila del socio, pulsa **Editar** y abre la pestaña **Cuotas**.
 3. Pulsa **Crear cuota**.
 4. Elige el **Tipo de periodo**. Empieza en el que diga la configuración del módulo.

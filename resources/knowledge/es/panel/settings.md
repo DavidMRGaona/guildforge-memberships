@@ -15,7 +15,7 @@ La configuración del módulo decide cómo se calculan las cuotas, quién recibe
 
 ## Abrir la configuración
 
-En el menú lateral, abre **Gestión de socios** y elige **Configuración**. La página se llama **Configuración del módulo**. Al terminar, pulsa **Guardar**.
+En el menú lateral, abre **Sistema**, elige **Configuración** y después **Socios**. La página se llama **Configuración del módulo**. Al terminar, pulsa **Guardar**.
 
 > [!IMPORTANT]
 > El permiso **Gestionar la configuración del módulo** decide quién recibe el rol de socio, porque incluye la asignación automática y los tipos permanentes. Dalo solo a quien deba decidirlo.
@@ -50,7 +50,7 @@ La administración puede abrir el mismo formulario en **Módulos**, con **Config
 
 ## Si algo no sale bien
 
-- **No ves Configuración en el menú**: necesitas el permiso **Gestionar la configuración del módulo**.
+- **No ves Socios en Sistema → Configuración**: necesitas el permiso **Gestionar la configuración del módulo**.
 - **Has cambiado los tipos permanentes y los roles siguen igual**: hay que revisar los roles de todos con `memberships:sync-roles`. La guía del rol de socio lo explica.
 
-[[action:filament.admin.pages.membership-settings|Abrir la configuración de socios]]
+[[action:filament.admin.configuracion.pages.membership-settings|Abrir la configuración de socios]]

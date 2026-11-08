@@ -46,7 +46,7 @@ El módulo no tiene componentes Vue, así que no necesita `module:build`.
 
 ## Configuración
 
-Se configura en el panel, en **Gestión de socios** → **Configuración** o en **Módulos** → **Gestión de socios** → **Configurar** (el mismo formulario). La primera entrada la ve quien tiene el permiso `memberships:settings.manage`, para delegar estos ajustes (por ejemplo, a tesorería) sin hacer administrador a nadie; la cuenta también tiene que poder entrar en el panel. La segunda es solo para administradores. Los valores guardados ahí tienen prioridad sobre `config/memberships.php`, que solo aporta los valores por defecto. `config/settings.php` contiene los valores por defecto con los que se publica el módulo: no lo edites a mano.
+Se configura en el panel, en **Sistema** → **Configuración** → **Socios** o en **Módulos** → **Gestión de socios** → **Configurar** (el mismo formulario). La primera entrada la ve quien tiene el permiso `memberships:settings.manage`, para delegar estos ajustes (por ejemplo, a tesorería) sin hacer administrador a nadie; la cuenta también tiene que poder entrar en el panel. La segunda es solo para administradores. Los valores guardados ahí tienen prioridad sobre `config/memberships.php`, que solo aporta los valores por defecto. `config/settings.php` contiene los valores por defecto con los que se publica el módulo: no lo edites a mano.
 
 | Opción | Descripción | Por defecto |
 |--------|-------------|-------------|
@@ -135,10 +135,10 @@ Cambiar el rol de socio en el core no retira el anterior a quien ya lo tenía, y
 
 ## Panel de administración
 
-En el grupo **Gestión de socios**:
+En el grupo **Personas**:
 
 - **Socios**: listado y ficha del socio; en la ficha, la pestaña **Cuotas** permite crear, editar y borrar sus cuotas, y la pestaña **Pagos** añadir pagos, registrar cobros, corregirlos y borrarlos (con doble confirmación).
-- **Tarifas**: importe por tipo de socio y periodo.
+- **Tarifas** (debajo de **Socios**): importe por tipo de socio y periodo.
 
 El panel no tiene todavía pantallas para registrar pagos.
 

@@ -6,6 +6,7 @@ namespace Modules\Memberships\Filament\Resources;
 
 use App\Filament\Actions\RowDetailsAction;
 use App\Filament\Resources\BaseResource;
+use App\Filament\Support\PanelNavigationGroup;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -36,11 +37,16 @@ class FeeStructureResource extends BaseResource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-currency-euro';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 1;
 
-    public static function getNavigationGroup(): ?string
+    public static function getNavigationGroup(): string
     {
-        return __('memberships::memberships.navigation_group');
+        return PanelNavigationGroup::People->getLabel();
+    }
+
+    public static function getNavigationParentItem(): string
+    {
+        return MemberResource::getNavigationLabel();
     }
 
     public static function getNavigationLabel(): string

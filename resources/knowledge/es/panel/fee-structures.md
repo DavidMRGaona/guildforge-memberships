@@ -18,7 +18,7 @@ Las tarifas recogen el importe de la cuota para cada tipo de socio y cada tipo d
 
 ## Ver las tarifas
 
-En el menú lateral, abre **Gestión de socios** y elige **Tarifas**. La lista muestra el tipo de socio, el tipo de periodo, el importe, la validez y si es la tarifa **Por defecto**. Una tarifa sin fecha de fin sale como **Indefinida**. Puedes filtrar por **Tipo de socio** y **Tipo de periodo**.
+En el menú lateral, abre **Personas**, elige **Socios** y después **Tarifas**. La lista muestra el tipo de socio, el tipo de periodo, el importe, la validez y si es la tarifa **Por defecto**. Una tarifa sin fecha de fin sale como **Indefinida**. Puedes filtrar por **Tipo de socio** y **Tipo de periodo**.
 
 ## Crear una tarifa
 

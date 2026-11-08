@@ -15,7 +15,7 @@ Cada persona asociada tiene una ficha de socio. Aquí se crea, se mantiene al d�
 
 ## Dar de alta un socio
 
-1. En el menú lateral, abre **Gestión de socios** y elige **Socios**.
+1. En el menú lateral, abre **Personas** y elige **Socios**.
 2. Pulsa **Crear socio**.
 3. En **Datos personales**, rellena **Nombre** y **Apellidos**, que son obligatorios, y si quieres la **Fecha de nacimiento**. Elige el **Tipo de socio** (empieza en **Regular**).
 4. En **Datos de contacto**, rellena **Email**, **Teléfono** y **Dirección** si los tienes.

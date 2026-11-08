@@ -6,6 +6,7 @@ namespace Modules\Memberships\Filament\Resources;
 
 use App\Filament\Actions\RowDetailsAction;
 use App\Filament\Resources\BaseResource;
+use App\Filament\Support\PanelNavigationGroup;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -40,11 +41,11 @@ class MemberResource extends BaseResource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 30;
 
-    public static function getNavigationGroup(): ?string
+    public static function getNavigationGroup(): string
     {
-        return __('memberships::memberships.navigation_group');
+        return PanelNavigationGroup::People->getLabel();
     }
 
     public static function getNavigationLabel(): string
