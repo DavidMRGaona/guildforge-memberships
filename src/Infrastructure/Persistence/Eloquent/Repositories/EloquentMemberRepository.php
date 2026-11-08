@@ -138,7 +138,8 @@ final readonly class EloquentMemberRepository implements MemberRepositoryInterfa
 
     public function existsByMemberNumber(MemberNumber $memberNumber): bool
     {
-        return MemberModel::query()
+        // Deleted members keep their number: the unique index counts them
+        return MemberModel::withTrashed()
             ->where('member_number', $memberNumber->value)
             ->exists();
     }
@@ -147,7 +148,8 @@ final readonly class EloquentMemberRepository implements MemberRepositoryInterfa
     {
         $pattern = sprintf('%04d-%%', $year);
 
-        $lastMember = MemberModel::query()
+        // Deleted members keep their number, so they count too
+        $lastMember = MemberModel::withTrashed()
             ->where('member_number', 'like', $pattern)
             ->orderByDesc('member_number')
             ->first();
