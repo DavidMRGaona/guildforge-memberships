@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Filament\RelationManagers;
 
 use App\Application\Services\TimezoneServiceInterface;
+use App\Filament\Actions\RowDetailsAction;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
@@ -209,6 +210,7 @@ class FeesRelationManager extends RelationManager
                     }),
 
                 ActionGroup::make([
+                    RowDetailsAction::make(),
                     EditAction::make()
                         ->modalHeading(__('memberships::memberships.relation_managers.fees.edit'))
                         ->mutateRecordDataUsing(fn (array $data, MembershipFeeModel $record): array => [
