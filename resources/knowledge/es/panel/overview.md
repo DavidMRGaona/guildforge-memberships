@@ -61,16 +61,16 @@ Ninguno de estos permisos se concede solo, tampoco al rol de edición: se dan a 
 | **Eliminar socio** | Borrar socios |
 | **Ver listado de tarifas** y **Ver tarifa** | Ver las tarifas |
 | **Crear tarifa**, **Editar tarifa** y **Eliminar tarifa** | Cambiar las tarifas |
+| **Ver los pagos de los socios** | Ver la pestaña **Pagos** de cada socio |
+| **Gestionar los pagos de los socios** | Añadir pagos, registrar cobros, corregirlos y borrarlos |
 | **Gestionar la configuración del módulo** | Cambiar la configuración del módulo. Incluye la asignación automática del rol de socio y los tipos permanentes, así que decide quién recibe el rol |
 
 ## Dónde está cada cosa
 
 - En el menú lateral, el grupo **Gestión de socios** tiene **Socios**, **Tarifas** y **Configuración**.
-- Dentro de un socio, las pestañas **Datos del socio** y **Cuotas**.
+- Dentro de un socio, las pestañas **Datos del socio**, **Cuotas** y **Pagos**.
 - En el escritorio, los resúmenes **Total de socios**, **Socios activos**, **Con cuota activa** y **Pagos pendientes**, y las tablas **Cuotas próximas a expirar** y **Cuotas vencidas sin pagar**.
 
-> [!IMPORTANT]
-> El panel todavía no tiene pantallas para registrar importes ni pagos: las cuotas guardan solo su periodo y su estado.
 
 [[action:filament.admin.resources.members.index|Ver los socios|if=memberships:members.view_any]]
 [[action:filament.admin.resources.fee-structures.index|Ver las tarifas|if=memberships:fee_structures.view_any]]

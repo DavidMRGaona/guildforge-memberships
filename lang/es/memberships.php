@@ -26,6 +26,10 @@ return [
             'singular' => 'Cuota',
             'plural' => 'Cuotas',
         ],
+        'fee' => [
+            'singular' => 'pago',
+            'plural' => 'pagos',
+        ],
         'fee_structure' => [
             'singular' => 'Tarifa',
             'plural' => 'Tarifas',
@@ -72,6 +76,11 @@ return [
         'paid_at' => 'Fecha de pago',
         'payment_method' => 'Método de pago',
         'transaction_reference' => 'Referencia de transacción',
+        'membership' => 'Cuota',
+        'membership_help' => 'El importe se rellena con la tarifa por defecto de este tipo de socio y periodo, si la hay. Puedes cambiarlo.',
+        'is_paid' => 'Ya está pagado',
+        'paid_on' => 'Fecha de pago',
+        'payment_status' => 'Estado del pago',
         'valid_from' => 'Válido desde',
         'valid_until' => 'Válido hasta',
         'valid_until_help' => 'Dejar vacío para validez indefinida',
@@ -155,6 +164,11 @@ return [
             'bank_transfer' => 'Transferencia bancaria',
             'card' => 'Tarjeta',
             'other' => 'Otro',
+        ],
+        'payment_status' => [
+            'paid' => 'Pagado',
+            'pending' => 'Pendiente',
+            'overdue' => 'Vencido',
         ],
     ],
 
@@ -289,8 +303,17 @@ return [
         ],
         'fees' => [
             'title' => 'Pagos',
-            'is_paid' => 'Pagado',
+            'create' => 'Nuevo pago',
+            'edit' => 'Editar pago',
             'record_payment' => 'Registrar pago',
+            'payment_recorded' => 'Pago registrado',
+            'empty_state_description' => 'Añada un pago para empezar.',
+            'delete_confirmation_check' => 'Entiendo que el pago se borrará y que no se puede deshacer.',
+            'columns' => [
+                'due_date' => 'Vencimiento',
+                'payment_status' => 'Estado',
+                'paid_at' => 'Pagado el',
+            ],
         ],
     ],
 
@@ -320,6 +343,11 @@ return [
             'create' => 'Crear tarifa',
             'update' => 'Editar tarifa',
             'delete' => 'Eliminar tarifa',
+        ],
+        'fees' => [
+            'view_any' => 'Ver los pagos de los socios',
+            'manage' => 'Gestionar los pagos de los socios',
+            'manage_help' => 'Crear pagos, registrar cobros, editarlos y borrarlos en la pestaña Pagos de la ficha del socio.',
         ],
         'settings' => [
             'manage' => 'Gestionar la configuración del módulo',

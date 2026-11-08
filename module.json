@@ -27,6 +27,8 @@
       "fee_structures.create",
       "fee_structures.update",
       "fee_structures.delete",
+      "fees.view_any",
+      "fees.manage",
       "settings.manage"
     ],
     "routes": [

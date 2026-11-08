@@ -6,15 +6,15 @@ category: memberships
 audience: panel
 order: 40
 keywords: [tarifa, tarifas, precio, precios, importe, cuánto cuesta, cuota anual, coste, euros, moneda, por defecto, predeterminada, tarifa habitual, validez, válido desde, válido hasta, subir la cuota, cambiar el precio, estudiante, senior]
-related: [memberships.panel.overview, memberships.panel.memberships]
+related: [memberships.panel.overview, memberships.panel.memberships, memberships.panel.payments]
 conditions:
   permissions:
     all: ['memberships:fee_structures.view_any']
 ---
-Las tarifas recogen el importe de la cuota para cada tipo de socio y cada tipo de periodo: por ejemplo, la cuota de **Estudiante** en **Año natural**. Sirven de referencia para quien lleva las cuotas.
+Las tarifas recogen el importe de la cuota para cada tipo de socio y cada tipo de periodo: por ejemplo, la cuota de **Estudiante** en **Año natural**. Sirven de referencia para quien lleva las cuotas y proponen el importe de los pagos.
 
-> [!IMPORTANT]
-> Por ahora, el panel no aplica las tarifas a las cuotas: una cuota guarda su periodo y su estado, pero no su importe.
+> [!TIP]
+> Al añadir un pago en la pestaña **Pagos** de un socio, el importe se rellena con la tarifa **Por defecto** de su tipo de socio y del tipo de periodo de la cuota. Se puede cambiar, y no se prorratea.
 
 ## Ver las tarifas
 

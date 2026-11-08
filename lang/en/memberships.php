@@ -26,6 +26,10 @@ return [
             'singular' => 'Membership',
             'plural' => 'Memberships',
         ],
+        'fee' => [
+            'singular' => 'payment',
+            'plural' => 'payments',
+        ],
         'fee_structure' => [
             'singular' => 'Fee structure',
             'plural' => 'Fee structures',
@@ -72,6 +76,11 @@ return [
         'paid_at' => 'Paid at',
         'payment_method' => 'Payment method',
         'transaction_reference' => 'Transaction reference',
+        'membership' => 'Membership',
+        'membership_help' => 'The amount is filled in with the default fee for this member type and period, if there is one. You can change it.',
+        'is_paid' => 'Already paid',
+        'paid_on' => 'Payment date',
+        'payment_status' => 'Payment status',
         'valid_from' => 'Valid from',
         'valid_until' => 'Valid until',
         'valid_until_help' => 'Leave empty for indefinite validity',
@@ -155,6 +164,11 @@ return [
             'bank_transfer' => 'Bank transfer',
             'card' => 'Card',
             'other' => 'Other',
+        ],
+        'payment_status' => [
+            'paid' => 'Paid',
+            'pending' => 'Pending',
+            'overdue' => 'Overdue',
         ],
     ],
 
@@ -289,8 +303,17 @@ return [
         ],
         'fees' => [
             'title' => 'Payments',
-            'is_paid' => 'Paid',
+            'create' => 'New payment',
+            'edit' => 'Edit payment',
             'record_payment' => 'Record payment',
+            'payment_recorded' => 'Payment recorded',
+            'empty_state_description' => 'Add a payment to get started.',
+            'delete_confirmation_check' => 'I understand that the payment will be deleted and that this cannot be undone.',
+            'columns' => [
+                'due_date' => 'Due',
+                'payment_status' => 'Status',
+                'paid_at' => 'Paid on',
+            ],
         ],
     ],
 
@@ -320,6 +343,11 @@ return [
             'create' => 'Create fee structure',
             'update' => 'Edit fee structure',
             'delete' => 'Delete fee structure',
+        ],
+        'fees' => [
+            'view_any' => 'View member payments',
+            'manage' => 'Manage member payments',
+            'manage_help' => 'Create payments, record what is paid, edit and delete them in the Payments tab of the member.',
         ],
         'settings' => [
             'manage' => 'Manage the module settings',
