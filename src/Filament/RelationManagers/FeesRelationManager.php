@@ -136,7 +136,8 @@ class FeesRelationManager extends RelationManager
                 TextColumn::make('due_date')
                     ->label(__('memberships::memberships.relation_managers.fees.columns.due_date'))
                     ->date('d/m/Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('sm'),
 
                 TextColumn::make('payment_status')
                     ->label(__('memberships::memberships.relation_managers.fees.columns.payment_status'))

@@ -40,7 +40,7 @@ Cada tipo de socio y tipo de periodo tiene como mucho una tarifa **Por defecto**
 
 Para que se vea qué importe valía en cada momento, no cambies el importe de una tarifa antigua: pon su **Válido hasta** en el último día del precio viejo y crea otra con el precio nuevo desde el día siguiente. Si marcas la nueva como **Por defecto**, la antigua deja de serlo.
 
-Para editar una tarifa, pulsa **Editar** en su fila, cambia lo que necesites y pulsa **Guardar cambios** (permiso **Editar tarifa**). Para borrarla, pulsa **Borrar** y confirma (permiso **Eliminar tarifa**). Borrar una tarifa no cambia ninguna cuota.
+Para editar una tarifa, abre el menú **⋯** de su fila, pulsa **Editar**, cambia lo que necesites y pulsa **Guardar cambios** (permiso **Editar tarifa**). Para borrarla, pulsa **Borrar** en ese mismo menú y confirma (permiso **Eliminar tarifa**). Borrar una tarifa no cambia ninguna cuota.
 
 ## Si algo no sale bien
 

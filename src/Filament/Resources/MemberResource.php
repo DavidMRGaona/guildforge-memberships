@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Filament\Resources;
 
 use App\Filament\Resources\BaseResource;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -157,7 +158,8 @@ class MemberResource extends BaseResource
                 TextColumn::make('member_number')
                     ->label(__('memberships::memberships.fields.member_number'))
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('sm'),
 
                 TextColumn::make('full_name')
                     ->label(__('memberships::memberships.fields.full_name'))
@@ -168,13 +170,15 @@ class MemberResource extends BaseResource
                 TextColumn::make('email')
                     ->label(__('memberships::memberships.fields.email'))
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->visibleFrom('lg'),
 
                 TextColumn::make('member_type')
                     ->label(__('memberships::memberships.fields.member_type'))
                     ->badge()
                     ->formatStateUsing(fn (MemberType $state): string => $state->label())
-                    ->color(fn (MemberType $state): string => $state->color()),
+                    ->color(fn (MemberType $state): string => $state->color())
+                    ->visibleFrom('md'),
 
                 TextColumn::make('status')
                     ->label(__('memberships::memberships.fields.status'))
@@ -185,7 +189,8 @@ class MemberResource extends BaseResource
                 TextColumn::make('joined_at')
                     ->label(__('memberships::memberships.fields.joined_at'))
                     ->date('d/m/Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('2xl'),
 
                 TextColumn::make('created_at')
                     ->label(__('memberships::memberships.fields.created_at'))
@@ -213,10 +218,13 @@ class MemberResource extends BaseResource
                         MemberStatus::Expelled->value => __('memberships::memberships.enums.member_status.expelled'),
                     ]),
             ])
+            // One menu: three labelled actions made the table overflow its container
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

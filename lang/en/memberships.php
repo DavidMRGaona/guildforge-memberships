@@ -19,19 +19,19 @@ return [
 
     'model' => [
         'member' => [
-            'singular' => 'Member',
+            'singular' => 'member',
             'plural' => 'Members',
         ],
         'membership' => [
-            'singular' => 'Membership',
-            'plural' => 'Memberships',
+            'singular' => 'membership',
+            'plural' => 'memberships',
         ],
         'fee' => [
             'singular' => 'payment',
             'plural' => 'payments',
         ],
         'fee_structure' => [
-            'singular' => 'Fee structure',
+            'singular' => 'fee structure',
             'plural' => 'Fee structures',
         ],
     ],
@@ -178,6 +178,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'widgets' => [
+        'day_count' => '{1} :count day|[0,*] :count days',
         'stats' => [
             'total_members' => 'Total members',
             'total_members_description' => 'All registered members',

@@ -60,7 +60,7 @@ final class ExpiringMembershipsWidget extends BaseWidget
                         $state <= 14 => 'warning',
                         default => 'info',
                     })
-                    ->suffix(fn (int $state): string => $state === 1 ? ' día' : ' días'),
+                    ->formatStateUsing(fn (int $state): string => trans_choice('memberships::memberships.widgets.day_count', $state, ['count' => $state])),
             ])
             ->paginated([$this->getConfiguredLimit()])
             ->defaultPaginationPageOption($this->getConfiguredLimit());

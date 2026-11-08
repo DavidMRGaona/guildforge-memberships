@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Filament\RelationManagers;
 
 use Carbon\Carbon;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -140,7 +141,8 @@ class MembershipsRelationManager extends RelationManager
                     ->label(__('memberships::memberships.fields.period_type'))
                     ->badge()
                     ->formatStateUsing(fn (MembershipPeriodType $state): string => $state->label())
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('sm'),
 
                 TextColumn::make('start_date')
                     ->label(__('memberships::memberships.fields.start_date'))
@@ -150,7 +152,8 @@ class MembershipsRelationManager extends RelationManager
                 TextColumn::make('end_date')
                     ->label(__('memberships::memberships.fields.end_date'))
                     ->date('d/m/Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('sm'),
 
                 TextColumn::make('status')
                     ->label(__('memberships::memberships.fields.status'))
@@ -163,7 +166,8 @@ class MembershipsRelationManager extends RelationManager
                     ->label(__('memberships::memberships.fields.activated_at'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->visibleFrom('xl'),
             ])
             ->defaultSort('start_date', 'desc')
             ->emptyStateDescription(__('memberships::memberships.relation_managers.memberships.empty_state_description'))
@@ -172,10 +176,13 @@ class MembershipsRelationManager extends RelationManager
                     ->label(__('memberships::memberships.pages.create_membership'))
                     ->modalHeading(__('memberships::memberships.pages.create_membership')),
             ])
+            // One menu: two labelled actions made the table overflow its container
             ->recordActions([
-                EditAction::make()
-                    ->modalHeading(__('memberships::memberships.pages.edit_membership')),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make()
+                        ->modalHeading(__('memberships::memberships.pages.edit_membership')),
+                    DeleteAction::make(),
+                ]),
             ]);
     }
 }

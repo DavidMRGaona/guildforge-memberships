@@ -52,7 +52,8 @@ final class OverdueFeesWidget extends BaseWidget
                 TextColumn::make('due_date')
                     ->label(__('memberships::memberships.widgets.overdue_fees.due_date'))
                     ->date('d/m/Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('sm'),
 
                 TextColumn::make('days_overdue')
                     ->label(__('memberships::memberships.widgets.overdue_fees.days_overdue'))
@@ -63,7 +64,7 @@ final class OverdueFeesWidget extends BaseWidget
                         $state > 30 => 'warning',
                         default => 'gray',
                     })
-                    ->suffix(fn (int $state): string => $state === 1 ? ' día' : ' días'),
+                    ->formatStateUsing(fn (int $state): string => trans_choice('memberships::memberships.widgets.day_count', $state, ['count' => $state])),
             ])
             ->paginated([$this->getConfiguredLimit()])
             ->defaultPaginationPageOption($this->getConfiguredLimit());
