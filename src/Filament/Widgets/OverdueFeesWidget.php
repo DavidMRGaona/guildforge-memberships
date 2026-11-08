@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Filament\Widgets;
 
 use App\Application\Services\DashboardWidgetConfigServiceInterface;
+use App\Filament\Actions\RowDetailsAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -66,6 +67,7 @@ final class OverdueFeesWidget extends BaseWidget
                     })
                     ->formatStateUsing(fn (int $state): string => trans_choice('memberships::memberships.widgets.day_count', $state, ['count' => $state])),
             ])
+            ->recordActions([RowDetailsAction::makeIconButton()])
             ->paginated([$this->getConfiguredLimit()])
             ->defaultPaginationPageOption($this->getConfiguredLimit());
     }

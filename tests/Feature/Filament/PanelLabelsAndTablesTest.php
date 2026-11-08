@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Tests\Feature\Filament;
 
+use App\Filament\Actions\RowDetailsAction;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\Testing\TestAction;
@@ -11,6 +12,7 @@ use Filament\Tables\Contracts\HasTable;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Memberships\Filament\RelationManagers\FeesRelationManager;
 use Modules\Memberships\Filament\RelationManagers\MembershipsRelationManager;
 use Modules\Memberships\Filament\Resources\FeeStructureResource;
 use Modules\Memberships\Filament\Resources\FeeStructureResource\Pages\ListFeeStructures;
@@ -150,6 +152,48 @@ final class PanelLabelsAndTablesTest extends ModuleTestCase
 
         $this->assertCount(1, $actions);
         $this->assertInstanceOf(ActionGroup::class, $actions[0]);
+    }
+
+    /**
+     * «Ver detalles» (core#399): what the tables hide on narrow screens stays reachable.
+     */
+    #[DataProvider('listPages')]
+    public function test_list_menus_start_with_row_details(string $page): void
+    {
+        /** @var HasTable $component */
+        $component = Livewire::test($page)->instance();
+        $group = $component->getTable()->getRecordActions()[0];
+
+        $this->assertInstanceOf(ActionGroup::class, $group);
+        $this->assertSame(RowDetailsAction::NAME, array_key_first($group->getFlatActions()));
+        $this->assertNotNull($component->getTable()->getAction(RowDetailsAction::NAME));
+    }
+
+    public function test_relation_manager_menus_start_with_row_details(): void
+    {
+        $member = $this->member();
+
+        foreach ([MembershipsRelationManager::class, FeesRelationManager::class] as $manager) {
+            $tab = Livewire::test($manager, ['ownerRecord' => $member, 'pageClass' => EditMember::class])->instance();
+            $this->assertInstanceOf($manager, $tab);
+            $actions = $tab->getTable()->getRecordActions();
+            $group = end($actions);
+
+            $this->assertInstanceOf(ActionGroup::class, $group);
+            $this->assertSame(RowDetailsAction::NAME, array_key_first($group->getFlatActions()), $manager);
+        }
+    }
+
+    public function test_the_overdue_widget_has_the_row_details_icon_only(): void
+    {
+        $widget = Livewire::test(OverdueFeesWidget::class)->instance();
+        $this->assertInstanceOf(OverdueFeesWidget::class, $widget);
+        $actions = $widget->getTable()->getRecordActions();
+
+        $this->assertCount(1, $actions);
+        $this->assertInstanceOf(Action::class, $actions[0]);
+        $this->assertSame(RowDetailsAction::NAME, $actions[0]->getName());
+        $this->assertTrue($actions[0]->isIconButton());
     }
 
     /**

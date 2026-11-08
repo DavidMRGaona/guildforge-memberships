@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\RelationManagers;
 
+use App\Filament\Actions\RowDetailsAction;
 use Carbon\Carbon;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
@@ -190,6 +191,7 @@ class MembershipsRelationManager extends RelationManager
             // One menu: two labelled actions made the table overflow its container
             ->recordActions([
                 ActionGroup::make([
+                    RowDetailsAction::make(),
                     EditAction::make()
                         ->modalHeading(__('memberships::memberships.pages.edit_membership')),
                     DeleteAction::make(),

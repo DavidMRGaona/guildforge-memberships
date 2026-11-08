@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Resources;
 
+use App\Filament\Actions\RowDetailsAction;
 use App\Filament\Resources\BaseResource;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -247,6 +248,7 @@ class MemberResource extends BaseResource
             // One menu: three labelled actions made the table overflow its container
             ->recordActions([
                 ActionGroup::make([
+                    RowDetailsAction::make(),
                     ViewAction::make()
                         ->hidden(fn (MemberModel $record): bool => $record->trashed()),
                     // A deleted member opens read-only: its memberships and payments stay readable
