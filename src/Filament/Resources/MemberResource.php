@@ -10,6 +10,8 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -20,7 +22,10 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Modules\Memberships\Domain\Enums\MemberStatus;
 use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Filament\Resources\MemberResource\Pages\CreateMember;
@@ -56,9 +61,27 @@ class MemberResource extends BaseResource
         return __('memberships::memberships.model.member.plural');
     }
 
+    /**
+     * Deleted members stay reachable (list filter, read-only record page) so they can be restored.
+     *
+     * @return Builder<MemberModel>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        /** @var Builder<MemberModel> $query */
+        $query = parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+
+        return $query;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
+            // A deleted member can be read, not changed: restore it first
+            ->disabled(fn (?MemberModel $record): bool => $record?->trashed() ?? false)
             ->components([
                 Section::make(__('memberships::memberships.sections.personal_data'))
                     ->schema([
@@ -217,18 +240,29 @@ class MemberResource extends BaseResource
                         MemberStatus::Suspended->value => __('memberships::memberships.enums.member_status.suspended'),
                         MemberStatus::Expelled->value => __('memberships::memberships.enums.member_status.expelled'),
                     ]),
+
+                TrashedFilter::make()
+                    ->label(__('memberships::memberships.filters.trashed')),
             ])
             // One menu: three labelled actions made the table overflow its container
             ->recordActions([
                 ActionGroup::make([
-                    ViewAction::make(),
-                    EditAction::make(),
+                    ViewAction::make()
+                        ->hidden(fn (MemberModel $record): bool => $record->trashed()),
+                    // A deleted member opens read-only: its memberships and payments stay readable
+                    EditAction::make()
+                        ->label(fn (MemberModel $record): ?string => $record->trashed()
+                            ? (string) __('memberships::memberships.actions.view_deleted')
+                            : null)
+                        ->icon(fn (MemberModel $record): ?string => $record->trashed() ? 'heroicon-m-eye' : null),
                     DeleteAction::make(),
+                    RestoreAction::make(),
                 ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ])
             ->defaultSort('joined_at', 'desc');

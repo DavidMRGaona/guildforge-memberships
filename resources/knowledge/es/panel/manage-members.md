@@ -49,10 +49,19 @@ Cambiar el **Estado** o el **Tipo de socio** también revisa el rol de socio: **
 
 Pulsa **Borrar** en el menú **⋯** de su fila o dentro de la ficha, y confirma. Desde la lista también puedes borrar varios a la vez.
 
-> [!WARNING]
-> Un socio borrado desaparece del panel y no se puede recuperar desde aquí. Si solo deja la asociación, pon su ficha en **Inactivo** en lugar de borrarla: así conservas su historial de cuotas.
+> [!TIP]
+> Borrar un socio no pierde su historial: sus cuotas y pagos se conservan y vuelven con él si lo restauras. Si solo deja la asociación, también puedes poner su ficha en **Inactivo** en lugar de borrarla.
 
 Al borrarlo, si estaba vinculado a una cuenta, se le retira el rol de socio salvo que otra ficha suya lo siga cumpliendo.
+
+## Restaurar un socio borrado
+
+Hace falta el mismo permiso que para borrar.
+
+1. En la lista de socios, abre los filtros y en **Borrados** elige **Solo registros eliminados** para ver únicamente los borrados, o **Con registros eliminados** para verlos junto al resto.
+2. Abre el menú **⋯** de su fila y pulsa **Restaurar**. También puedes marcar varios y restaurarlos a la vez.
+
+El socio vuelve a la lista con sus datos, cuotas y pagos tal como estaban, y recupera el rol de socio si su ficha lo cumple. **Ver ficha** abre un socio borrado solo para consultarlo, con sus cuotas y pagos; hasta que lo restaures no se puede editar ni registrar pagos.
 
 ## Si algo no sale bien
 

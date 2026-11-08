@@ -50,6 +50,16 @@ class FeesRelationManager extends RelationManager
 
     private const string OVERDUE = 'overdue';
 
+    /**
+     * The memberships and payments of a deleted member can be read, not changed.
+     */
+    public function isReadOnly(): bool
+    {
+        $member = $this->getOwnerRecord();
+
+        return ($member instanceof MemberModel && $member->trashed()) || parent::isReadOnly();
+    }
+
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('memberships::memberships.relation_managers.fees.title');
@@ -185,7 +195,7 @@ class FeesRelationManager extends RelationManager
                     ->button()
                     ->labeledFrom('md')
                     ->color('success')
-                    ->visible(fn (MembershipFeeModel $record): bool => $record->paid_at === null)
+                    ->visible(fn (MembershipFeeModel $record): bool => $record->paid_at === null && ! $this->isReadOnly())
                     ->authorize('update')
                     ->modalHeading(__('memberships::memberships.relation_managers.fees.record_payment'))
                     ->schema($this->paymentFields())

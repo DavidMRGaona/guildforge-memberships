@@ -118,6 +118,11 @@ return [
         'member_type' => 'Member type',
         'status' => 'Status',
         'period_type' => 'Period type',
+        'trashed' => 'Deleted',
+    ],
+
+    'actions' => [
+        'view_deleted' => 'View record',
     ],
 
     /*
