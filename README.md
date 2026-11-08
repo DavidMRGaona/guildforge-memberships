@@ -7,7 +7,8 @@ Módulo para GuildForge que gestiona los socios de la asociación, sus cuotas (p
 - **Socios**: alta, edición y baja con datos personales, de contacto, tipo, estado y usuario vinculado.
 - **Número de socio**: se genera al crear el socio, con el formato `YYYY-NNNN`.
 - **Cuotas**: periodos con fecha de inicio y fin y estado (pendiente, activa, expirada, cancelada). La fecha de fin se calcula a partir del tipo de periodo.
-- **Tarifas**: importe por tipo de socio y tipo de periodo, con fechas de validez y una sola tarifa por defecto para cada combinación (marcar otra le quita la marca a la anterior). Son de referencia: las cuotas no guardan importe.
+- **Pagos**: lo que cada socio tiene que abonar por sus cuotas (importe y vencimiento) y su cobro (fecha, método y referencia). Pagado, pendiente o vencido desde el día siguiente al vencimiento.
+- **Tarifas**: importe por tipo de socio y tipo de periodo, con fechas de validez y una sola tarifa por defecto para cada combinación (marcar otra le quita la marca a la anterior). Proponen el importe de los pagos, sin prorrateo.
 - **Expiración diaria**: un comando programado marca las cuotas caducadas, avisa por correo de las que están a punto de caducar y detecta pagos vencidos.
 - **Rol de socio** (opcional): asigna el rol de socio del core al usuario vinculado mientras su ficha está activa y tiene una cuota activa o es de un tipo permanente.
 - **Socios permanentes**: los tipos marcados (honorario por defecto) no necesitan cuota y quedan fuera de los avisos de caducidad y de las cuotas vencidas.
@@ -136,7 +137,7 @@ Cambiar el rol de socio en el core no retira el anterior a quien ya lo tenía, y
 
 En el grupo **Gestión de socios**:
 
-- **Socios**: listado y ficha del socio; en la ficha, la pestaña **Cuotas** permite crear, editar y borrar sus cuotas.
+- **Socios**: listado y ficha del socio; en la ficha, la pestaña **Cuotas** permite crear, editar y borrar sus cuotas, y la pestaña **Pagos** añadir pagos, registrar cobros, corregirlos y borrarlos (con doble confirmación).
 - **Tarifas**: importe por tipo de socio y periodo.
 
 El panel no tiene todavía pantallas para registrar pagos.
@@ -165,6 +166,8 @@ Los permisos llevan el prefijo `memberships:` y se asignan a los roles en el edi
 | `fee_structures.create` | Crear tarifa | — |
 | `fee_structures.update` | Editar tarifa | — |
 | `fee_structures.delete` | Eliminar tarifa | — |
+| `fees.view_any` | Ver los pagos de los socios (pestaña **Pagos**) | — |
+| `fees.manage` | Gestionar los pagos: añadirlos, registrar cobros, corregirlos y borrarlos | — |
 | `settings.manage` | Gestionar la configuración del módulo. Incluye la asignación automática del rol de socio y los tipos permanentes, así que decide quién recibe el rol de socio | — |
 
 ## Eventos

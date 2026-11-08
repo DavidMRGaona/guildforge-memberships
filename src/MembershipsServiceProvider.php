@@ -29,6 +29,7 @@ use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
 use Modules\Memberships\Filament\Pages\MembershipSettings;
+use Modules\Memberships\Filament\RelationManagers\FeesRelationManager;
 use Modules\Memberships\Filament\RelationManagers\MembershipsRelationManager;
 use Modules\Memberships\Filament\Resources\FeeStructureResource;
 use Modules\Memberships\Filament\Resources\MemberResource;
@@ -38,6 +39,7 @@ use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
 use Modules\Memberships\Infrastructure\Knowledge\HasMemberRecordCapability;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipFeeModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\FeeStructureModelObserver;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers\MemberModelObserver;
@@ -55,6 +57,7 @@ use Modules\Memberships\Listeners\NotifyMembershipExpired;
 use Modules\Memberships\Listeners\NotifyMembershipExpiring;
 use Modules\Memberships\Policies\FeeStructurePolicy;
 use Modules\Memberships\Policies\MemberPolicy;
+use Modules\Memberships\Policies\MembershipFeePolicy;
 
 final class MembershipsServiceProvider extends ModuleServiceProvider
 {
@@ -104,6 +107,10 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         Livewire::component(
             'modules.memberships.filament.relation-managers.memberships-relation-manager',
             MembershipsRelationManager::class
+        );
+        Livewire::component(
+            'modules.memberships.filament.relation-managers.fees-relation-manager',
+            FeesRelationManager::class
         );
     }
 
@@ -213,6 +220,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         return [
             MemberModel::class => MemberPolicy::class,
             FeeStructureModel::class => FeeStructurePolicy::class,
+            MembershipFeeModel::class => MembershipFeePolicy::class,
         ];
     }
 
@@ -311,6 +319,22 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
                 name: 'fee_structures.delete',
                 label: __('memberships::memberships.permissions.fee_structures.delete'),
                 group: __('memberships::memberships.navigation.fee_structures'),
+                module: 'memberships',
+                roles: [],
+            ),
+            // Payment permissions: seeing them is not handling the money
+            new PermissionDTO(
+                name: 'fees.view_any',
+                label: __('memberships::memberships.permissions.fees.view_any'),
+                group: __('memberships::memberships.navigation.members'),
+                module: 'memberships',
+                roles: [],
+            ),
+            new PermissionDTO(
+                name: 'fees.manage',
+                label: __('memberships::memberships.permissions.fees.manage'),
+                group: __('memberships::memberships.navigation.members'),
+                description: __('memberships::memberships.permissions.fees.manage_help'),
                 module: 'memberships',
                 roles: [],
             ),

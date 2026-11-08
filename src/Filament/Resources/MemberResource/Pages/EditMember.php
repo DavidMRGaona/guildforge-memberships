@@ -7,6 +7,7 @@ namespace Modules\Memberships\Filament\Resources\MemberResource\Pages;
 use App\Filament\Concerns\HasKnowledgeGuideAction;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Modules\Memberships\Filament\RelationManagers\FeesRelationManager;
 use Modules\Memberships\Filament\RelationManagers\MembershipsRelationManager;
 use Modules\Memberships\Filament\Resources\MemberResource;
 
@@ -43,6 +44,7 @@ class EditMember extends EditRecord
     {
         return [
             MembershipsRelationManager::class,
+            FeesRelationManager::class,
         ];
     }
 

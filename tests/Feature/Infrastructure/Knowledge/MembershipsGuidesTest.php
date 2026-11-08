@@ -47,6 +47,7 @@ final class MembershipsGuidesTest extends ModuleTestCase
         'memberships.panel.member-role',
         'memberships.panel.memberships',
         'memberships.panel.overview',
+        'memberships.panel.payments',
         'memberships.panel.settings',
     ];
 
@@ -94,6 +95,10 @@ final class MembershipsGuidesTest extends ModuleTestCase
         $this->assertSame(
             ['memberships.panel.fee-structures', 'memberships.panel.overview'],
             $this->visibleGuides($this->userWith('memberships:fee_structures.view_any'), GuideAudience::Panel),
+        );
+        $this->assertSame(
+            ['memberships.panel.payments'],
+            $this->visibleGuides($this->userWith('memberships:fees.view_any'), GuideAudience::Panel),
         );
         $this->assertSame(
             ['memberships.panel.expiry-and-notices', 'memberships.panel.member-role', 'memberships.panel.overview', 'memberships.panel.settings'],

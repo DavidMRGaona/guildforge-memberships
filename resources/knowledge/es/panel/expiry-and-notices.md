@@ -6,7 +6,7 @@ category: memberships
 audience: panel
 order: 50
 keywords: [caducidad, caducar, caduca, expirar, expirada, vencer, vencida, aviso, avisos, correo, correos, email, recordatorio, notificación, impago, cuota atrasada, pago pendiente, pagos pendientes, escritorio, widget, resumen, próximas a expirar, vencidas sin pagar, renovaciones, cada noche]
-related: [memberships.panel.memberships, memberships.panel.settings, memberships.panel.overview, core.panel.dashboard-settings]
+related: [memberships.panel.memberships, memberships.panel.payments, memberships.panel.settings, memberships.panel.overview, core.panel.dashboard-settings]
 conditions:
   permissions:
     any: ['memberships:members.view_any', 'memberships:settings.manage']
@@ -41,8 +41,7 @@ Quien tiene **Ver listado de socios** ve en el escritorio:
 
 Las dos tablas no incluyen a los socios permanentes. Se activan, se ordenan y se limitan en la configuración del escritorio.
 
-> [!IMPORTANT]
-> El panel todavía no tiene pantallas para registrar pagos, así que **Pagos pendientes** y **Cuotas vencidas sin pagar** solo muestran pagos que se hayan registrado por otra vía.
+Los pagos se añaden y se cobran en la pestaña **Pagos** de la ficha de cada socio.
 
 ## Si algo no sale bien
 

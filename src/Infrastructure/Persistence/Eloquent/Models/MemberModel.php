@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Modules\Memberships\Application\Services\MemberNumberGeneratorInterface;
@@ -100,6 +101,16 @@ final class MemberModel extends Model
     public function memberships(): HasMany
     {
         return $this->hasMany(MembershipModel::class, 'member_id');
+    }
+
+    /**
+     * The fees of all the member's memberships.
+     *
+     * @return HasManyThrough<MembershipFeeModel, MembershipModel, $this>
+     */
+    public function fees(): HasManyThrough
+    {
+        return $this->hasManyThrough(MembershipFeeModel::class, MembershipModel::class, 'member_id', 'membership_id');
     }
 
     /**
