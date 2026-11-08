@@ -8,6 +8,7 @@ use App\Application\Modules\Services\ModuleContextServiceInterface;
 use App\Application\Modules\Services\ModuleManagerServiceInterface;
 use App\Application\Modules\Services\ModuleSettingsStoreInterface;
 use App\Domain\Modules\ValueObjects\ModuleName;
+use App\Filament\Clusters\SettingsCluster;
 use App\Filament\Concerns\ChecksPermissions;
 use App\Filament\Concerns\HasKnowledgeGuideAction;
 use App\Filament\Concerns\SafeModuleNavigation;
@@ -37,7 +38,9 @@ final class MembershipSettings extends Page implements HasForms
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static ?int $navigationSort = 99;
+    protected static ?string $cluster = SettingsCluster::class;
+
+    protected static ?int $navigationSort = 170;
 
     protected string $view = 'filament.pages.simple-settings';
 
@@ -45,11 +48,6 @@ final class MembershipSettings extends Page implements HasForms
      * @var array<string, mixed>
      */
     public ?array $data = [];
-
-    public static function getNavigationGroup(): string
-    {
-        return __('memberships::memberships.navigation_group');
-    }
 
     public static function getNavigationLabel(): string
     {

@@ -67,7 +67,7 @@ Ninguno de estos permisos se concede solo, tampoco al rol de edición: se dan a 
 
 ## Dónde está cada cosa
 
-- En el menú lateral, el grupo **Gestión de socios** tiene **Socios**, **Tarifas** y **Configuración**.
+- En el menú lateral, el grupo **Personas** tiene **Socios**; **Tarifas** aparece debajo de **Socios**. Los ajustes están en **Sistema** → **Configuración** → **Socios**.
 - Dentro de un socio, las pestañas **Datos del socio**, **Cuotas** y **Pagos**.
 - En el escritorio, los resúmenes **Total de socios**, **Socios activos**, **Con cuota activa** y **Pagos pendientes**, y las tablas **Cuotas próximas a expirar** y **Cuotas vencidas sin pagar**.
 

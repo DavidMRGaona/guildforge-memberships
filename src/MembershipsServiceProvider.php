@@ -7,6 +7,7 @@ namespace Modules\Memberships;
 use App\Application\Knowledge\Contracts\KnowledgeCapabilityInterface;
 use App\Application\Modules\DTOs\NavigationItemDTO;
 use App\Application\Modules\DTOs\PermissionDTO;
+use App\Filament\Support\PanelNavigationGroup;
 use App\Modules\ModuleServiceProvider;
 use Filament\Pages\Page;
 use Filament\Resources\Resource as FilamentResource;
@@ -237,17 +238,13 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     }
 
     /**
-     * Register navigation groups provided by this module.
+     * The sidebar groups belong to the core (PanelNavigationGroup): the module declares none.
      *
      * @return array<string, array{icon?: string, sort?: int}>
      */
     public function registerNavigationGroups(): array
     {
-        return [
-            __('memberships::memberships.navigation_group') => [
-                'sort' => 15, // After 'Contenido' (10), before 'Comunicación' (20)
-            ],
-        ];
+        return [];
     }
 
     /**
@@ -342,7 +339,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
             new PermissionDTO(
                 name: 'settings.manage',
                 label: __('memberships::memberships.permissions.settings.manage'),
-                group: __('memberships::memberships.navigation.settings'),
+                group: __('memberships::memberships.permissions.settings.group'),
                 description: __('memberships::memberships.permissions.settings.manage_help'),
                 module: 'memberships',
                 roles: [],
@@ -360,8 +357,8 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
                 label: __('memberships::memberships.navigation.members'),
                 route: 'filament.admin.resources.members.index',
                 icon: 'heroicon-o-user-group',
-                group: __('memberships::memberships.navigation_group'),
-                sort: 1,
+                group: PanelNavigationGroup::People->getLabel(),
+                sort: 30,
                 permissions: ['memberships:members.view_any'],
                 module: 'memberships',
             ),
@@ -369,8 +366,8 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
                 label: __('memberships::memberships.navigation.fee_structures'),
                 route: 'filament.admin.resources.fee-structures.index',
                 icon: 'heroicon-o-currency-euro',
-                group: __('memberships::memberships.navigation_group'),
-                sort: 2,
+                group: PanelNavigationGroup::People->getLabel(),
+                sort: 31,
                 permissions: ['memberships:fee_structures.view_any'],
                 module: 'memberships',
             ),

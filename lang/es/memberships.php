@@ -8,13 +8,11 @@ return [
     | Navigation & UI Labels
     |--------------------------------------------------------------------------
     */
-    'navigation_group' => 'Gestión de socios',
-
     'navigation' => [
         'members' => 'Socios',
         'memberships' => 'Cuotas',
         'fee_structures' => 'Tarifas',
-        'settings' => 'Configuración',
+        'settings' => 'Socios',
     ],
 
     'model' => [
@@ -356,6 +354,7 @@ return [
             'manage_help' => 'Crear pagos, registrar cobros, editarlos y borrarlos en la pestaña Pagos de la ficha del socio.',
         ],
         'settings' => [
+            'group' => 'Configuración',
             'manage' => 'Gestionar la configuración del módulo',
             'manage_help' => 'Incluye la asignación automática del rol de socio y los tipos de socio permanentes: decide quién recibe el rol de socio.',
         ],

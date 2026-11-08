@@ -15,7 +15,7 @@ El rol {{association_role}} es el que distingue en la web a quien es de la asoci
 
 ## Activarlo
 
-1. En el menú lateral, abre **Gestión de socios** y elige **Configuración**.
+1. En el menú lateral, abre **Sistema**, elige **Configuración** y después **Socios**.
 2. En **Integración con roles**, activa **Asignar rol automáticamente**.
 3. Revisa **Tipos de socio permanentes**: los tipos marcados no necesitan cuota.
 4. Pulsa **Guardar**.
@@ -57,4 +57,4 @@ El cambio de rol vale al momento.
 - **Nadie recibe el rol**: comprueba que **Asignar rol automáticamente** está activado y que el **Rol de socio** de la configuración del sitio existe. Si no se puede usar, el módulo no cambia ningún rol.
 - **Una cuenta no recibe el rol**: comprueba que su ficha está en **Activo**, que está vinculada a esa cuenta y que tiene una cuota **Activa** (una **Pendiente** no cuenta).
 
-[[action:filament.admin.pages.membership-settings|Abrir la configuración de socios]]
+[[action:filament.admin.configuracion.pages.membership-settings|Abrir la configuración de socios]]

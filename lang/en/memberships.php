@@ -8,13 +8,11 @@ return [
     | Navigation & UI Labels
     |--------------------------------------------------------------------------
     */
-    'navigation_group' => 'Member management',
-
     'navigation' => [
         'members' => 'Members',
         'memberships' => 'Memberships',
         'fee_structures' => 'Fee structures',
-        'settings' => 'Settings',
+        'settings' => 'Members',
     ],
 
     'model' => [
@@ -356,6 +354,7 @@ return [
             'manage_help' => 'Create payments, record what is paid, edit and delete them in the Payments tab of the member.',
         ],
         'settings' => [
+            'group' => 'Settings',
             'manage' => 'Manage the module settings',
             'manage_help' => 'Includes the automatic association member role and the permanent member types: it decides who gets the association member role.',
         ],
