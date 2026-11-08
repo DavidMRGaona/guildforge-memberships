@@ -118,6 +118,11 @@ return [
         'member_type' => 'Tipo de socio',
         'status' => 'Estado',
         'period_type' => 'Tipo de periodo',
+        'trashed' => 'Borrados',
+    ],
+
+    'actions' => [
+        'view_deleted' => 'Ver ficha',
     ],
 
     /*

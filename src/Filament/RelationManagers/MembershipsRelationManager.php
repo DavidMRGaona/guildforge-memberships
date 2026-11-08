@@ -21,11 +21,22 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Memberships\Domain\Enums\MembershipPeriodType;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
+use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 class MembershipsRelationManager extends RelationManager
 {
     protected static string $relationship = 'memberships';
+
+    /**
+     * The memberships and payments of a deleted member can be read, not changed.
+     */
+    public function isReadOnly(): bool
+    {
+        $member = $this->getOwnerRecord();
+
+        return ($member instanceof MemberModel && $member->trashed()) || parent::isReadOnly();
+    }
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
