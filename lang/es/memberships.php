@@ -19,19 +19,19 @@ return [
 
     'model' => [
         'member' => [
-            'singular' => 'Socio',
+            'singular' => 'socio',
             'plural' => 'Socios',
         ],
         'membership' => [
-            'singular' => 'Cuota',
-            'plural' => 'Cuotas',
+            'singular' => 'cuota',
+            'plural' => 'cuotas',
         ],
         'fee' => [
             'singular' => 'pago',
             'plural' => 'pagos',
         ],
         'fee_structure' => [
-            'singular' => 'Tarifa',
+            'singular' => 'tarifa',
             'plural' => 'Tarifas',
         ],
     ],
@@ -178,6 +178,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'widgets' => [
+        'day_count' => '{1} :count día|[0,*] :count días',
         'stats' => [
             'total_members' => 'Total de socios',
             'total_members_description' => 'Todos los socios registrados',

@@ -16,7 +16,7 @@ Una cuota es un periodo de pertenencia de un socio. Cada socio tiene las suyas e
 ## Crear una cuota
 
 1. En el menú lateral, abre **Gestión de socios** y elige **Socios**.
-2. Pulsa **Editar** en la fila del socio y abre la pestaña **Cuotas**.
+2. Abre el menú **⋯** de la fila del socio, pulsa **Editar** y abre la pestaña **Cuotas**.
 3. Pulsa **Crear cuota**.
 4. Elige el **Tipo de periodo**. Empieza en el que diga la configuración del módulo.
 5. Elige la **Fecha de inicio**. La **Fecha de fin** se rellena sola según el tipo de periodo. Puedes cambiarla después, siempre que sea posterior a la de inicio.
@@ -38,7 +38,7 @@ La cuota vale hasta el final de su último día.
 
 Una cuota **Pendiente** no cuenta: no da el rol de socio ni sale en los avisos de caducidad. Cuando corresponda, por ejemplo al recibir el pago:
 
-1. En la pestaña **Cuotas**, pulsa **Editar** en su fila.
+1. En la pestaña **Cuotas**, abre el menú **⋯** de su fila y pulsa **Editar**.
 2. Cambia el **Estado** a **Activa**.
 3. Pulsa **Guardar cambios**.
 
@@ -54,7 +54,7 @@ Crea la cuota del periodo siguiente, con la **Fecha de inicio** del día despué
 ## Cancelar o borrar una cuota
 
 - **Cancelar**: edita la cuota y cambia el **Estado** a **Cancelada**. La cuota queda en el historial del socio.
-- **Borrar**: pulsa **Borrar** en su fila y confirma. La cuota desaparece. No se puede deshacer.
+- **Borrar**: abre el menú **⋯** de su fila, pulsa **Borrar** y confirma. La cuota desaparece. No se puede deshacer.
 
 En los dos casos, si era la cuota activa, se revisa el rol de socio de la cuenta vinculada. Poner una cuota en **Expirada** a mano tiene el mismo efecto que su caducidad: puede enviar el correo de cuota expirada.
 

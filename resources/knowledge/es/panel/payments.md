@@ -26,7 +26,7 @@ Para ver la pestaña necesitas el permiso **Ver los pagos de los socios**. Para 
 ## Añadir un pago
 
 1. En el menú lateral, abre **Gestión de socios** y elige **Socios**.
-2. Pulsa **Editar** en la fila del socio y abre la pestaña **Pagos**.
+2. Abre el menú **⋯** de la fila del socio, pulsa **Editar** y abre la pestaña **Pagos**.
 3. Pulsa **Nuevo pago**.
 4. Elige la **Cuota**. Si hay una tarifa **Por defecto** para el tipo de socio y el tipo de periodo de esa cuota, el **Importe** y la **Moneda** se rellenan con ella. Puedes cambiarlos, por ejemplo si cobras solo una parte del año.
 5. Elige la **Fecha de vencimiento**. Empieza en hoy.

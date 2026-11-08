@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Filament\Resources;
 
 use App\Filament\Resources\BaseResource;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -151,7 +152,8 @@ class FeeStructureResource extends BaseResource
                     ->label(__('memberships::memberships.fields.period_type'))
                     ->badge()
                     ->formatStateUsing(fn (MembershipPeriodType $state): string => $state->label())
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('lg'),
 
                 TextColumn::make('amount')
                     ->label(__('memberships::memberships.fields.amount'))
@@ -161,18 +163,21 @@ class FeeStructureResource extends BaseResource
                 TextColumn::make('valid_from')
                     ->label(__('memberships::memberships.fields.valid_from'))
                     ->date('d/m/Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('md'),
 
                 TextColumn::make('valid_until')
                     ->label(__('memberships::memberships.fields.valid_until'))
                     ->date('d/m/Y')
                     ->sortable()
-                    ->placeholder(__('memberships::memberships.status.indefinite')),
+                    ->placeholder(__('memberships::memberships.status.indefinite'))
+                    ->visibleFrom('2xl'),
 
                 IconColumn::make('is_default')
                     ->label(__('memberships::memberships.fields.is_default'))
                     ->boolean()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('sm'),
 
                 TextColumn::make('created_at')
                     ->label(__('memberships::memberships.fields.created_at'))
@@ -199,9 +204,12 @@ class FeeStructureResource extends BaseResource
                         MembershipPeriodType::Rolling->value => __('memberships::memberships.enums.membership_period_type.rolling'),
                     ]),
             ])
+            // One menu: two labelled actions made the table overflow its container
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

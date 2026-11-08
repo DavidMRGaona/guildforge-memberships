@@ -39,7 +39,7 @@ Al cambiar o quitar la cuenta vinculada, se revisa el rol de la cuenta anterior 
 
 ## Editar un socio
 
-1. En la lista de socios, pulsa **Editar** en su fila. Puedes buscarlo por número, nombre o email, y filtrar por **Tipo de socio** o **Estado**.
+1. En la lista de socios, abre el menú **⋯** de su fila y pulsa **Editar**. Puedes buscarlo por número, nombre o email, y filtrar por **Tipo de socio** o **Estado**.
 2. En la pestaña **Datos del socio**, cambia lo que necesites.
 3. Pulsa **Guardar cambios**.
 
@@ -47,7 +47,7 @@ Cambiar el **Estado** o el **Tipo de socio** también revisa el rol de socio: **
 
 ## Borrar un socio
 
-Pulsa **Borrar** en su fila o dentro de la ficha, y confirma. Desde la lista también puedes borrar varios a la vez.
+Pulsa **Borrar** en el menú **⋯** de su fila o dentro de la ficha, y confirma. Desde la lista también puedes borrar varios a la vez.
 
 > [!WARNING]
 > Un socio borrado desaparece del panel y no se puede recuperar desde aquí. Si solo deja la asociación, pon su ficha en **Inactivo** en lugar de borrarla: así conservas su historial de cuotas.
