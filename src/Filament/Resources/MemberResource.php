@@ -196,7 +196,8 @@ class MemberResource extends BaseResource
                     ->label(__('memberships::memberships.fields.email'))
                     ->searchable()
                     ->toggleable()
-                    ->visibleFrom('lg'),
+                    // At lg the fixed sidebar leaves no more room than at md
+                    ->visibleFrom('xl'),
 
                 TextColumn::make('member_type')
                     ->label(__('memberships::memberships.fields.member_type'))
