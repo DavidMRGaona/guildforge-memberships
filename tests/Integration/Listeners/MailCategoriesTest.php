@@ -125,6 +125,21 @@ final class MailCategoriesTest extends ModuleTestCase
         );
     }
 
+    public function test_the_section_names_the_persons_own_membership_not_the_administration(): void
+    {
+        $service = $this->app->make(MailPreferenceServiceInterface::class);
+        $user = UserModel::factory()->create();
+        $this->member($user->id);
+
+        $labels = array_map(
+            static fn (MailPreferenceSectionDTO $section): string => $section->label,
+            $service->sectionsFor($user),
+        );
+
+        $this->assertContains('Tu membresía', $labels);
+        $this->assertNotContains('Gestión de socios', $labels);
+    }
+
     /**
      * @param  list<MailPreferenceSectionDTO>  $sections
      * @return list<string>

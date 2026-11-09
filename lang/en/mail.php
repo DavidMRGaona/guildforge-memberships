@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'categories' => [
-        'section' => 'Membership management',
+        'section' => 'Your membership',
         'expiry_notices' => [
             'label' => 'Notices before your membership expires',
             'description' => 'We warn you a few days before your fee ends so you can renew it.',
