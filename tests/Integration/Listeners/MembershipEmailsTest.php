@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Tests\Integration\Listeners;
 
+use App\Application\Services\TimezoneServiceInterface;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Notification;
@@ -14,11 +16,13 @@ use Modules\Memberships\Console\Commands\ProcessExpiredMemberships;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipFeeModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 use Modules\Memberships\Notifications\MembershipExpiredNotification;
 use Modules\Memberships\Notifications\MembershipExpiringNotification;
 use Modules\Memberships\Notifications\PaymentOverdueNotification;
 use Tests\Support\Modules\ModuleTestCase;
+use Tests\Support\Time\UsesUtcStorage;
 
 /**
  * Expired-membership and overdue-fee emails exist but stay off until an admin turns
@@ -26,6 +30,8 @@ use Tests\Support\Modules\ModuleTestCase;
  */
 final class MembershipEmailsTest extends ModuleTestCase
 {
+    use UsesUtcStorage;
+
     protected ?string $moduleName = 'memberships';
 
     protected bool $autoEnableModule = true;
@@ -153,11 +159,24 @@ final class MembershipEmailsTest extends ModuleTestCase
 
         $this->processExpired();
 
-        Notification::assertSentTo($this->user, PaymentOverdueNotification::class, function (PaymentOverdueNotification $n): bool {
-            $text = implode(' ', $n->toMail($this->user)->introLines);
+        $this->assertOverdueNoticeSays('25,00 €', '10 días');
+    }
 
-            return str_contains($text, '25,00 €') && str_contains($text, '10 días');
-        });
+    /**
+     * Right after midnight in the display zone, UTC is still on the day before: a due date
+     * taken from the storage day made the notice read «11 días» (seen as a random failure).
+     */
+    public function test_overdue_delay_counts_display_days_right_after_midnight(): void
+    {
+        $this->useUtcStorage();
+        $displayZone = app(TimezoneServiceInterface::class)->displayTimezone();
+        $this->travelTo(CarbonImmutable::parse('2026-03-11 00:30:00', $displayZone));
+        config()->set('modules.settings.memberships.send_overdue_email', true);
+        $this->fee($this->membership('active'), dueDaysAgo: 10, amount: '25.00');
+
+        $this->processExpired();
+
+        $this->assertOverdueNoticeSays('25,00 €', '10 días');
     }
 
     public function test_paid_fee_is_never_reported(): void
@@ -223,9 +242,24 @@ final class MembershipEmailsTest extends ModuleTestCase
             'membership_id' => $membership->id,
             'amount' => $amount,
             'currency' => 'EUR',
-            'due_date' => now()->subDays($dueDaysAgo)->startOfDay(),
+            // A calendar day, counted back from today in the display zone as the listener does
+            'due_date' => CalendarDate::today()->modify("-{$dueDaysAgo} days")->format('Y-m-d'),
             'paid_at' => $paid ? now()->subDays($dueDaysAgo + 1) : null,
         ]);
+    }
+
+    private function assertOverdueNoticeSays(string ...$fragments): void
+    {
+        $intro = null;
+        Notification::assertSentTo($this->user, PaymentOverdueNotification::class, function (PaymentOverdueNotification $n) use (&$intro): bool {
+            $intro = implode(' ', $n->toMail($this->user)->introLines);
+
+            return true;
+        });
+
+        foreach ($fragments as $fragment) {
+            $this->assertStringContainsString($fragment, (string) $intro);
+        }
     }
 
     private function processExpired(): void
