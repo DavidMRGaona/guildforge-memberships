@@ -75,6 +75,7 @@ final class MailCategoriesTest extends ModuleTestCase
     public function test_an_optional_category_turned_off_is_not_sent(): void
     {
         $user = UserModel::factory()->create();
+        $this->member($user->id);
         $this->app->make(MailPreferenceServiceInterface::class)
             ->update($user, [MembershipsServiceProvider::MAIL_EXPIRY_NOTICES => false]);
         $before = $this->sentCount();
@@ -97,6 +98,7 @@ final class MailCategoriesTest extends ModuleTestCase
     public function test_the_mandatory_category_is_sent_even_with_everything_optional_off(): void
     {
         $user = UserModel::factory()->create();
+        $this->member($user->id);
         $this->app->make(MailPreferenceServiceInterface::class)
             ->update($user, [MembershipsServiceProvider::MAIL_EXPIRY_NOTICES => false]);
         $date = new DateTimeImmutable('2026-12-31');
