@@ -37,7 +37,7 @@ Cambiar estos campos no toca las cuotas que ya existen.
 
 ## Notificaciones
 
-- **Días de aviso antes de expiración**: cuántos días antes del fin de una cuota activa se envía el correo «Tu membresía está a punto de expirar», de 0 a 365 (30 por defecto). Este correo no se puede apagar.
+- **Días de aviso antes de expiración**: cuántos días antes del fin de una cuota activa se envía el correo «Tu membresía está a punto de expirar», de 0 a 365 (30 por defecto). Este correo no se puede apagar aquí, pero cada socio con cuenta puede darse de baja desde su perfil.
 - **Avisar de la membresía expirada**: envía un correo al socio cuando su cuota expira, salvo que ya la haya renovado. Viene desactivado, y solo afecta a las cuotas que expiren después de activarlo.
 - **Avisar de las cuotas atrasadas**: envía un recordatorio al mes por cada pago vencido sin pagar, también los antiguos. Viene desactivado.
 

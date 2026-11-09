@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships;
 
 use App\Application\Knowledge\Contracts\KnowledgeCapabilityInterface;
+use App\Application\Mail\DTOs\MailCategoryDTO;
 use App\Application\Modules\DTOs\NavigationItemDTO;
 use App\Application\Modules\DTOs\PermissionDTO;
 use App\Filament\Support\PanelNavigationGroup;
@@ -62,6 +63,12 @@ use Modules\Memberships\Policies\MembershipFeePolicy;
 
 final class MembershipsServiceProvider extends ModuleServiceProvider
 {
+    /** Optional: reminder before the membership runs out. */
+    public const string MAIL_EXPIRY_NOTICES = 'memberships.expiry-notices';
+
+    /** Mandatory: the membership expired or a fee is overdue. */
+    public const string MAIL_FEES = 'memberships.fees';
+
     public function moduleName(): string
     {
         return 'memberships';
@@ -222,6 +229,35 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
             MemberModel::class => MemberPolicy::class,
             FeeStructureModel::class => FeeStructurePolicy::class,
             MembershipFeeModel::class => MembershipFeePolicy::class,
+        ];
+    }
+
+    /**
+     * Mail categories people see in their profile. Only accounts linked to a member record
+     * see them: nobody else receives these mails.
+     *
+     * @return list<MailCategoryDTO>
+     */
+    public function registerMailCategories(): array
+    {
+        $hasMemberRecord = fn (object $user): bool => $this->app->make(HasMemberRecordCapability::class)->passes($user);
+
+        return [
+            MailCategoryDTO::optional(
+                key: self::MAIL_EXPIRY_NOTICES,
+                section: 'memberships::mail.categories.section',
+                label: 'memberships::mail.categories.expiry_notices.label',
+                description: 'memberships::mail.categories.expiry_notices.description',
+                audience: $hasMemberRecord,
+            ),
+            MailCategoryDTO::mandatory(
+                key: self::MAIL_FEES,
+                section: 'memberships::mail.categories.section',
+                label: 'memberships::mail.categories.fees.label',
+                description: 'memberships::mail.categories.fees.description',
+                reason: 'memberships::mail.categories.fees.reason',
+                audience: $hasMemberRecord,
+            ),
         ];
     }
 
