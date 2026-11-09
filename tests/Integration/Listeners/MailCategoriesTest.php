@@ -10,6 +10,7 @@ use App\Application\Mail\Services\MailCategoryRegistryInterface;
 use App\Application\Mail\Services\MailPreferenceServiceInterface;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use DateTimeImmutable;
+use Illuminate\Mail\Transport\ArrayTransport;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
@@ -18,7 +19,6 @@ use Modules\Memberships\Notifications\MembershipExpiredNotification;
 use Modules\Memberships\Notifications\MembershipExpiringNotification;
 use Modules\Memberships\Notifications\PaymentOverdueNotification;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Symfony\Component\Mailer\Transport\TransportInterface;
 use Tests\Support\Modules\ModuleTestCase;
 
 /**
@@ -146,8 +146,7 @@ final class MailCategoriesTest extends ModuleTestCase
     private function sentCount(): int
     {
         $transport = $this->app->make('mailer')->getSymfonyTransport();
-        $this->assertInstanceOf(TransportInterface::class, $transport);
-        $this->assertTrue(method_exists($transport, 'messages'));
+        $this->assertInstanceOf(ArrayTransport::class, $transport);
 
         return count($transport->messages());
     }
