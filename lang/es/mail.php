@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'categories' => [
-        'section' => 'Gestión de socios',
+        'section' => 'Tu membresía',
         'expiry_notices' => [
             'label' => 'Avisos antes de que expire tu membresía',
             'description' => 'Te avisamos unos días antes de que termine tu cuota para que puedas renovarla.',
