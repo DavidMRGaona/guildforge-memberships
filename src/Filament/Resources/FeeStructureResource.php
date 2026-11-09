@@ -160,7 +160,8 @@ class FeeStructureResource extends BaseResource
                     ->badge()
                     ->formatStateUsing(fn (MembershipPeriodType $state): string => $state->label())
                     ->sortable()
-                    ->visibleFrom('lg'),
+                    // At lg the fixed sidebar leaves no more room than at md
+                    ->visibleFrom('xl'),
 
                 TextColumn::make('amount')
                     ->label(__('memberships::memberships.fields.amount'))

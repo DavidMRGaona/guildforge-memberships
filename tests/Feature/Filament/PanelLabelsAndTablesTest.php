@@ -184,6 +184,54 @@ final class PanelLabelsAndTablesTest extends ModuleTestCase
         }
     }
 
+    /**
+     * At 1024 px the fixed sidebar leaves the table ~640 px, no more than at 768: columns
+     * shown from `lg` made Socios overflow by 187 px and Tarifas by 124 px, so they show
+     * from `xl`. Column => breakpoint it shows from; null for the ones that always show.
+     *
+     * @return array<string, array{class-string<HasTable>, array<string, string|null>}>
+     */
+    public static function columnBreakpoints(): array
+    {
+        return [
+            'members' => [ListMembers::class, [
+                'full_name' => null,
+                'status' => null,
+                'member_number' => 'sm',
+                'member_type' => 'md',
+                'email' => 'xl',
+                'joined_at' => '2xl',
+            ]],
+            'fee structures' => [ListFeeStructures::class, [
+                'member_type' => null,
+                'amount' => null,
+                'is_default' => 'sm',
+                'valid_from' => 'md',
+                'period_type' => 'xl',
+                'valid_until' => '2xl',
+            ]],
+        ];
+    }
+
+    /**
+     * @param  class-string<HasTable>  $page
+     * @param  array<string, string|null>  $breakpoints
+     */
+    #[DataProvider('columnBreakpoints')]
+    public function test_secondary_columns_show_only_from_the_width_where_they_fit(string $page, array $breakpoints): void
+    {
+        /** @var HasTable $component */
+        $component = Livewire::test($page)->instance();
+        $table = $component->getTable();
+
+        foreach ($breakpoints as $name => $breakpoint) {
+            $column = $table->getColumn($name);
+
+            $this->assertNotNull($column, "Column {$name} is missing");
+            $this->assertSame($breakpoint, $column->getVisibleFrom(), "Column {$name}");
+        }
+    }
+
     public function test_the_overdue_widget_has_the_row_details_icon_only(): void
     {
         $widget = Livewire::test(OverdueFeesWidget::class)->instance();
