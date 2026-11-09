@@ -25,11 +25,13 @@ Los socios de un tipo permanente (por defecto, **Honorario**) nunca reciben avis
 
 | Correo | Cuándo sale | Se puede apagar |
 |---|---|---|
-| **Tu membresía está a punto de expirar** | Cuando a una cuota activa le quedan los días de aviso o menos. | No, pero puedes cambiar los días de aviso. |
-| **Tu membresía ha expirado** | Cuando una cuota pasa a **Expirada**, cada noche o a mano. No sale si la ficha no está en **Activo** ni si el socio ya tiene otra cuota pendiente o activa que no ha terminado. | Sí: **Avisar de la membresía expirada**, desactivado por defecto. |
-| **Cuota pendiente de pago** | Una vez al mes por cada pago vencido sin pagar. No sale si la ficha no está en **Activo** ni si la cuota está cancelada. | Sí: **Avisar de las cuotas atrasadas**, desactivado por defecto. |
+| **Tu membresía está a punto de expirar** | Cuando a una cuota activa le quedan los días de aviso o menos. | Cada socio con cuenta puede darse de baja de este aviso en la pestaña **Correos** de su perfil. Tú puedes cambiar los días de aviso (con 0 no sale). |
+| **Tu membresía ha expirado** | Cuando una cuota pasa a **Expirada**, cada noche o a mano. No sale si la ficha no está en **Activo** ni si el socio ya tiene otra cuota pendiente o activa que no ha terminado. | Sí: **Avisar de la membresía expirada**, desactivado por defecto. El socio no puede darse de baja. |
+| **Cuota pendiente de pago** | Una vez al mes por cada pago vencido sin pagar. No sale si la ficha no está en **Activo** ni si la cuota está cancelada. | Sí: **Avisar de las cuotas atrasadas**, desactivado por defecto. El socio no puede darse de baja. |
 
 Los correos van al email de la cuenta vinculada al socio o, si no tiene, al **Email** de su ficha. Si no tiene ninguno de los dos, no se envían. Todos traen el botón **Contactar con la asociación**, que abre la página **Nosotros** de la web.
+
+Cada socio con cuenta elige qué correos recibe en la pestaña **Correos** de su perfil. El aviso de que la membresía va a expirar es optativo: si se da de baja, no le llega, y el correo trae un enlace para hacerlo con un clic. Los de cuota expirada y pago pendiente son obligatorios y siempre salen si tú los tienes activados. Los ajustes del módulo mandan antes: lo que apagas aquí no sale aunque el socio lo tenga activado. Los socios sin cuenta, que reciben el correo en el **Email** de su ficha, no pueden elegir.
 
 ## El escritorio
 
@@ -45,5 +47,5 @@ Los pagos se añaden y se cobran en la pestaña **Pagos** de la ficha de cada so
 
 ## Si algo no sale bien
 
-- **Un socio no ha recibido el aviso de caducidad**: comprueba que su cuota está **Activa** (las pendientes no avisan), que su tipo no es permanente y que tiene una cuenta vinculada o un **Email** en la ficha.
+- **Un socio no ha recibido el aviso de caducidad**: comprueba que su cuota está **Activa** (las pendientes no avisan), que su tipo no es permanente y que tiene una cuenta vinculada o un **Email** en la ficha. Si tiene cuenta, comprueba también que no se ha dado de baja de los avisos en su perfil, o que no tiene los correos en pausa.
 - **Una cuota no ha pasado a Expirada**: pasa la noche siguiente a su fecha de fin. Si sigue igual días después, avisa a quien mantiene la instalación: la revisión nocturna depende de su planificador de tareas.

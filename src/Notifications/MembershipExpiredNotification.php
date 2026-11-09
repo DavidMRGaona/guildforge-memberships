@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Notifications;
 
+use App\Application\Mail\Contracts\HasMailCategory;
 use DateTimeImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Modules\Memberships\MembershipsServiceProvider;
 
-final class MembershipExpiredNotification extends Notification implements ShouldQueue
+final class MembershipExpiredNotification extends Notification implements HasMailCategory, ShouldQueue
 {
     use Queueable;
 
@@ -18,6 +20,11 @@ final class MembershipExpiredNotification extends Notification implements Should
         private readonly string $memberName,
         private readonly DateTimeImmutable $endDate,
     ) {}
+
+    public function mailCategory(): string
+    {
+        return MembershipsServiceProvider::MAIL_FEES;
+    }
 
     /**
      * @return array<string>
