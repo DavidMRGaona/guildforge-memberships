@@ -15,6 +15,10 @@ return [
         'line2' => 'To renew it, get in touch with the association.',
         'action' => 'Contact the association',
         'salutation' => 'Thank you for being part of our association.',
+        'site' => [
+            'title' => 'Your membership expires soon',
+            'body' => 'Expires in :days days (on :date). Get in touch with the association to renew it.',
+        ],
     ],
 
     /*
@@ -29,6 +33,10 @@ return [
         'line2' => 'To renew it and keep your member benefits, get in touch with the association.',
         'action' => 'Contact the association',
         'salutation' => 'We hope to see you soon.',
+        'site' => [
+            'title' => 'Your membership has expired',
+            'body' => 'Expired on :date. Get in touch with the association to renew it.',
+        ],
     ],
 
     /*
@@ -44,6 +52,10 @@ return [
         'line3' => 'If you have already paid it, you can ignore this message; if in doubt, get in touch with the association.',
         'action' => 'Contact the association',
         'salutation' => 'Thank you for your cooperation.',
+        'site' => [
+            'title' => 'You have a fee pending payment',
+            'body' => 'Fee of :amount due on :date, :days days overdue.',
+        ],
     ],
 
     /*
