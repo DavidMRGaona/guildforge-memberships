@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\Memberships\Notifications;
 
 use App\Application\Mail\Contracts\HasMailCategory;
+use App\Application\SiteNotifications\Contracts\HasSiteNotification;
+use App\Application\SiteNotifications\DTOs\SiteNotificationDTO;
 use DateTimeImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,7 +14,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Modules\Memberships\MembershipsServiceProvider;
 
-final class MembershipExpiredNotification extends Notification implements HasMailCategory, ShouldQueue
+final class MembershipExpiredNotification extends Notification implements HasMailCategory, HasSiteNotification, ShouldQueue
 {
     use Queueable;
 
@@ -31,7 +33,7 @@ final class MembershipExpiredNotification extends Notification implements HasMai
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', HasSiteNotification::CHANNEL];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -49,5 +51,20 @@ final class MembershipExpiredNotification extends Notification implements HasMai
                 route('about')
             )
             ->salutation(__('memberships::notifications.membership_expired.salutation'));
+    }
+
+    /**
+     * The bell notice: the same facts as the mail, with the site's own page instead of a host.
+     */
+    public function toSiteNotification(object $notifiable): SiteNotificationDTO
+    {
+        return new SiteNotificationDTO(
+            title: __('memberships::notifications.membership_expired.site.title'),
+            url: route('about', absolute: false),
+            body: __('memberships::notifications.membership_expired.site.body', [
+                'date' => $this->endDate->format('d/m/Y'),
+            ]),
+            icon: 'id-card',
+        );
     }
 }

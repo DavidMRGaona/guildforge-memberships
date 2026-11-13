@@ -249,6 +249,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
                 label: 'memberships::mail.categories.expiry_notices.label',
                 description: 'memberships::mail.categories.expiry_notices.description',
                 audience: $hasMemberRecord,
+                site: true,
             ),
             MailCategoryDTO::mandatory(
                 key: self::MAIL_FEES,
@@ -257,6 +258,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
                 description: 'memberships::mail.categories.fees.description',
                 reason: 'memberships::mail.categories.fees.reason',
                 audience: $hasMemberRecord,
+                site: true,
             ),
         ];
     }

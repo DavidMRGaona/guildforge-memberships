@@ -182,6 +182,8 @@ Los permisos llevan el prefijo `memberships:` y se asignan a los roles en el edi
 
 Con `send_expired_email` activado, `MembershipExpired` envía un correo al socio salvo que sea de un tipo permanente, no esté activo o ya tenga una cuota vigente o pendiente que termine hoy o después (ya ha renovado). Los dos avisos están desactivados por defecto; los correos del módulo enlazan con la página de contacto de la asociación.
 
+Los avisos de expiración, de cuota caducada y de pago vencido también aparecen en la campana de la web cuando el socio tiene cuenta vinculada (categorías `memberships.expiry-notices` y `memberships.fees` con `site: true`). La campana enlaza con «Sobre nosotros», como el correo, y no se guarda nada para un socio sin cuenta: le llega solo el correo. Requiere core ≥ 3.58.
+
 Las demás clases de `src/Domain/Events` (`MemberCreated`, `MemberStatusChanged`, `MembershipCreated`, `MembershipCancelled`, `FeePaymentRecorded`) no se disparan todavía.
 
 ## Estructura del módulo

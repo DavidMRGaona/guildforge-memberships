@@ -15,6 +15,10 @@ return [
         'line2' => 'Para renovarla, ponte en contacto con la asociación.',
         'action' => 'Contactar con la asociación',
         'salutation' => 'Gracias por ser parte de nuestra asociación.',
+        'site' => [
+            'title' => 'Tu membresía expira pronto',
+            'body' => 'Expira en :days días (el :date). Ponte en contacto con la asociación para renovarla.',
+        ],
     ],
 
     /*
@@ -29,6 +33,10 @@ return [
         'line2' => 'Para renovarla y seguir disfrutando de las ventajas de socio, ponte en contacto con la asociación.',
         'action' => 'Contactar con la asociación',
         'salutation' => 'Esperamos verte pronto.',
+        'site' => [
+            'title' => 'Tu membresía ha expirado',
+            'body' => 'Expiró el :date. Ponte en contacto con la asociación para renovarla.',
+        ],
     ],
 
     /*
@@ -44,6 +52,10 @@ return [
         'line3' => 'Si ya la has pagado, puedes ignorar este mensaje; si tienes dudas, ponte en contacto con la asociación.',
         'action' => 'Contactar con la asociación',
         'salutation' => 'Gracias por tu colaboración.',
+        'site' => [
+            'title' => 'Tienes una cuota pendiente de pago',
+            'body' => 'Cuota de :amount con vencimiento el :date, con :days días de retraso.',
+        ],
     ],
 
     /*
