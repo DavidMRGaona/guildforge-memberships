@@ -9,7 +9,7 @@ use Stringable;
 
 final readonly class MemberNumber implements Stringable
 {
-    private const string PATTERN = '/^\d{4}-\d{4}$/';
+    private const string PATTERN = '/^\d{4}-\d{4}\z/';
 
     public string $value;
 

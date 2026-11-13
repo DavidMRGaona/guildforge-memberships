@@ -109,6 +109,21 @@ final class FeesRelationManagerTest extends ModuleTestCase
         $this->assertSame('Primer plazo', $fee->notes);
     }
 
+    public function test_an_amount_with_a_trailing_newline_is_refused(): void
+    {
+        $this->tab()
+            ->callAction(TestAction::make('create')->table(), data: [
+                'membership_id' => $this->membership->id,
+                'amount' => "30\n",
+                'currency' => 'EUR',
+                'due_date' => '2026-02-01',
+                'is_paid' => false,
+            ])
+            ->assertHasFormErrors(['amount']);
+
+        $this->assertSame(0, MembershipFeeModel::query()->count());
+    }
+
     public function test_creating_a_fee_already_paid_records_the_payment(): void
     {
         $this->tab()

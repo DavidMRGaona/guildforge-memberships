@@ -96,7 +96,7 @@ class FeesRelationManager extends RelationManager
                     ->required()
                     ->minValue(0)
                     ->step(0.01)
-                    ->rules(['regex:/^\d+(\.\d{1,2})?$/']),
+                    ->rules(['regex:/^\d+(\.\d{1,2})?\z/']),
 
                 TextInput::make('currency')
                     ->label(__('memberships::memberships.fields.currency'))
