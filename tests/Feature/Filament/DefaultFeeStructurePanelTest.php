@@ -86,6 +86,23 @@ final class DefaultFeeStructurePanelTest extends ModuleTestCase
             ->assertNotNotified('Tarifa por defecto cambiada');
     }
 
+    public function test_an_amount_with_a_trailing_newline_is_refused(): void
+    {
+        Livewire::test(CreateFeeStructure::class)
+            ->fillForm([
+                'member_type' => 'regular',
+                'period_type' => 'calendar_year',
+                'amount' => "30\n",
+                'currency' => 'EUR',
+                'valid_from' => '2026-01-01',
+                'is_default' => false,
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['amount']);
+
+        $this->assertSame(0, FeeStructureModel::query()->count());
+    }
+
     public function test_the_default_checkbox_explains_that_there_is_only_one(): void
     {
         Livewire::test(CreateFeeStructure::class)

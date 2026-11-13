@@ -41,6 +41,13 @@ final class MemberNumberTest extends TestCase
         new MemberNumber('2024-001');
     }
 
+    public function test_it_throws_exception_with_a_trailing_newline(): void
+    {
+        $this->expectException(InvalidMemberNumberException::class);
+
+        new MemberNumber("2024-0001\n");
+    }
+
     public function test_it_throws_exception_with_empty_value(): void
     {
         $this->expectException(InvalidMemberNumberException::class);

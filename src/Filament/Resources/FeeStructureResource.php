@@ -99,7 +99,7 @@ class FeeStructureResource extends BaseResource
                             ->minValue(0)
                             ->step(0.01)
                             ->prefix('€')
-                            ->rules(['regex:/^\d+(\.\d{1,2})?$/']),
+                            ->rules(['regex:/^\d+(\.\d{1,2})?\z/']),
 
                         TextInput::make('currency')
                             ->label(__('memberships::memberships.fields.currency'))
