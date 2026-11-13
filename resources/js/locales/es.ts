@@ -1,0 +1,50 @@
+export default {
+    memberships: {
+        profile: {
+            tabLabel: 'Socio',
+            title: 'Tu situación de socio',
+            number: 'Número de socio',
+            type: 'Tipo de socio',
+            status: 'Estado de la ficha',
+            joined: 'Fecha de alta',
+            membership: 'Membresía',
+            period: 'Del {start} al {end}',
+            noMembership: 'La asociación aún no te ha registrado ninguna membresía.',
+            permanent: 'Tu tipo de socio no necesita renovar la membresía.',
+            fees: 'Cuotas pendientes',
+            upToDate: 'Estás al día: no tienes ninguna cuota pendiente.',
+            dueOn: 'Vence el {date}',
+            overdue: 'Atrasada',
+            lastPayment: 'Último pago',
+            lastPaymentText: '{amount}, pagado el {date}',
+            noPayments: 'Todavía no consta ningún pago.',
+            readOnly:
+                'La asociación lleva tu ficha y tus cuotas. Si algo no es correcto o quieres saber cómo pagar, ponte en contacto con ella.',
+            contact: 'Contactar con la asociación',
+        },
+        memberType: {
+            regular: 'Regular',
+            student: 'Estudiante',
+            senior: 'Senior',
+            honorary: 'Honorario',
+            founder: 'Fundador',
+        },
+        memberStatus: {
+            active: 'Activo',
+            inactive: 'Inactivo',
+            suspended: 'Suspendido',
+            expelled: 'Expulsado',
+        },
+        membershipStatus: {
+            pending: 'Pendiente',
+            active: 'Activa',
+            expired: 'Expirada',
+            cancelled: 'Cancelada',
+        },
+        periodType: {
+            calendar_year: 'Año natural',
+            academic_year: 'Año académico',
+            rolling: 'Rotativo',
+        },
+    },
+};

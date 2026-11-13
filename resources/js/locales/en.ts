@@ -1,0 +1,50 @@
+export default {
+    memberships: {
+        profile: {
+            tabLabel: 'Membership',
+            title: 'Your membership',
+            number: 'Member number',
+            type: 'Member type',
+            status: 'Record status',
+            joined: 'Joined on',
+            membership: 'Membership',
+            period: 'From {start} to {end}',
+            noMembership: 'The association has not registered any membership for you yet.',
+            permanent: 'Your member type does not need to renew the membership.',
+            fees: 'Pending fees',
+            upToDate: 'You are up to date: no fee is pending.',
+            dueOn: 'Due on {date}',
+            overdue: 'Overdue',
+            lastPayment: 'Last payment',
+            lastPaymentText: '{amount}, paid on {date}',
+            noPayments: 'No payment recorded yet.',
+            readOnly:
+                'The association keeps your record and your fees. If something is wrong or you want to know how to pay, get in touch with it.',
+            contact: 'Contact the association',
+        },
+        memberType: {
+            regular: 'Regular',
+            student: 'Student',
+            senior: 'Senior',
+            honorary: 'Honorary',
+            founder: 'Founder',
+        },
+        memberStatus: {
+            active: 'Active',
+            inactive: 'Inactive',
+            suspended: 'Suspended',
+            expelled: 'Expelled',
+        },
+        membershipStatus: {
+            pending: 'Pending',
+            active: 'Active',
+            expired: 'Expired',
+            cancelled: 'Cancelled',
+        },
+        periodType: {
+            calendar_year: 'Calendar year',
+            academic_year: 'Academic year',
+            rolling: 'Rolling',
+        },
+    },
+};

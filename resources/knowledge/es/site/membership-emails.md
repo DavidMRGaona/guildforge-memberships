@@ -5,13 +5,13 @@ summary: Qué correos te envía la asociación cuando tu cuota está a punto de 
 category: membership
 audience: site
 order: 20
-keywords: [correo, correos, email, aviso, avisos, recordatorio, notificación, cuota, membresía, expirar, caducar, a punto de expirar, expirada, pago pendiente, impago, cuota atrasada, deuda, renovar, socio, no me llega]
+keywords: [ver tu situación de socio, correo, correos, email, aviso, avisos, recordatorio, notificación, cuota, membresía, expirar, caducar, a punto de expirar, expirada, pago pendiente, impago, cuota atrasada, deuda, renovar, socio, no me llega]
 related: [memberships.membership, core.account.change-email]
 conditions:
   capabilities: [memberships.has_member_record]
   modules: [memberships]
 ---
-La asociación puede avisarte por correo de lo que pasa con tu cuota. Los correos llegan al email de tu cuenta, y todos traen el botón **Contactar con la asociación**, que abre la página **Nosotros**.
+La asociación puede avisarte por correo de lo que pasa con tu cuota. Los correos llegan al email de tu cuenta, y todos traen el botón **Ver tu situación de socio**, que abre la pestaña **Socio** de tu perfil: ahí ves tu membresía, lo que tienes pendiente de pago y tu último pago. Los mismos avisos salen en la campana de la web y llevan a la misma pestaña.
 
 Puedes elegir cuáles recibes en la pestaña **Correos** de tu perfil. El aviso de que tu membresía está a punto de expirar es optativo; los de cuota expirada y pago pendiente son obligatorios y no se pueden apagar, porque te cuentan que tu cuota ha cambiado o te piden que pagues.
 

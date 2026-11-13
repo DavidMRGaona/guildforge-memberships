@@ -13,9 +13,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Modules\Memberships\MembershipsServiceProvider;
+use Modules\Memberships\Notifications\Concerns\LinksToMemberSituation;
 
 final class MembershipExpiringNotification extends Notification implements HasMailCategory, HasSiteNotification, ShouldQueue
 {
+    use LinksToMemberSituation;
     use Queueable;
 
     public function __construct(
@@ -55,7 +57,8 @@ final class MembershipExpiringNotification extends Notification implements HasMa
                 'date' => $formattedDate,
             ]))
             ->line(__('memberships::notifications.membership_expiring.line2'))
-            ->action(__('memberships::notifications.membership_expiring.action'), route('about'))
+            ->action($this->situationActionText($notifiable, 'memberships::notifications.membership_expiring.action'),
+                $this->situationUrl($notifiable))
             ->salutation(__('memberships::notifications.membership_expiring.salutation'));
     }
 
@@ -66,7 +69,7 @@ final class MembershipExpiringNotification extends Notification implements HasMa
     {
         return new SiteNotificationDTO(
             title: __('memberships::notifications.membership_expiring.site.title'),
-            url: route('about', absolute: false),
+            url: $this->situationUrl($notifiable, absolute: false),
             body: __('memberships::notifications.membership_expiring.site.body', [
                 'days' => $this->daysUntilExpiration,
                 'date' => $this->endDate->format('d/m/Y'),

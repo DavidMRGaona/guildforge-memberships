@@ -189,21 +189,40 @@ final class MembershipEmailsTest extends ModuleTestCase
         Notification::assertNotSentTo($this->user, PaymentOverdueNotification::class);
     }
 
-    public function test_membership_emails_link_to_the_association_contact_page(): void
+    public function test_membership_emails_to_an_account_link_to_its_member_tab(): void
     {
-        $date = new \DateTimeImmutable('2026-12-31');
-        $notifications = [
-            new MembershipExpiringNotification('John', $date, 7),
-            new MembershipExpiredNotification('John', $date),
-            new PaymentOverdueNotification('John', '25,00 €', $date, 3),
-        ];
-
-        foreach ($notifications as $notification) {
+        foreach ($this->notices() as $notification) {
             $message = $notification->toMail($this->user);
+
+            $this->assertSame(route('profile.show', ['tab' => 'memberships']), $message->actionUrl, $notification::class);
+            $this->assertSame('Ver tu situación de socio', $message->actionText, $notification::class);
+        }
+    }
+
+    public function test_membership_emails_to_a_member_without_account_link_to_the_association_page(): void
+    {
+        $address = (new AnonymousNotifiable)->route('mail', 'sin.cuenta@example.test');
+
+        foreach ($this->notices() as $notification) {
+            $message = $notification->toMail($address);
 
             $this->assertSame(route('about'), $message->actionUrl, $notification::class);
             $this->assertSame('Contactar con la asociación', $message->actionText, $notification::class);
         }
+    }
+
+    /**
+     * @return list<MembershipExpiringNotification|MembershipExpiredNotification|PaymentOverdueNotification>
+     */
+    private function notices(): array
+    {
+        $date = new \DateTimeImmutable('2026-12-31');
+
+        return [
+            new MembershipExpiringNotification('John', $date, 7),
+            new MembershipExpiredNotification('John', $date),
+            new PaymentOverdueNotification('John', '25,00 €', $date, 3),
+        ];
     }
 
     private function member(string $type, ?string $userId, string $email = 'john@example.test', string $status = 'active'): MemberModel

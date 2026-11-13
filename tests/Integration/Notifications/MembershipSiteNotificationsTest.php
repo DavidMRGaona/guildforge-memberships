@@ -78,13 +78,13 @@ final class MembershipSiteNotificationsTest extends ModuleTestCase
     }
 
     #[DataProvider('notifications')]
-    public function test_the_bell_notice_has_title_icon_and_relative_link_to_about(MembershipExpiringNotification|MembershipExpiredNotification|PaymentOverdueNotification $notification, string $title, string $icon): void
+    public function test_the_bell_notice_has_title_icon_and_relative_link_to_the_member_tab(MembershipExpiringNotification|MembershipExpiredNotification|PaymentOverdueNotification $notification, string $title, string $icon): void
     {
         $dto = $notification->toSiteNotification(UserModel::factory()->make());
 
         $this->assertSame($title, $dto->title);
         $this->assertSame($icon, $dto->icon);
-        $this->assertSame(route('about', absolute: false), $dto->url);
+        $this->assertSame(route('profile.show', ['tab' => 'memberships'], false), $dto->url);
         $this->assertNull($dto->groupKey);
         $this->assertNull($dto->actorId);
     }
@@ -100,7 +100,7 @@ final class MembershipSiteNotificationsTest extends ModuleTestCase
             'user_id' => $user->id,
             'category' => MembershipsServiceProvider::MAIL_EXPIRY_NOTICES,
             'title' => 'Tu membresía expira pronto',
-            'url' => route('about', absolute: false),
+            'url' => route('profile.show', ['tab' => 'memberships'], false),
         ]);
     }
 
