@@ -13,9 +13,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Modules\Memberships\MembershipsServiceProvider;
+use Modules\Memberships\Notifications\Concerns\LinksToMemberSituation;
 
 final class PaymentOverdueNotification extends Notification implements HasMailCategory, HasSiteNotification, ShouldQueue
 {
+    use LinksToMemberSituation;
     use Queueable;
 
     public function __construct(
@@ -53,8 +55,8 @@ final class PaymentOverdueNotification extends Notification implements HasMailCa
             ]))
             ->line(__('memberships::notifications.payment_overdue.line3'))
             ->action(
-                __('memberships::notifications.payment_overdue.action'),
-                route('about')
+                $this->situationActionText($notifiable, 'memberships::notifications.payment_overdue.action'),
+                $this->situationUrl($notifiable)
             )
             ->salutation(__('memberships::notifications.payment_overdue.salutation'));
     }
@@ -66,7 +68,7 @@ final class PaymentOverdueNotification extends Notification implements HasMailCa
     {
         return new SiteNotificationDTO(
             title: __('memberships::notifications.payment_overdue.site.title'),
-            url: route('about', absolute: false),
+            url: $this->situationUrl($notifiable, absolute: false),
             body: __('memberships::notifications.payment_overdue.site.body', [
                 'amount' => $this->formattedAmount,
                 'date' => $this->dueDate->format('d/m/Y'),

@@ -13,9 +13,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Modules\Memberships\MembershipsServiceProvider;
+use Modules\Memberships\Notifications\Concerns\LinksToMemberSituation;
 
 final class MembershipExpiredNotification extends Notification implements HasMailCategory, HasSiteNotification, ShouldQueue
 {
+    use LinksToMemberSituation;
     use Queueable;
 
     public function __construct(
@@ -47,8 +49,8 @@ final class MembershipExpiredNotification extends Notification implements HasMai
             ]))
             ->line(__('memberships::notifications.membership_expired.line2'))
             ->action(
-                __('memberships::notifications.membership_expired.action'),
-                route('about')
+                $this->situationActionText($notifiable, 'memberships::notifications.membership_expired.action'),
+                $this->situationUrl($notifiable)
             )
             ->salutation(__('memberships::notifications.membership_expired.salutation'));
     }
@@ -60,7 +62,7 @@ final class MembershipExpiredNotification extends Notification implements HasMai
     {
         return new SiteNotificationDTO(
             title: __('memberships::notifications.membership_expired.site.title'),
-            url: route('about', absolute: false),
+            url: $this->situationUrl($notifiable, absolute: false),
             body: __('memberships::notifications.membership_expired.site.body', [
                 'date' => $this->endDate->format('d/m/Y'),
             ]),
