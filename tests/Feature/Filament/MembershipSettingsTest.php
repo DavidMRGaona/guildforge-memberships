@@ -6,6 +6,8 @@ namespace Modules\Memberships\Tests\Feature\Filament;
 
 use App\Application\Authorization\Services\PermissionRegistryInterface;
 use App\Application\Services\SettingsServiceInterface;
+use App\Filament\Clusters\SettingsCluster;
+use App\Filament\Support\ModuleSettingsPages;
 use App\Infrastructure\Persistence\Eloquent\Models\PermissionModel;
 use App\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
@@ -40,6 +42,48 @@ final class MembershipSettingsTest extends ModuleTestCase
     public function test_the_provider_registers_the_page(): void
     {
         $this->assertContains(MembershipSettings::class, (new MembershipsServiceProvider(app()))->registerFilamentPages());
+    }
+
+    public function test_the_provider_declares_the_page_as_the_only_place_for_the_settings(): void
+    {
+        $provider = new MembershipsServiceProvider(app());
+
+        $this->assertSame(MembershipSettings::class, $provider->getSettingsPage());
+        $this->assertContains($provider->getSettingsPage(), $provider->registerFilamentPages());
+        $this->assertSame([], $provider->getSettingsSchema());
+    }
+
+    public function test_the_page_sits_in_the_settings_cluster(): void
+    {
+        $this->assertSame(SettingsCluster::class, MembershipSettings::getCluster());
+    }
+
+    public function test_the_core_resolves_the_declared_page(): void
+    {
+        $this->actingAsPanelAdmin();
+
+        $this->assertSame(MembershipSettings::getUrl(), app(ModuleSettingsPages::class)->pageUrl('memberships'));
+    }
+
+    public function test_modules_configure_alone_is_not_enough(): void
+    {
+        $this->actingAs($this->editorWith(['modules.configure']));
+
+        $this->assertFalse(MembershipSettings::canAccess());
+        Livewire::test(MembershipSettings::class)->assertForbidden();
+    }
+
+    public function test_saved_values_go_to_the_module_settings_row(): void
+    {
+        $this->actingAs($this->editorWith([self::PERMISSION]));
+
+        Livewire::test(MembershipSettings::class)
+            ->fillForm(['expiration_warning_days' => 21])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $stored = json_decode((string) app(SettingsServiceInterface::class)->get('module_settings:memberships'), true);
+        $this->assertSame(21, (int) $stored['expiration_warning_days']);
     }
 
     public function test_the_permission_is_registered_and_proposed_to_no_role(): void
