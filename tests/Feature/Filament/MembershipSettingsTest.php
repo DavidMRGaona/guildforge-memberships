@@ -7,6 +7,7 @@ namespace Modules\Memberships\Tests\Feature\Filament;
 use App\Application\Authorization\Services\PermissionRegistryInterface;
 use App\Application\Services\SettingsServiceInterface;
 use App\Filament\Clusters\SettingsCluster;
+use App\Filament\Pages\ModuleSettingsPage;
 use App\Filament\Support\ModuleSettingsPages;
 use App\Infrastructure\Persistence\Eloquent\Models\PermissionModel;
 use App\Infrastructure\Persistence\Eloquent\Models\RoleModel;
@@ -172,6 +173,19 @@ final class MembershipSettingsTest extends ModuleTestCase
                 ->call('save')
                 ->assertHasFormErrors(['expiration_warning_days']);
         }
+    }
+
+    public function test_the_generic_settings_page_hands_over_to_the_module_page(): void
+    {
+        // Since core#666 the generic page of «Módulos» no longer edits the module: it redirects here
+        $this->actingAsPanelAdmin();
+
+        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+            ->assertRedirect(MembershipSettings::getUrl());
+
+        $page = app(ModuleSettingsPage::class);
+        $page->module = 'memberships';
+        $this->assertFalse($page->hasSettings());
     }
 
     /**
