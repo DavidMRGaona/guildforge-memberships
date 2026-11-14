@@ -47,7 +47,7 @@ La pestaña del perfil es un componente Vue: en desarrollo lo sirve el Vite del 
 
 ## Configuración
 
-Se configura en el panel, en **Sistema** → **Configuración** → **Socios** o en **Módulos** → **Gestión de socios** → **Configurar** (el mismo formulario). La primera entrada la ve quien tiene el permiso `memberships:settings.manage`, para delegar estos ajustes (por ejemplo, a tesorería) sin hacer administrador a nadie; la cuenta también tiene que poder entrar en el panel. La segunda es solo para administradores. Los valores guardados ahí tienen prioridad sobre `config/memberships.php`, que solo aporta los valores por defecto. `config/settings.php` contiene los valores por defecto con los que se publica el módulo: no lo edites a mano.
+Se configura en el panel, en **Sistema** → **Configuración** → **Socios** (el botón **Configurar** de **Módulos** → **Gestión de socios** lleva a la misma página). Solo la ve quien tiene el permiso `memberships:settings.manage`, para delegar estos ajustes (por ejemplo, a tesorería) sin hacer administrador a nadie; la cuenta también tiene que poder entrar en el panel. Tener solo `modules.configure` no basta. Los valores guardados ahí tienen prioridad sobre `config/memberships.php`, que solo aporta los valores por defecto. `config/settings.php` contiene los valores por defecto con los que se publica el módulo: no lo edites a mano.
 
 | Opción | Descripción | Por defecto |
 |--------|-------------|-------------|

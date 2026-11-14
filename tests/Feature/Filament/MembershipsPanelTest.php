@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Tests\Feature\Filament;
 
-use App\Filament\Pages\ModuleSettingsPage;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Filament\Actions\CreateAction;
 use Illuminate\Console\Scheduling\Event as ScheduledEvent;
@@ -107,12 +106,11 @@ final class MembershipsPanelTest extends ModuleTestCase
     public function test_settings_pages_render(): void
     {
         Livewire::test(MembershipSettings::class)->assertOk();
-        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])->assertOk();
     }
 
     public function test_the_settings_form_offers_the_permanent_member_types_and_no_role_name(): void
     {
-        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+        Livewire::test(MembershipSettings::class)
             ->assertOk()
             ->assertFormFieldExists('permanent_member_types')
             ->assertFormFieldDoesNotExist('member_role_name')
@@ -122,7 +120,7 @@ final class MembershipsPanelTest extends ModuleTestCase
 
     public function test_the_permanent_member_types_saved_in_the_panel_are_used(): void
     {
-        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+        Livewire::test(MembershipSettings::class)
             ->fillForm(['permanent_member_types' => ['founder', 'honorary']])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -142,7 +140,7 @@ final class MembershipsPanelTest extends ModuleTestCase
 
     public function test_the_settings_form_has_no_unused_fields(): void
     {
-        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+        Livewire::test(MembershipSettings::class)
             ->assertOk()
             ->assertFormFieldExists('expiration_warning_days')
             ->assertFormFieldDoesNotExist('grace_period_days')
@@ -152,14 +150,14 @@ final class MembershipsPanelTest extends ModuleTestCase
 
     public function test_an_empty_list_of_permanent_member_types_saved_in_the_panel_is_kept(): void
     {
-        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+        Livewire::test(MembershipSettings::class)
             ->fillForm(['permanent_member_types' => []])
             ->call('save')
             ->assertHasNoFormErrors();
 
         // The shipped default (honorary) must not come back over the saved empty list
         $this->assertSame([], $this->app->make(MembershipSettingsReader::class)->permanentMemberTypes());
-        Livewire::test(ModuleSettingsPage::class, ['module' => 'memberships'])
+        Livewire::test(MembershipSettings::class)
             ->assertFormSet(['permanent_member_types' => []]);
     }
 

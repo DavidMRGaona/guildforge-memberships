@@ -471,12 +471,21 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     }
 
     /**
-     * Get the Filament form schema for module settings.
+     * The settings live only on the module's own page in the settings cluster, guarded by
+     * memberships:settings.manage, so the generic module settings page edits nothing.
      *
      * @return array<Component>
      */
     public function getSettingsSchema(): array
     {
-        return MembershipSettings::getFormSchemaComponents();
+        return [];
+    }
+
+    /**
+     * @return class-string<Page>
+     */
+    public function getSettingsPage(): string
+    {
+        return MembershipSettings::class;
     }
 }

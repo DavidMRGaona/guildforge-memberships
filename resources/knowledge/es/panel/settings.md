@@ -44,9 +44,9 @@ Cambiar estos campos no toca las cuotas que ya existen.
 > [!WARNING]
 > Antes de activar **Avisar de las cuotas atrasadas**, comprueba que los pagos ya cobrados estén marcados como pagados: si no, los socios recibirán recordatorios de lo que ya pagaron.
 
-## También desde Módulos
+## Desde Módulos
 
-La administración puede abrir el mismo formulario en **Módulos**, con **Configurar** en **Gestión de socios**. Los valores son los mismos en las dos páginas.
+El botón **Configurar** de **Gestión de socios**, en **Módulos**, lleva a esta misma página y solo aparece a quien tiene el permiso **Gestionar la configuración del módulo**. Es el único sitio donde se editan estos ajustes.
 
 ## Si algo no sale bien
 
