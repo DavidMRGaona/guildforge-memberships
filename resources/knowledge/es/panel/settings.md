@@ -46,7 +46,7 @@ Cambiar estos campos no toca las cuotas que ya existen.
 
 ## Desde Módulos
 
-El botón **Configurar** de **Gestión de socios**, en **Módulos**, lleva a esta misma página y solo aparece a quien tiene el permiso **Gestionar la configuración del módulo**. Es el único sitio donde se editan estos ajustes.
+El botón **Configuración** de **Gestión de socios**, en **Módulos**, lleva a esta misma página. Solo lo ve quien puede entrar en **Módulos** y además tiene el permiso **Gestionar la configuración del módulo**. Con solo ese permiso, como suele pasar con la tesorería, se entra por **Sistema** → **Configuración** → **Socios**. Esta página es el único sitio donde se editan estos ajustes.
 
 ## Si algo no sale bien
 
