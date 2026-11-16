@@ -13,7 +13,7 @@ Módulo para GuildForge que gestiona los socios de la asociación, sus cuotas (p
 - **Rol de socio** (opcional): asigna el rol de socio del core al usuario vinculado mientras su ficha está activa y tiene una cuota activa o es de un tipo permanente.
 - **Socios permanentes**: los tipos marcados (honorario por defecto) no necesitan cuota y quedan fuera de los avisos de caducidad y de las cuotas vencidas.
 - **Widgets del dashboard**: estadísticas de socios, cuotas próximas a expirar y cuotas vencidas sin pagar.
-- **Pestaña «Socio» del perfil**: la cuenta vinculada a una ficha ve su número de socio, tipo, estado y fecha de alta, la membresía en vigor (o la más reciente), las cuotas sin pagar con su vencimiento (las atrasadas marcadas y contadas en la pestaña) y el último pago. Solo lectura; las cuentas sin ficha no ven la pestaña.
+- **Pestaña «Socio» de Ajustes de la cuenta**: la cuenta vinculada a una ficha ve su número de socio, tipo, estado y fecha de alta, la membresía en vigor (o la más reciente), las cuotas sin pagar con su vencimiento (las atrasadas marcadas y contadas en la pestaña) y el último pago. Solo lectura; las cuentas sin ficha no ven la pestaña.
 - **Guías de ayuda**: guías del panel (categoría propia «Socios y cuotas») y del sitio (categoría «Socios y cuotas» del core, solo para cuentas vinculadas a una ficha, capacidad `memberships.has_member_record`) en `resources/knowledge/es/`, con el botón de ayuda en las páginas del panel del módulo.
 - **Zonas horarias**: los instantes (alta, pagos, activación) se guardan en la zona de almacenamiento del sitio (UTC cuando el sitio lo usa) y se muestran en la zona de visualización (por defecto Europe/Madrid); las fechas de las cuotas, las tarifas y los vencimientos son días naturales de la zona de visualización, y la cuota de un socio dura hasta el final de su último día allí.
 
@@ -43,7 +43,7 @@ Con el repositorio clonado en `src/modules/memberships`:
     php artisan module:discover
     php artisan module:enable memberships
 
-La pestaña del perfil es un componente Vue: en desarrollo lo sirve el Vite del core; para probar la build, `php artisan module:build memberships`.
+La pestaña de Ajustes de la cuenta es un componente Vue: en desarrollo lo sirve el Vite del core; para probar la build, `php artisan module:build memberships`.
 
 ## Configuración
 
@@ -181,9 +181,9 @@ Los permisos llevan el prefijo `memberships:` y se asignan a los roles en el edi
 | `MembershipExpiring` | Cuando el comando diario envía el aviso de expiración (nunca para socios permanentes) |
 | `FeePaymentOverdue` | Cuando el comando diario detecta un pago vencido (nunca para socios permanentes) |
 
-Con `send_expired_email` activado, `MembershipExpired` envía un correo al socio salvo que sea de un tipo permanente, no esté activo o ya tenga una cuota vigente o pendiente que termine hoy o después (ya ha renovado). Los dos avisos están desactivados por defecto; los correos del módulo enlazan con la pestaña «Socio» del perfil cuando van a una cuenta, y con «Sobre nosotros» cuando van al email de la ficha (`Notifications/Concerns/LinksToMemberSituation`).
+Con `send_expired_email` activado, `MembershipExpired` envía un correo al socio salvo que sea de un tipo permanente, no esté activo o ya tenga una cuota vigente o pendiente que termine hoy o después (ya ha renovado). Los dos avisos están desactivados por defecto; los correos del módulo enlazan con la pestaña «Socio» de Ajustes de la cuenta cuando van a una cuenta, y con «Sobre nosotros» cuando van al email de la ficha (`Notifications/Concerns/LinksToMemberSituation`).
 
-Los avisos de expiración, de cuota caducada y de pago vencido también aparecen en la campana de la web cuando el socio tiene cuenta vinculada (categorías `memberships.expiry-notices` y `memberships.fees` con `site: true`). La campana enlaza con la pestaña «Socio» del perfil (`?tab=memberships`), y no se guarda nada para un socio sin cuenta: le llega solo el correo. Requiere core ≥ 3.58.
+Los avisos de expiración, de cuota caducada y de pago vencido también aparecen en la campana de la web cuando el socio tiene cuenta vinculada (categorías `memberships.expiry-notices` y `memberships.fees` con `site: true`). La campana enlaza con la pestaña «Socio» de Ajustes de la cuenta (`?tab=memberships`), y no se guarda nada para un socio sin cuenta: le llega solo el correo. Requiere core ≥ 3.58.
 
 Las demás clases de `src/Domain/Events` (`MemberCreated`, `MemberStatusChanged`, `MembershipCreated`, `MembershipCancelled`, `FeePaymentRecorded`) no se disparan todavía.
 
@@ -199,7 +199,7 @@ src/modules/memberships/
 ├── lang/{es,en}/                # memberships.php, notifications.php
 ├── resources/
 │   ├── css/module.css           # Utilidades Tailwind de los componentes del módulo
-│   ├── js/                      # Pestaña «Socio» del perfil, locales y tipos
+│   ├── js/                      # Pestaña «Socio» de Ajustes de la cuenta, locales y tipos
 │   └── knowledge/es/            # Guías de ayuda
 ├── routes/                      # api.php y web.php (vacíos)
 ├── src/
@@ -207,7 +207,7 @@ src/modules/memberships/
 │   ├── Console/Commands/        # memberships:process-expired, memberships:sync-roles
 │   ├── Domain/                  # Entidades, value objects, enums, eventos
 │   ├── Filament/                # Resources, relation manager, widgets, formulario de configuración
-│   ├── Infrastructure/          # Modelos, observers (rol de socio), repositorios, servicios (situación del socio para el perfil)
+│   ├── Infrastructure/          # Modelos, observers (rol de socio), repositorios, servicios (situación del socio para Ajustes de la cuenta)
 │   ├── Listeners/               # Aviso de expiración
 │   ├── Notifications/
 │   └── Policies/
@@ -215,7 +215,7 @@ src/modules/memberships/
     ├── Unit/
     ├── Integration/
     ├── Feature/
-    └── js/                      # Vitest de la pestaña del perfil
+    └── js/                      # Vitest de la pestaña de Ajustes de la cuenta
 ```
 
 ## Tests
