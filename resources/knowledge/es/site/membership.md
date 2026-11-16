@@ -12,11 +12,11 @@ conditions:
   capabilities: [memberships.has_member_record]
   modules: [memberships]
 ---
-Tu cuenta de {{site_name}} está vinculada a una ficha de socio. La ficha y las cuotas las lleva la asociación desde su panel. En la web puedes verlas en la pestaña **Socio** de tu perfil, pero no cambiarlas. Esta guía te explica qué contienen y cómo funcionan.
+Tu cuenta de {{site_name}} está vinculada a una ficha de socio. La ficha y las cuotas las lleva la asociación desde su panel. En la web puedes verlas en la pestaña **Socio** de Ajustes de la cuenta, pero no cambiarlas. Esta guía te explica qué contienen y cómo funcionan.
 
-## La pestaña Socio de tu perfil
+## La pestaña Socio de Ajustes de la cuenta
 
-En tu perfil, la pestaña **Socio** reúne lo que la asociación tiene sobre ti:
+En Ajustes de la cuenta, la pestaña **Socio** reúne lo que la asociación tiene sobre ti:
 
 - tu número de socio, tu tipo de socio, el estado de tu ficha y tu fecha de alta;
 - tu **Membresía**: la que está en vigor o, si no hay ninguna, la más reciente (por ejemplo, una renovación que todavía no ha empezado), con su estado y sus fechas;
@@ -29,7 +29,7 @@ La pestaña solo enseña los datos. Para corregir algo o saber cómo pagar, usa 
 
 La ficha guarda tus datos como socio: nombre y apellidos, email, teléfono, dirección, fecha de nacimiento, fecha de alta y tipo de socio (regular, estudiante, senior, honorario o fundador). También tiene un **número de socio** con la forma «2026-0001»: el año del alta y un número de orden.
 
-La ficha no es tu perfil. Cambiar tu nombre o tu email en tu perfil no cambia tu ficha, y al revés.
+La ficha no es tu cuenta. Cambiar tu nombre o tu email en Ajustes de la cuenta no cambia tu ficha, y al revés.
 
 La ficha tiene uno de estos estados: **Activo**, **Inactivo**, **Suspendido** o **Expulsado**.
 
@@ -63,7 +63,7 @@ La cuota no se renueva desde la web: ponte en contacto con la asociación. En la
 
 ## Si algo no sale bien
 
-- **Tus datos de socio no están al día**: cambiarlos en tu perfil no los cambia en la ficha. Pídeselo a la asociación.
+- **Tus datos de socio no están al día**: cambiarlos en Ajustes de la cuenta no los cambia en la ficha. Pídeselo a la asociación.
 - **Has pagado y la pestaña Socio sigue mostrando la cuota pendiente**: la asociación aún no ha anotado el pago. Avísala.
 - **Has pagado y no tienes el rol {{association_role}}**: tu nueva cuota puede seguir **Pendiente**. Avisa a la asociación para que la active.
 

@@ -11,15 +11,15 @@ conditions:
   capabilities: [memberships.has_member_record]
   modules: [memberships]
 ---
-La asociación puede avisarte por correo de lo que pasa con tu cuota. Los correos llegan al email de tu cuenta, y todos traen el botón **Ver tu situación de socio**, que abre la pestaña **Socio** de tu perfil: ahí ves tu membresía, lo que tienes pendiente de pago y tu último pago. Los mismos avisos salen en la campana de la web y llevan a la misma pestaña.
+La asociación puede avisarte por correo de lo que pasa con tu cuota. Los correos llegan al email de tu cuenta, y todos traen el botón **Ver tu situación de socio**, que abre la pestaña **Socio** de Ajustes de la cuenta: ahí ves tu membresía, lo que tienes pendiente de pago y tu último pago. Los mismos avisos salen en la campana de la web y llevan a la misma pestaña.
 
-Puedes elegir cuáles recibes en la pestaña **Correos** de tu perfil. El aviso de que tu membresía está a punto de expirar es optativo; los de cuota expirada y pago pendiente son obligatorios y no se pueden apagar, porque te cuentan que tu cuota ha cambiado o te piden que pagues.
+Puedes elegir cuáles recibes en la pestaña **Correos** de Ajustes de la cuenta. El aviso de que tu membresía está a punto de expirar es optativo; los de cuota expirada y pago pendiente son obligatorios y no se pueden apagar, porque te cuentan que tu cuota ha cambiado o te piden que pagues.
 
 ## Tu membresía está a punto de expirar
 
 Te llega cuando a tu cuota activa le quedan pocos días: los que decide la asociación, 30 por defecto. Dice cuántos días quedan y la fecha de fin. Suele llegar una sola vez por cuota.
 
-Si quieres seguir siendo socio, ponte en contacto con la asociación para renovarla antes de esa fecha. Si no quieres este aviso, usa el enlace del pie del correo o desactívalo en la pestaña **Correos** de tu perfil.
+Si quieres seguir siendo socio, ponte en contacto con la asociación para renovarla antes de esa fecha. Si no quieres este aviso, usa el enlace del pie del correo o desactívalo en la pestaña **Correos** de Ajustes de la cuenta.
 
 ## Tu membresía ha expirado
 
@@ -36,7 +36,7 @@ Si ya lo has pagado, puedes ignorarlo. Si tienes dudas, ponte en contacto con la
 
 ## Si algo no sale bien
 
-- **No te llega ningún correo**: mira en la carpeta de correo no deseado y comprueba el email de tu cuenta y que no tienes los correos en pausa ni este aviso desactivado en la pestaña **Correos** de tu perfil. Recuerda que los avisos de cuota expirada y de pago pendiente solo salen si la asociación los tiene activados.
+- **No te llega ningún correo**: mira en la carpeta de correo no deseado y comprueba el email de tu cuenta y que no tienes los correos en pausa ni este aviso desactivado en la pestaña **Correos** de Ajustes de la cuenta. Recuerda que los avisos de cuota expirada y de pago pendiente solo salen si la asociación los tiene activados.
 - **Te sigue llegando el recordatorio de pago y ya pagaste**: avisa a la asociación para que lo marque como pagado.
 
 [[action:about|Contactar con la asociación]]

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 return [
-    // Button of the notices sent to an account: it opens the profile's member tab
+    // Button of the notices sent to an account: it opens the member tab of the account settings
     'see_situation' => 'See your membership',
 
     /*
