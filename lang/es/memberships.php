@@ -387,6 +387,10 @@ return [
             'payment_reference' => 'Referencia',
         ],
         'last_separator' => ' y ',
+        'busy' => 'Ya hay otra importación de socios en marcha. Inténtalo de nuevo en un momento.',
+        'link_skipped' => [
+            'would_remove_association_role' => 'No se vincula a la cuenta: perdería el rol de socio que ya tiene, porque esta ficha no tiene un periodo en curso.',
+        ],
         'errors' => [
             'required' => 'Falta este dato.',
             'too_long' => 'Admite como mucho :max caracteres.',
@@ -401,6 +405,7 @@ return [
             'repeated_in_file' => 'Se repite en las filas :lines.',
             'amount' => 'Escribe el importe como 25, 25,00 o 25.00, sin signo negativo.',
             'fee_needs_period' => 'La cuota necesita un periodo: indica su inicio, su fin o su tipo.',
+            'period_type_required' => 'Indica el tipo de periodo: las fechas no encajan con ninguno.',
             'period_end_before_start' => 'El fin del periodo no puede ser anterior a su inicio.',
             'period_end_required' => 'Indica el fin del periodo: no se puede deducir de su inicio.',
             'paid_at_required' => 'Indica la fecha de pago para guardar la forma de pago o la referencia.',

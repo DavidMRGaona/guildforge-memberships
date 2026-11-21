@@ -9,8 +9,13 @@ namespace Modules\Memberships\Application\DTOs\Import;
  */
 final readonly class LinkableAccountDTO
 {
+    /**
+     * @param  bool  $holdsAssociationRole  the account holds the association member role
+     *                                      now (stored, whoever gave it)
+     */
     public function __construct(
         public string $id,
         public string $name,
+        public bool $holdsAssociationRole = false,
     ) {}
 }

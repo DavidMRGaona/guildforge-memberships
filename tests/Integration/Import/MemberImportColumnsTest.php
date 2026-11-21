@@ -383,6 +383,15 @@ final class MemberImportColumnsTest extends ModuleTestCase
         $this->assertArrayHasKey(MemberImportColumn::PeriodEnd->value, $row->errors);
     }
 
+    public function test_an_end_that_cannot_be_worked_out_from_the_start_is_asked_for(): void
+    {
+        // 15 July belongs to the academic year that ended on 30 June
+        $row = $this->onlyRow($this->preview([$this->row(['Tipo de periodo' => 'Año académico', 'Inicio del periodo' => '15/07/2025'])]));
+
+        $this->assertSame(MemberImportRowStatus::Invalid, $row->status);
+        $this->assertArrayHasKey(MemberImportColumn::PeriodEnd->value, $row->errors);
+    }
+
     public function test_a_member_number_with_another_format_is_invalid(): void
     {
         $row = $this->onlyRow($this->preview([$this->row(['Número de socio' => '17'])]));

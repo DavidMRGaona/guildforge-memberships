@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Application\DTOs\Import;
 
 use Modules\Memberships\Domain\Enums\MemberImportDuplicateReason;
+use Modules\Memberships\Domain\Enums\MemberImportLinkSkipReason;
 use Modules\Memberships\Domain\Enums\MemberImportRowStatus;
 
 /**
@@ -18,6 +19,8 @@ final readonly class MemberImportRowReportDTO
      *                                               (MemberImportColumn values)
      * @param  string|null  $memberNumber  the number the member gets (new rows) or the one
      *                                     the row gives
+     * @param  MemberImportLinkSkipReason|null  $linkSkipReason  why a matching account is
+     *                                                           not linked
      */
     public function __construct(
         public int $line,
@@ -30,10 +33,11 @@ final readonly class MemberImportRowReportDTO
         public bool $hasFee = false,
         public ?string $linkedUserId = null,
         public ?string $linkedUserName = null,
+        public ?MemberImportLinkSkipReason $linkSkipReason = null,
     ) {}
 
     /**
-     * @return array{line: int, status: string, duplicateReason: string|null, errors: array<string, list<string>>, memberNumber: string|null, fullName: string|null, hasPeriod: bool, hasFee: bool, linkedUserId: string|null, linkedUserName: string|null}
+     * @return array{line: int, status: string, duplicateReason: string|null, errors: array<string, list<string>>, memberNumber: string|null, fullName: string|null, hasPeriod: bool, hasFee: bool, linkedUserId: string|null, linkedUserName: string|null, linkSkipReason: string|null, linkSkipMessage: string|null}
      */
     public function toArray(): array
     {
@@ -48,6 +52,8 @@ final readonly class MemberImportRowReportDTO
             'hasFee' => $this->hasFee,
             'linkedUserId' => $this->linkedUserId,
             'linkedUserName' => $this->linkedUserName,
+            'linkSkipReason' => $this->linkSkipReason?->value,
+            'linkSkipMessage' => $this->linkSkipReason?->message(),
         ];
     }
 }

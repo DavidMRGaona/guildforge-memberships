@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Services\Import;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Memberships\Application\DTOs\Import\LinkableAccountDTO;
@@ -21,9 +23,14 @@ use Modules\Memberships\Domain\Entities\Membership;
 use Modules\Memberships\Domain\Entities\MembershipFee;
 use Modules\Memberships\Domain\Enums\MemberImportColumn;
 use Modules\Memberships\Domain\Enums\MemberImportDuplicateReason;
+use Modules\Memberships\Domain\Enums\MemberImportLinkSkipReason;
 use Modules\Memberships\Domain\Enums\MemberImportRowStatus;
+use Modules\Memberships\Domain\Enums\MembershipPeriodType;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Enums\MemberStatus;
+use Modules\Memberships\Domain\Enums\MemberType;
+use Modules\Memberships\Domain\Exceptions\MemberImportFailedException;
+use Modules\Memberships\Domain\Repositories\FeeStructureRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MemberRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipFeeRepositoryInterface;
 use Modules\Memberships\Domain\Repositories\MembershipRepositoryInterface;
@@ -32,17 +39,27 @@ use Modules\Memberships\Domain\ValueObjects\MemberNumber;
 use Modules\Memberships\Domain\ValueObjects\MembershipFeeId;
 use Modules\Memberships\Domain\ValueObjects\MembershipId;
 use Modules\Memberships\Domain\ValueObjects\Money;
+use Modules\Memberships\Infrastructure\Services\CalendarDate;
 use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 /**
  * Members are saved through the repositories, so the model observers keep the association
- * member role in line (MemberRoleSynchronizer) as for any other member. A period is created
- * active, or expired when it already ended: no expiry event is raised, so nothing is mailed.
+ * member role in line (MemberRoleSynchronizer) as for any other member. Each member is
+ * linked to its account last, once its period exists, so the role is worked out once with
+ * the final state and never taken and given back. A period is created active (raising
+ * MembershipActivated inside the transaction) or expired when it already ended: no expiry
+ * event is raised, so nothing is mailed.
  */
 final readonly class MemberImportService implements MemberImportServiceInterface
 {
-    /** Fees are kept in euros, as the panel creates them. */
-    private const string CURRENCY = 'EUR';
+    /** One import at a time: numbers are planned from what is stored. */
+    public const string LOCK = 'memberships:member-import';
+
+    /** Long enough for the largest import; released as soon as it ends. */
+    private const int LOCK_SECONDS = 600;
+
+    /** When no default fee structure gives a currency, as the panel does. */
+    private const string DEFAULT_CURRENCY = 'EUR';
 
     public function __construct(
         private MemberRepositoryInterface $members,
@@ -51,6 +68,7 @@ final readonly class MemberImportService implements MemberImportServiceInterface
         private MemberNumberGeneratorInterface $numbers,
         private LinkableAccountFinderInterface $accounts,
         private MembershipSettingsReader $settings,
+        private FeeStructureRepositoryInterface $feeStructures,
     ) {}
 
     /**
@@ -66,20 +84,17 @@ final readonly class MemberImportService implements MemberImportServiceInterface
      */
     public function import(array $rows, MemberImportOptionsDTO $options): MemberImportResultDTO
     {
-        $result = DB::transaction(function () use ($rows, $options): MemberImportResultDTO {
-            // Checked again inside the transaction: numbers are planned from what it sees
-            ['report' => $report, 'planned' => $planned] = $this->analyse($rows, $options);
+        $lock = Cache::lock(self::LOCK, self::LOCK_SECONDS);
 
-            if (! $report->canImport()) {
-                return new MemberImportResultDTO(imported: false, report: $report);
-            }
+        if (! $lock->get()) {
+            return MemberImportResultDTO::busy();
+        }
 
-            foreach ($planned as $plan) {
-                $this->create($plan['row'], $plan['number'], $plan['account']);
-            }
-
-            return new MemberImportResultDTO(imported: true, report: $report, createdCount: count($planned));
-        });
+        try {
+            $result = $this->importNow($rows, $options);
+        } finally {
+            $lock->release();
+        }
 
         // Counts only: the rows hold personal data
         Log::info('Memberships: member import finished', [
@@ -95,6 +110,37 @@ final readonly class MemberImportService implements MemberImportServiceInterface
 
     /**
      * @param  list<MemberImportRowDTO>  $rows
+     */
+    private function importNow(array $rows, MemberImportOptionsDTO $options): MemberImportResultDTO
+    {
+        try {
+            return DB::transaction(function () use ($rows, $options): MemberImportResultDTO {
+                // Checked again inside the transaction: numbers are planned from what it sees
+                ['report' => $report, 'planned' => $planned] = $this->analyse($rows, $options);
+
+                if (! $report->canImport()) {
+                    return new MemberImportResultDTO(imported: false, report: $report);
+                }
+
+                $currencies = $this->currencies($planned);
+
+                foreach ($planned as $plan) {
+                    $this->create($plan['row'], $plan['number'], $plan['account'], $currencies);
+                }
+
+                return new MemberImportResultDTO(imported: true, report: $report, createdCount: count($planned));
+            });
+        } catch (QueryException $exception) {
+            // The query and its values hold the rows' personal data: neither goes on
+            $sqlState = is_string($exception->errorInfo[0] ?? null) ? $exception->errorInfo[0] : (string) $exception->getCode();
+            Log::error('Memberships: member import failed while saving', ['sqlstate' => $sqlState]);
+
+            throw new MemberImportFailedException($sqlState);
+        }
+    }
+
+    /**
+     * @param  array<int, MemberImportRowDTO>  $rows
      * @return array{report: MemberImportPreviewDTO, planned: list<array{row: ParsedMemberImportRow, number: MemberNumber, account: LinkableAccountDTO|null}>}
      */
     private function analyse(array $rows, MemberImportOptionsDTO $options): array
@@ -103,6 +149,8 @@ final readonly class MemberImportService implements MemberImportServiceInterface
             return ['report' => new MemberImportPreviewDTO(rows: [], rowLimitExceeded: true), 'planned' => []];
         }
 
+        // Results are matched to rows by position
+        $rows = array_values($rows);
         $headers = MemberImportHeaders::resolve($this->headerNames($rows));
         $parser = new MemberImportRowParser($this->settings);
 
@@ -172,6 +220,12 @@ final readonly class MemberImportService implements MemberImportServiceInterface
             $account = $status === MemberImportRowStatus::New && $row->emailKey() !== null
                 ? ($accounts[$row->emailKey()] ?? null)
                 : null;
+            $linkSkipReason = null;
+
+            if ($account instanceof LinkableAccountDTO && $this->wouldRemoveAssociationRole($row, $account)) {
+                $account = null;
+                $linkSkipReason = MemberImportLinkSkipReason::WouldRemoveAssociationRole;
+            }
 
             $reports[] = new MemberImportRowReportDTO(
                 line: $rows[$index]->line,
@@ -184,6 +238,7 @@ final readonly class MemberImportService implements MemberImportServiceInterface
                 hasFee: $row->hasFee,
                 linkedUserId: $account?->id,
                 linkedUserName: $account?->name,
+                linkSkipReason: $linkSkipReason,
             );
 
             if ($status === MemberImportRowStatus::New && isset($numbers[$index])) {
@@ -199,6 +254,33 @@ final readonly class MemberImportService implements MemberImportServiceInterface
             ),
             'planned' => $planned,
         ];
+    }
+
+    /**
+     * Linking hands the account's association member role to MemberRoleSynchronizer. The
+     * account is linked to no other member (LinkableAccountFinderInterface), so this one alone
+     * decides: when it would not qualify, linking would take a role the account holds now
+     * (given by hand, or before the import). Such rows are imported without linking.
+     */
+    private function wouldRemoveAssociationRole(ParsedMemberImportRow $row, LinkableAccountDTO $account): bool
+    {
+        if (! $account->holdsAssociationRole || ! $this->settings->roleAssignmentEnabled()) {
+            return false;
+        }
+
+        return ! Member::qualifiesForAssociationRole(
+            MemberStatus::Active,
+            $row->memberType,
+            $this->periodWillBeActive($row),
+            $this->settings->permanentMemberTypes(),
+        );
+    }
+
+    /** Whether the row's period is created active: it has not ended yet. */
+    private function periodWillBeActive(ParsedMemberImportRow $row): bool
+    {
+        return $row->createsPeriod()
+            && $row->periodEnd->format('Y-m-d') >= CalendarDate::today()->format('Y-m-d');
     }
 
     /**
@@ -320,8 +402,12 @@ final readonly class MemberImportService implements MemberImportServiceInterface
         return array_map(strval(...), array_keys($headers));
     }
 
-    private function create(ParsedMemberImportRow $row, MemberNumber $number, ?LinkableAccountDTO $account): void
+    /**
+     * @param  array<string, string>  $currencies  by currencyKey()
+     */
+    private function create(ParsedMemberImportRow $row, MemberNumber $number, ?LinkableAccountDTO $account, array $currencies): void
     {
+        // Saved without its account first: see the class comment
         $member = new Member(
             id: MemberId::generate(),
             memberNumber: $number,
@@ -333,13 +419,30 @@ final readonly class MemberImportService implements MemberImportServiceInterface
             address: $row->address,
             memberType: $row->memberType,
             status: MemberStatus::Active,
-            userId: $account?->id,
             notes: $row->notes,
             joinedAt: $row->joinedAt,
         );
 
         $this->members->save($member);
 
+        if ($row->createsPeriod()) {
+            $this->createPeriod($row, $member, $currencies);
+        }
+
+        if ($account instanceof LinkableAccountDTO) {
+            $member->linkToUser($account->id);
+            $this->members->save($member);
+        }
+    }
+
+    /**
+     * The period keeps the days the row gives: they are the member's real ones, unlike
+     * MembershipService::create(), which moves the start to the start of the period type.
+     *
+     * @param  array<string, string>  $currencies  by currencyKey()
+     */
+    private function createPeriod(ParsedMemberImportRow $row, Member $member, array $currencies): void
+    {
         if (! $row->createsPeriod()) {
             return;
         }
@@ -368,11 +471,43 @@ final readonly class MemberImportService implements MemberImportServiceInterface
         $this->fees->save(new MembershipFee(
             id: MembershipFeeId::generate(),
             membershipId: $membership->id,
-            amount: Money::fromCents($row->feeAmountCents, self::CURRENCY),
+            amount: Money::fromCents($row->feeAmountCents, $currencies[$this->currencyKey($row->memberType, $row->periodType)] ?? self::DEFAULT_CURRENCY),
             dueDate: $row->feeDueDate ?? $row->periodStart,
             paidAt: $row->feePaidAt,
             paymentMethod: $row->paymentMethod,
             transactionReference: $row->paymentReference,
         ));
+    }
+
+    /**
+     * The currency of each member type and period type the fees use: the one of their default
+     * fee structure, as the panel proposes it, or euros without one. Read once per pair.
+     *
+     * @param  list<array{row: ParsedMemberImportRow, number: MemberNumber, account: LinkableAccountDTO|null}>  $planned
+     * @return array<string, string> by currencyKey()
+     */
+    private function currencies(array $planned): array
+    {
+        $currencies = [];
+
+        foreach ($planned as ['row' => $row]) {
+            if (! $row->createsPeriod() || ! $row->createsFee()) {
+                continue;
+            }
+
+            $key = $this->currencyKey($row->memberType, $row->periodType);
+
+            if (! isset($currencies[$key])) {
+                $currency = $this->feeStructures->getDefaultStructure($row->memberType, $row->periodType)?->amount->currency;
+                $currencies[$key] = is_string($currency) && trim($currency) !== '' ? strtoupper(trim($currency)) : self::DEFAULT_CURRENCY;
+            }
+        }
+
+        return $currencies;
+    }
+
+    private function currencyKey(MemberType $memberType, MembershipPeriodType $periodType): string
+    {
+        return $memberType->value.'|'.$periodType->value;
     }
 }

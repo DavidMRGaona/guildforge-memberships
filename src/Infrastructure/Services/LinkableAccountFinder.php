@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Services;
 
+use App\Application\Authorization\Services\AssociationMembershipServiceInterface;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Modules\Memberships\Application\DTOs\Import\LinkableAccountDTO;
 use Modules\Memberships\Application\Services\LinkableAccountFinderInterface;
@@ -17,6 +19,10 @@ use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 final readonly class LinkableAccountFinder implements LinkableAccountFinderInterface
 {
     private const int LOOKUP_CHUNK = 500;
+
+    public function __construct(
+        private AssociationMembershipServiceInterface $associationMembership,
+    ) {}
 
     /**
      * @param  list<string>  $emails
@@ -51,10 +57,12 @@ final readonly class LinkableAccountFinder implements LinkableAccountFinderInter
             }
         }
 
-        $linked = $this->alreadyLinked(array_map(
+        $candidateIds = array_map(
             static fn (UserModel $account): string => (string) $account->getKey(),
             array_values($candidates),
-        ));
+        );
+        $linked = $this->alreadyLinked($candidateIds);
+        $holders = $this->associationRoleHolders($candidateIds);
 
         $found = [];
 
@@ -62,7 +70,11 @@ final readonly class LinkableAccountFinder implements LinkableAccountFinderInter
             $id = (string) $account->getKey();
 
             if (! isset($linked[$id])) {
-                $found[$email] = new LinkableAccountDTO($id, (string) ($account->display_name ?? $account->name));
+                $found[$email] = new LinkableAccountDTO(
+                    id: $id,
+                    name: (string) ($account->display_name ?? $account->name),
+                    holdsAssociationRole: isset($holders[$id]),
+                );
             }
         }
 
@@ -74,6 +86,37 @@ final readonly class LinkableAccountFinder implements LinkableAccountFinderInter
         return ! $account->trashed()
             && $account->anonymized_at === null
             && $account->email_verified_at !== null;
+    }
+
+    /**
+     * Accounts holding the association member role, read from the stored roles as
+     * MemberRoleSynchronizer reads them.
+     *
+     * @param  list<string>  $userIds
+     * @return array<string, true>
+     */
+    private function associationRoleHolders(array $userIds): array
+    {
+        $roleName = $this->associationMembership->roleName();
+
+        if ($roleName === null || $userIds === []) {
+            return [];
+        }
+
+        $holders = [];
+
+        foreach (array_chunk($userIds, self::LOOKUP_CHUNK) as $chunk) {
+            $ids = UserModel::query()
+                ->whereIn('id', $chunk)
+                ->whereHas('roles', static fn (Builder $query): Builder => $query->where('name', $roleName))
+                ->pluck('id');
+
+            foreach ($ids as $id) {
+                $holders[(string) $id] = true;
+            }
+        }
+
+        return $holders;
     }
 
     /**

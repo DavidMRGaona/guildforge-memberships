@@ -137,33 +137,73 @@ final class MemberImportRowParser
             return [$type, $start, $end];
         }
 
-        $type ??= $this->settings->defaultPeriodType();
         $month = $this->settings->academicStartMonth();
 
-        if (! $start instanceof DateTimeImmutable && ! $end instanceof DateTimeImmutable) {
-            $dates = $type->getPeriodDates($this->today, $month);
-            [$start, $end] = [$dates['start'], $dates['end']];
-        } elseif (! $start instanceof DateTimeImmutable) {
-            $start = $type === MembershipPeriodType::Rolling
-                ? $end->modify('-1 year +1 day')
-                : $type->getPeriodDates($end, $month)['start'];
-        } elseif (! $end instanceof DateTimeImmutable) {
-            $end = $type->getPeriodDates($start, $month)['end'];
-
+        if ($start instanceof DateTimeImmutable && $end instanceof DateTimeImmutable) {
             if ($end < $start) {
-                $this->fail(MemberImportColumn::PeriodEnd, 'period_end_required');
+                $this->fail(MemberImportColumn::PeriodEnd, 'period_end_before_start');
 
                 return [$type, $start, null];
             }
+
+            // Days given are the member's real ones: kept as they are, whatever the type
+            $type ??= $this->typeFitting($start, $end, $month);
+
+            if (! $type instanceof MembershipPeriodType) {
+                $this->fail(MemberImportColumn::PeriodType, 'period_type_required');
+            }
+
+            return [$type, $start, $end];
         }
 
+        $type ??= $this->settings->defaultPeriodType();
+
+        if (! $start instanceof DateTimeImmutable && ! $end instanceof DateTimeImmutable) {
+            $dates = $type->getPeriodDates($this->today, $month);
+
+            return [$type, $dates['start'], $dates['end']];
+        }
+
+        if (! $start instanceof DateTimeImmutable) {
+            // A day after the end, a year back: 29/02/2028 starts on 01/03/2027
+            $start = $type === MembershipPeriodType::Rolling
+                ? $end->modify('+1 day')->modify('-1 year')
+                : $type->getPeriodDates($end, $month)['start'];
+
+            return [$type, $start, $end];
+        }
+
+        $end = $type->getPeriodDates($start, $month)['end'];
+
         if ($end < $start) {
-            $this->fail(MemberImportColumn::PeriodEnd, 'period_end_before_start');
+            $this->fail(MemberImportColumn::PeriodEnd, 'period_end_required');
 
             return [$type, $start, null];
         }
 
         return [$type, $start, $end];
+    }
+
+    /**
+     * The period type whose period starting on $start ends exactly on $end. When several fit
+     * (1 January to 31 December is a calendar year and a rolling year), the module's default
+     * type if it is one of them, otherwise the first of calendar, academic and rolling.
+     */
+    private function typeFitting(DateTimeImmutable $start, DateTimeImmutable $end, int $month): ?MembershipPeriodType
+    {
+        $fitting = array_values(array_filter(
+            MembershipPeriodType::cases(),
+            static function (MembershipPeriodType $type) use ($start, $end, $month): bool {
+                $dates = $type->getPeriodDates($start, $month);
+
+                return $dates['start']->format('Y-m-d') === $start->format('Y-m-d')
+                    && $dates['end']->format('Y-m-d') === $end->format('Y-m-d');
+            },
+        ));
+
+        $default = $this->settings->defaultPeriodType();
+
+        return in_array($default, $fitting, true) ? $default : ($fitting[0] ?? null);
     }
 
     private function text(MemberImportColumn $column, bool $required = false, ?int $maxLength = self::MAX_TEXT_LENGTH): ?string

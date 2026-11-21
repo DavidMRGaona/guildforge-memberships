@@ -8,6 +8,7 @@ use Modules\Memberships\Application\DTOs\Import\MemberImportOptionsDTO;
 use Modules\Memberships\Application\DTOs\Import\MemberImportPreviewDTO;
 use Modules\Memberships\Application\DTOs\Import\MemberImportResultDTO;
 use Modules\Memberships\Application\DTOs\Import\MemberImportRowDTO;
+use Modules\Memberships\Domain\Exceptions\MemberImportFailedException;
 
 /**
  * Imports members, one per row, with their current period and its fee. Works on rows
@@ -30,9 +31,13 @@ interface MemberImportServiceInterface
 
     /**
      * Checks every row again (never trusts an earlier preview) and, when the report allows
-     * it, creates every new row in one transaction; otherwise creates nothing.
+     * it, creates every new row in one transaction; otherwise creates nothing. One import
+     * runs at a time: while another one runs, the result is busy() and nothing is checked.
      *
      * @param  list<MemberImportRowDTO>  $rows
+     *
+     * @throws MemberImportFailedException when the database refuses a write; nothing is
+     *                                     created and the exception carries no row data
      */
     public function import(array $rows, MemberImportOptionsDTO $options): MemberImportResultDTO;
 }

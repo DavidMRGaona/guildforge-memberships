@@ -387,6 +387,10 @@ return [
             'payment_reference' => 'Reference',
         ],
         'last_separator' => ' and ',
+        'busy' => 'Another member import is running. Try again in a moment.',
+        'link_skipped' => [
+            'would_remove_association_role' => 'Not linked to the account: it would lose the association member role it holds, because this member has no running period.',
+        ],
         'errors' => [
             'required' => 'This value is missing.',
             'too_long' => 'It takes :max characters at most.',
@@ -401,6 +405,7 @@ return [
             'repeated_in_file' => 'It is repeated in rows :lines.',
             'amount' => 'Write the amount as 25, 25,00 or 25.00, without a minus sign.',
             'fee_needs_period' => 'The fee needs a period: give its start, its end or its type.',
+            'period_type_required' => 'Give the period type: the dates fit none.',
             'period_end_before_start' => 'The period cannot end before it starts.',
             'period_end_required' => 'Give the end of the period: it cannot be worked out from its start.',
             'paid_at_required' => 'Give the payment date to keep the payment method or the reference.',

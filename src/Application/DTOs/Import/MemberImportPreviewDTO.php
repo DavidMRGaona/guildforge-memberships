@@ -7,8 +7,9 @@ namespace Modules\Memberships\Application\DTOs\Import;
 use Modules\Memberships\Domain\Enums\MemberImportRowStatus;
 
 /**
- * What an import would do with each row, and whether it can run: never with an invalid row,
- * two headers for the same column or more rows than allowed.
+ * What an import would do with each row, and whether it can run: only with at least one new
+ * row, and never with an invalid row, two headers for the same column or more rows than
+ * allowed.
  */
 final readonly class MemberImportPreviewDTO
 {
@@ -52,7 +53,10 @@ final readonly class MemberImportPreviewDTO
 
     public function canImport(): bool
     {
-        return ! $this->rowLimitExceeded && $this->repeatedColumns === [] && $this->invalidCount() === 0;
+        return ! $this->rowLimitExceeded
+            && $this->repeatedColumns === []
+            && $this->invalidCount() === 0
+            && $this->newCount() > 0;
     }
 
     /**
