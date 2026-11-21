@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Event;
 use Inertia\Inertia;
 use Livewire\Livewire;
 use Modules\Memberships\Application\DTOs\MemberSituationDTO;
+use Modules\Memberships\Application\Services\LinkableAccountFinderInterface;
+use Modules\Memberships\Application\Services\MemberImportServiceInterface;
 use Modules\Memberships\Application\Services\MemberNumberGeneratorInterface;
 use Modules\Memberships\Application\Services\MemberServiceInterface;
 use Modules\Memberships\Application\Services\MembershipFeeServiceInterface;
@@ -54,6 +56,8 @@ use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\Eloquen
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\EloquentMemberRepository;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\EloquentMembershipFeeRepository;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\EloquentMembershipRepository;
+use Modules\Memberships\Infrastructure\Services\Import\MemberImportService;
+use Modules\Memberships\Infrastructure\Services\LinkableAccountFinder;
 use Modules\Memberships\Infrastructure\Services\MemberNumberGenerator;
 use Modules\Memberships\Infrastructure\Services\MemberService;
 use Modules\Memberships\Infrastructure\Services\MembershipFeeService;
@@ -102,6 +106,8 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         $this->app->bind(MembershipServiceInterface::class, MembershipService::class);
         $this->app->bind(MembershipFeeServiceInterface::class, MembershipFeeService::class);
         $this->app->bind(MemberSituationQueryInterface::class, MemberSituationQuery::class);
+        $this->app->bind(MemberImportServiceInterface::class, MemberImportService::class);
+        $this->app->bind(LinkableAccountFinderInterface::class, LinkableAccountFinder::class);
     }
 
     public function boot(): void

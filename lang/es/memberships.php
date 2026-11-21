@@ -359,4 +359,56 @@ return [
             'manage_help' => 'Incluye la asignación automática del rol de socio y los tipos de socio permanentes: decide quién recibe el rol de socio.',
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Member import
+    |--------------------------------------------------------------------------
+    */
+    'import' => [
+        'columns' => [
+            'first_name' => 'Nombre',
+            'last_name' => 'Apellidos',
+            'email' => 'Email',
+            'phone' => 'Teléfono',
+            'birth_date' => 'Fecha de nacimiento',
+            'address' => 'Dirección',
+            'member_type' => 'Tipo de socio',
+            'joined_at' => 'Fecha de alta',
+            'member_number' => 'Número de socio',
+            'notes' => 'Notas',
+            'period_type' => 'Tipo de periodo',
+            'period_start' => 'Inicio del periodo',
+            'period_end' => 'Fin del periodo',
+            'fee_amount' => 'Importe',
+            'fee_due_date' => 'Vencimiento',
+            'fee_paid_at' => 'Pagada el',
+            'payment_method' => 'Forma de pago',
+            'payment_reference' => 'Referencia',
+        ],
+        'last_separator' => ' y ',
+        'busy' => 'Ya hay otra importación de socios en marcha. Inténtalo de nuevo en un momento.',
+        'link_skipped' => [
+            'would_remove_association_role' => 'No se vincula a la cuenta: perdería el rol de socio que ya tiene, porque esta ficha no tiene un periodo en curso.',
+        ],
+        'errors' => [
+            'required' => 'Falta este dato.',
+            'too_long' => 'Admite como mucho :max caracteres.',
+            'email' => 'No es un email válido.',
+            'date' => 'Escribe la fecha como 31/12/2025 o 2025-12-31.',
+            'future_date' => 'No puede ser una fecha futura.',
+            'member_type' => 'No es un tipo de socio. Usa uno de estos: :options.',
+            'period_type' => 'No es un tipo de periodo. Usa uno de estos: :options.',
+            'payment_method' => 'No es una forma de pago. Usa una de estas: :options.',
+            'member_number' => 'Escribe el número como AAAA-NNNN, por ejemplo 2025-0001.',
+            'member_numbers_exhausted' => 'No quedan números de socio libres en :year.',
+            'repeated_in_file' => 'Se repite en las filas :lines.',
+            'amount' => 'Escribe el importe como 25, 25,00 o 25.00, sin signo negativo.',
+            'fee_needs_period' => 'La cuota necesita un periodo: indica su inicio, su fin o su tipo.',
+            'period_type_required' => 'Indica el tipo de periodo: las fechas no encajan con ninguno.',
+            'period_end_before_start' => 'El fin del periodo no puede ser anterior a su inicio.',
+            'period_end_required' => 'Indica el fin del periodo: no se puede deducir de su inicio.',
+            'paid_at_required' => 'Indica la fecha de pago para guardar la forma de pago o la referencia.',
+        ],
+    ],
 ];
