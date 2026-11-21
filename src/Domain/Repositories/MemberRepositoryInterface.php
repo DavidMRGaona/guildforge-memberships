@@ -86,6 +86,23 @@ interface MemberRepositoryInterface
     public function getNextMemberNumber(int $year): MemberNumber;
 
     /**
+     * The given member numbers that a member already has, deleted members included.
+     *
+     * @param  list<string>  $memberNumbers
+     * @return list<string>
+     */
+    public function existingMemberNumbers(array $memberNumbers): array;
+
+    /**
+     * The given emails that a member already has, deleted members included, compared
+     * without case and returned in lower case.
+     *
+     * @param  list<string>  $emails
+     * @return list<string>
+     */
+    public function existingEmails(array $emails): array;
+
+    /**
      * Get all members.
      *
      * @return array<Member>

@@ -134,6 +134,24 @@ Al desactivar `enable_role_assignment`, el módulo deja de asignar y retirar el 
 
 Cambiar el rol de socio en el core no retira el anterior a quien ya lo tenía, y `memberships:sync-roles` tampoco lo hace: solo gestiona el rol configurado en ese momento. Retira el anterior desde el editor de roles y ejecuta el comando para asignar el nuevo.
 
+## Importar socios
+
+`MemberImportServiceInterface` da de alta socios a partir de filas ya leídas de una hoja de cálculo (`MemberImportRowDTO`: número de fila y mapa `cabecera → texto`), así que no depende de cómo se lee el fichero. Cada fila es un socio con, si se indica, su periodo actual y la cuota de ese periodo.
+
+- `preview()` dice qué pasaría con cada fila sin escribir nada: `new`, `duplicate` (con el motivo: número o email) o `invalid` (con los mensajes por columna), el número de socio que recibiría y, con `linkByEmail`, la cuenta con la que se vincularía.
+- `import()` vuelve a comprobarlo todo y crea las filas nuevas en una sola transacción. Si alguna fila no es válida, hay dos cabeceras para la misma columna o más de 1000 filas, no crea nada.
+
+Reglas:
+
+- **Columnas**: las cabeceras son las de `import.columns` en las traducciones (o su código), sin distinguir mayúsculas, tildes ni espacios de más. Solo `Nombre` y `Apellidos` son obligatorias; las desconocidas se ignoran y se avisan.
+- **Valores**: tipos de socio, tipos de periodo y formas de pago por su nombre o su código; fechas `dd/mm/aaaa` o `aaaa-mm-dd`; importes `25`, `25,00` o `25.00`, nunca negativos y siempre en euros.
+- **Duplicados**: una fila cuyo número o email (sin distinguir mayúsculas) ya tiene un socio, también uno borrado, se salta; nunca se actualiza un socio. Dos filas del mismo fichero con el mismo número o email son las dos inválidas. Importar dos veces el mismo fichero no duplica nada.
+- **Número de socio**: si viene con el formato `AAAA-NNNN` se respeta; si no viene, se genera con el año de la fecha de alta, después de los que ya existen y sin chocar con los que da el propio fichero.
+- **Periodo**: sin columnas de periodo, el socio entra sin periodo. Lo que falta se deduce del tipo (el predeterminado del módulo si no se indica). Queda `expired` si su fin ya pasó y `active` si no.
+- **Cuota**: necesita periodo. Vence el primer día del periodo si no se indica otra fecha; la forma de pago y la referencia necesitan la fecha de pago.
+- **Cuentas**: solo con `linkByEmail` y solo con la única cuenta con ese email (sin distinguir mayúsculas, contando las desactivadas), si está activa, sin anonimizar, con el email verificado y sin socio vinculado. Si hay dudas, la fila entra sin vincular. El rol de socio lo da el sincronizador de siempre.
+- No se envía ningún correo: las cuotas vencidas las detecta después el comando diario. El log solo guarda recuentos, nunca datos de las filas.
+
 ## Panel de administración
 
 En el grupo **Personas**:

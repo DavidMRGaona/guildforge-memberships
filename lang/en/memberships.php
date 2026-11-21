@@ -359,4 +359,51 @@ return [
             'manage_help' => 'Includes the automatic association member role and the permanent member types: it decides who gets the association member role.',
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Member import
+    |--------------------------------------------------------------------------
+    */
+    'import' => [
+        'columns' => [
+            'first_name' => 'First name',
+            'last_name' => 'Last name',
+            'email' => 'Email',
+            'phone' => 'Phone',
+            'birth_date' => 'Birth date',
+            'address' => 'Address',
+            'member_type' => 'Member type',
+            'joined_at' => 'Joined on',
+            'member_number' => 'Member number',
+            'notes' => 'Notes',
+            'period_type' => 'Period type',
+            'period_start' => 'Period start',
+            'period_end' => 'Period end',
+            'fee_amount' => 'Amount',
+            'fee_due_date' => 'Due date',
+            'fee_paid_at' => 'Paid on',
+            'payment_method' => 'Payment method',
+            'payment_reference' => 'Reference',
+        ],
+        'last_separator' => ' and ',
+        'errors' => [
+            'required' => 'This value is missing.',
+            'too_long' => 'It takes :max characters at most.',
+            'email' => 'This is not a valid email.',
+            'date' => 'Write the date as 31/12/2025 or 2025-12-31.',
+            'future_date' => 'It cannot be a future date.',
+            'member_type' => 'This is not a member type. Use one of these: :options.',
+            'period_type' => 'This is not a period type. Use one of these: :options.',
+            'payment_method' => 'This is not a payment method. Use one of these: :options.',
+            'member_number' => 'Write the number as YYYY-NNNN, for example 2025-0001.',
+            'member_numbers_exhausted' => 'There are no free member numbers left in :year.',
+            'repeated_in_file' => 'It is repeated in rows :lines.',
+            'amount' => 'Write the amount as 25, 25,00 or 25.00, without a minus sign.',
+            'fee_needs_period' => 'The fee needs a period: give its start, its end or its type.',
+            'period_end_before_start' => 'The period cannot end before it starts.',
+            'period_end_required' => 'Give the end of the period: it cannot be worked out from its start.',
+            'paid_at_required' => 'Give the payment date to keep the payment method or the reference.',
+        ],
+    ],
 ];

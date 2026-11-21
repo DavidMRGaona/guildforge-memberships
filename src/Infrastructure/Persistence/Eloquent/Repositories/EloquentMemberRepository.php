@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories;
 
+use Illuminate\Support\Facades\DB;
 use Modules\Memberships\Domain\Entities\Member;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Enums\MemberStatus;
@@ -16,6 +17,9 @@ use Modules\Memberships\Infrastructure\Services\CalendarDate;
 
 final readonly class EloquentMemberRepository implements MemberRepositoryInterface
 {
+    /** Values per query, well under the bound parameters every database accepts. */
+    private const int LOOKUP_CHUNK = 500;
+
     public function save(Member $member): void
     {
         MemberModel::query()->updateOrCreate(
@@ -162,6 +166,48 @@ final readonly class EloquentMemberRepository implements MemberRepositoryInterfa
         $nextSequence = $lastNumber->sequence() + 1;
 
         return MemberNumber::generate($year, $nextSequence);
+    }
+
+    /**
+     * @param  list<string>  $memberNumbers
+     * @return list<string>
+     */
+    public function existingMemberNumbers(array $memberNumbers): array
+    {
+        $existing = [];
+
+        foreach (array_chunk(array_values(array_unique($memberNumbers)), self::LOOKUP_CHUNK) as $chunk) {
+            // Deleted members keep their number: the unique index counts them
+            foreach (MemberModel::withTrashed()->whereIn('member_number', $chunk)->pluck('member_number') as $number) {
+                $existing[] = (string) $number;
+            }
+        }
+
+        return $existing;
+    }
+
+    /**
+     * @param  list<string>  $emails
+     * @return list<string>
+     */
+    public function existingEmails(array $emails): array
+    {
+        $wanted = array_values(array_unique(array_map(mb_strtolower(...), $emails)));
+        $existing = [];
+
+        foreach (array_chunk($wanted, self::LOOKUP_CHUNK) as $chunk) {
+            $found = MemberModel::withTrashed()
+                ->whereNotNull('email')
+                ->whereIn(DB::raw('lower(email)'), $chunk)
+                ->pluck('email');
+
+            foreach ($found as $email) {
+                $existing[] = mb_strtolower((string) $email);
+            }
+        }
+
+        // SQL lower() may fold fewer characters than PHP: keep only what was asked for
+        return array_values(array_intersect(array_unique($existing), $wanted));
     }
 
     /**
