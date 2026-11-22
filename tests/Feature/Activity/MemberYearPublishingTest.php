@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Memberships\Tests\Feature\Activity;
 
 use App\Application\Activity\Services\ActivityPublisherInterface;
+use App\Application\Services\SettingsServiceInterface;
 use App\Domain\Activity\Events\ActivityRecorded;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Carbon\CarbonImmutable;
@@ -333,6 +334,100 @@ final class MemberYearPublishingTest extends ModuleTestCase
         return $ids;
     }
 
+    public function test_expiring_a_period_by_hand_before_its_end_announces_the_years_it_stops_counting(): void
+    {
+        $user = UserModel::factory()->create();
+        $period = $this->period($this->memberOf($user), MembershipStatus::Active, '2023-01-01', '2026-12-31');
+        $this->forgetRecorded();
+
+        $this->travelTo(CarbonImmutable::parse('2024-03-10T12:00:00+01:00'));
+        $this->travelTo(CarbonImmutable::parse('2026-06-15T12:00:00+02:00'));
+        $period->update(['status' => MembershipStatus::Expired->value, 'expired_at' => '2024-03-10 12:00:00']);
+
+        $this->assertRecorded($user, [2025, 2026]);
+    }
+
+    public function test_changing_the_status_or_type_of_a_permanent_member_announces_their_years(): void
+    {
+        $user = UserModel::factory()->create();
+        $member = $this->memberOf($user, MemberType::Honorary, '2024-05-01 10:00:00');
+        $this->forgetRecorded();
+
+        $member->update(['status' => 'inactive']);
+        $this->assertRecorded($user, [2024, 2025, 2026]);
+
+        $this->forgetRecorded();
+        $member->update(['status' => 'active', 'member_type' => MemberType::Regular->value]);
+        $this->assertRecorded($user, [2024, 2025, 2026]);
+    }
+
+    public function test_changing_the_status_of_a_regular_member_without_periods_announces_nothing(): void
+    {
+        $member = $this->memberOf(UserModel::factory()->create());
+        $this->forgetRecorded();
+
+        $member->update(['status' => 'inactive']);
+
+        $this->assertNothingRecorded();
+    }
+
+    public function test_the_daily_command_catches_up_the_days_it_missed(): void
+    {
+        $user = UserModel::factory()->create();
+        $this->period($this->memberOf($user), MembershipStatus::Active, '2026-09-01', '2027-06-30');
+        $this->forgetRecorded();
+        $this->settings()->set(AnnounceMemberYears::LAST_DAY_SETTING, '2026-12-20');
+
+        $this->travelTo(CarbonImmutable::parse('2027-01-03T10:00:00+01:00'));
+        $this->announceYears();
+
+        $this->assertRecorded($user, [2027]);
+        $this->assertSame('2027-01-03', $this->settings()->getStored(AnnounceMemberYears::LAST_DAY_SETTING));
+    }
+
+    public function test_the_daily_command_is_quiet_when_it_already_ran_today(): void
+    {
+        $this->period($this->memberOf(UserModel::factory()->create()), MembershipStatus::Active, '2026-09-01', '2027-06-30');
+        $this->forgetRecorded();
+        $this->travelTo(CarbonImmutable::parse('2027-01-01T00:30:00+01:00'));
+        $this->announceYears();
+        $this->forgetRecorded();
+
+        $this->announceYears();
+
+        $this->assertNothingRecorded();
+    }
+
+    public function test_the_daily_command_ignores_a_period_expired_by_hand_before_the_new_year(): void
+    {
+        $this->period($this->memberOf(UserModel::factory()->create()), MembershipStatus::Active, '2026-01-01', '2027-12-31')
+            ->update(['status' => MembershipStatus::Expired->value, 'expired_at' => '2026-06-01 10:00:00']);
+        $this->forgetRecorded();
+
+        $this->travelTo(CarbonImmutable::parse('2027-01-01T00:30:00+01:00'));
+        $this->announceYears();
+
+        $this->assertNothingRecorded();
+    }
+
+    public function test_the_daily_command_announces_the_new_year_of_a_permanent_member(): void
+    {
+        $user = UserModel::factory()->create();
+        $this->memberOf($user, MemberType::Honorary, '2020-05-01 10:00:00');
+        $this->memberOf(UserModel::factory()->create(), MemberType::Regular, '2020-05-01 10:00:00');
+        $this->forgetRecorded();
+
+        $this->travelTo(CarbonImmutable::parse('2027-01-01T00:30:00+01:00'));
+        $this->announceYears();
+
+        $this->assertRecorded($user, [2027]);
+    }
+
+    private function settings(): SettingsServiceInterface
+    {
+        return $this->app->make(SettingsServiceInterface::class);
+    }
+
     private function announceYears(): void
     {
         $kernel = $this->app->make(Kernel::class);
@@ -346,7 +441,7 @@ final class MemberYearPublishingTest extends ModuleTestCase
         $this->app->forgetInstance(ActivityPublisherInterface::class);
     }
 
-    private function memberOf(?UserModel $user): MemberModel
+    private function memberOf(?UserModel $user, MemberType $type = MemberType::Regular, string $joined = '2020-01-01 00:00:00'): MemberModel
     {
         $this->numbers++;
 
@@ -355,10 +450,10 @@ final class MemberYearPublishingTest extends ModuleTestCase
             'member_number' => sprintf('2020-%04d', $this->numbers),
             'first_name' => 'Ana',
             'last_name' => 'García',
-            'member_type' => MemberType::Regular->value,
+            'member_type' => $type->value,
             'status' => 'active',
             'user_id' => $user?->id,
-            'joined_at' => '2020-01-01 00:00:00',
+            'joined_at' => $joined,
         ]);
     }
 

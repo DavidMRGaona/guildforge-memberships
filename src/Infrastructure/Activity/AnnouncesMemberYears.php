@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Modules\Memberships\Infrastructure\Activity;
 
 use App\Application\Activity\Services\ActivityPublisherInterface;
+use DateTimeInterface;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
+use Modules\Memberships\Domain\Enums\MemberStatus;
+use Modules\Memberships\Domain\Enums\MemberType;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
-use Modules\Memberships\Infrastructure\Services\CalendarDate;
+use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
 
 /**
  * Tells the core which years of which accounts may have changed (core#774), through
@@ -45,7 +48,7 @@ final class AnnouncesMemberYears
     }
 
     /** The years a period covers, for the account of the member it belongs to (even a deleted one). */
-    public function period(string $memberId, ?string $status, string $startDate, string $endDate): void
+    public function period(string $memberId, ?string $status, string $startDate, string $endDate, ?string $expiredOn = null): void
     {
         $status = MembershipStatus::tryFrom((string) $status);
 
@@ -53,7 +56,7 @@ final class AnnouncesMemberYears
             return;
         }
 
-        $this->years($this->accountOf($memberId), MemberYears::covered($status, $startDate, $endDate, $this->today()));
+        $this->years($this->accountOf($memberId), MemberYears::covered($status, $startDate, $endDate, ActivityDays::today(), $expiredOn));
     }
 
     /**
@@ -65,18 +68,27 @@ final class AnnouncesMemberYears
         string $previousStatus,
         string $previousStart,
         string $previousEnd,
+        ?string $previousExpiredOn,
         string $memberId,
         string $status,
         string $start,
         string $end,
+        ?string $expiredOn,
     ): void {
-        $today = $this->today();
+        $today = ActivityDays::today();
         $before = MembershipStatus::tryFrom($previousStatus);
         $after = MembershipStatus::tryFrom($status);
-        $yearsBefore = $before === null ? [] : MemberYears::covered($before, $previousStart, $previousEnd, $today);
-        $yearsAfter = $after === null ? [] : MemberYears::covered($after, $start, $end, $today);
+        $yearsBefore = $before === null ? [] : MemberYears::covered($before, $previousStart, $previousEnd, $today, $previousExpiredOn);
+        $yearsAfter = $after === null ? [] : MemberYears::covered($after, $start, $end, $today, $expiredOn);
 
         if ($previousMemberId === $memberId && $yearsBefore === $yearsAfter && ($yearsAfter === [] || substr($previousStart, 0, 10) === substr($start, 0, 10))) {
+            return;
+        }
+
+        // From the same day of the same record only the years that began or stopped counting change
+        if ($previousMemberId === $memberId && substr($previousStart, 0, 10) === substr($start, 0, 10)) {
+            $this->years($this->accountOf($memberId), array_values(array_unique([...array_diff($yearsBefore, $yearsAfter), ...array_diff($yearsAfter, $yearsBefore)])));
+
             return;
         }
 
@@ -85,23 +97,54 @@ final class AnnouncesMemberYears
     }
 
     /**
-     * Every year any period of the member covers, oldest first.
+     * Every year the member counts for, oldest first: the ones their periods cover and, while the
+     * record is active and of a permanent type, every one since they joined.
      *
      * @return list<int>
      */
     public function yearsOfMember(string $memberId): array
     {
-        $today = $this->today();
+        $today = ActivityDays::today();
         $years = [];
 
-        foreach (MembershipModel::query()->where('member_id', $memberId)->get(['status', 'start_date', 'end_date']) as $period) {
-            array_push($years, ...MemberYears::covered($period->status, $period->start_date->toDateString(), $period->end_date->toDateString(), $today));
+        foreach (MembershipModel::query()->where('member_id', $memberId)->get(['status', 'start_date', 'end_date', 'expired_at']) as $period) {
+            array_push($years, ...MemberYears::covered($period->status, $period->start_date->toDateString(), $period->end_date->toDateString(), $today, ActivityDays::of($period->expired_at)));
+        }
+
+        $member = MemberModel::withTrashed()->find($memberId, ['id', 'status', 'member_type', 'joined_at']);
+
+        if ($member instanceof MemberModel && $member->status === MemberStatus::Active && $this->isPermanent($member->member_type)) {
+            array_push($years, ...MemberYears::permanent(ActivityDays::of($member->joined_at), $today));
         }
 
         $years = array_values(array_unique($years));
         sort($years);
 
         return $years;
+    }
+
+    /**
+     * The status, type or join day of a record changed: it may have been, or may now be, a
+     * permanent member, whose years begin the day they joined.
+     */
+    public function memberStateChanged(MemberModel $member): void
+    {
+        $previousType = $member->getOriginal('member_type');
+
+        if ($this->isPermanent($member->member_type) || ($previousType instanceof MemberType && $this->isPermanent($previousType))) {
+            $years = $this->yearsOfMember($member->id);
+            $previousJoined = $member->getOriginal('joined_at');
+            $joined = min(
+                ActivityDays::of($member->joined_at) ?? '9999-12-31',
+                $previousJoined instanceof DateTimeInterface ? (ActivityDays::of($previousJoined) ?? '9999-12-31') : '9999-12-31',
+            );
+
+            array_push($years, ...MemberYears::permanent($joined === '9999-12-31' ? null : $joined, ActivityDays::today()));
+            $years = array_values(array_unique($years));
+            sort($years);
+
+            $this->years($member->user_id, $years);
+        }
     }
 
     public function member(MemberModel $member, ?string $userId): void
@@ -116,8 +159,8 @@ final class AnnouncesMemberYears
         return is_string($userId) ? $userId : null;
     }
 
-    private function today(): string
+    private function isPermanent(MemberType $type): bool
     {
-        return CalendarDate::today()->format('Y-m-d');
+        return in_array($type, app(MembershipSettingsReader::class)->permanentMemberTypes(), true);
     }
 }

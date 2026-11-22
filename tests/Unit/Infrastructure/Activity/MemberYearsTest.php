@@ -41,6 +41,27 @@ final class MemberYearsTest extends TestCase
         $this->assertSame($expected, MemberYears::covered($status, $start, $end, $today));
     }
 
+    public function test_a_period_expired_by_hand_counts_up_to_the_day_it_was_expired(): void
+    {
+        $this->assertSame([2024, 2025], MemberYears::covered(MembershipStatus::Expired, '2024-01-01', '2026-12-31', '2030-01-01', '2025-03-01'));
+        $this->assertSame([2024, 2025, 2026], MemberYears::covered(MembershipStatus::Expired, '2024-01-01', '2026-12-31', '2030-01-01'));
+        $this->assertSame([2024], MemberYears::covered(MembershipStatus::Expired, '2024-01-01', '2024-12-31', '2030-01-01', '2026-01-02'));
+        $this->assertSame([2024, 2025], MemberYears::covered(MembershipStatus::Active, '2024-01-01', '2025-12-31', '2030-01-01', '2024-02-01'));
+        $this->assertSame([], MemberYears::covered(MembershipStatus::Expired, '2025-06-01', '2025-12-31', '2030-01-01', '2025-05-31'));
+    }
+
+    public function test_a_permanent_member_counts_every_year_from_the_day_they_joined(): void
+    {
+        $this->assertSame([2023, 2024, 2025, 2026], MemberYears::permanent('2023-11-05', '2026-06-15'));
+        $this->assertSame([], MemberYears::permanent('2026-06-16', '2026-06-15'));
+        $this->assertSame([], MemberYears::permanent(null, '2026-06-15'));
+        $this->assertSame(
+            [2023 => '2023-11-05', 2024 => '2024-01-01', 2025 => '2025-01-01', 2026 => '2026-01-01'],
+            MemberYears::firstDays([], '2026-06-15', '2023-11-05'),
+        );
+        $this->assertSame([2023 => '2023-02-01', 2024 => '2024-01-01'], MemberYears::firstDays([[MembershipStatus::Expired, '2023-02-01', '2023-12-31', null]], '2024-03-01', '2023-11-05'));
+    }
+
     public function test_the_first_day_of_a_year_is_the_start_of_the_period_when_it_begins_inside_it(): void
     {
         $this->assertSame('2025-03-10', MemberYears::firstDay(2025, '2025-03-10'));

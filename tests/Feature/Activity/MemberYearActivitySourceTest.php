@@ -363,7 +363,137 @@ final class MemberYearActivitySourceTest extends ActivitySourceTestCase
         $this->assertSame([$user->id.':2024'], array_map(static fn ($subject): string => $subject->subjectId, array_values($described)));
     }
 
-    private function memberOf(?UserModel $user, MemberStatus $status = MemberStatus::Active): MemberModel
+    public function test_a_period_expired_by_hand_counts_up_to_the_day_it_was_expired(): void
+    {
+        $user = UserModel::factory()->create();
+        $period = $this->period($this->memberOf($user), MembershipStatus::Active, '2023-01-01', '2026-12-31');
+
+        $this->travelTo(CarbonImmutable::parse('2025-03-10T12:00:00+01:00'));
+        $period->update(['status' => MembershipStatus::Expired->value]);
+        $this->travelTo(CarbonImmutable::parse('2026-06-15T12:00:00+02:00'));
+
+        $source = $this->activitySource();
+        $this->assertNotNull(MembershipModel::query()->findOrFail($period->id)->expired_at);
+        $this->assertCount(1, $source->facts($user->id.':2025'));
+        $this->assertSame([], $source->facts($user->id.':2026'));
+    }
+
+    public function test_a_period_expired_at_its_end_without_a_day_counts_up_to_its_end(): void
+    {
+        $user = UserModel::factory()->create();
+        $this->period($this->memberOf($user), MembershipStatus::Expired, '2023-01-01', '2025-12-31');
+
+        $source = $this->activitySource();
+
+        $this->assertCount(1, $source->facts($user->id.':2025'));
+        $this->assertSame([], $source->facts($user->id.':2026'));
+    }
+
+    public function test_reactivating_an_expired_period_clears_the_day_it_was_expired(): void
+    {
+        $period = $this->period($this->memberOf(UserModel::factory()->create()), MembershipStatus::Active, '2023-01-01', '2026-12-31');
+        $period->update(['status' => MembershipStatus::Expired->value]);
+        $this->assertNotNull(MembershipModel::query()->findOrFail($period->id)->expired_at);
+
+        $period->update(['status' => MembershipStatus::Active->value]);
+
+        $this->assertNull(MembershipModel::query()->findOrFail($period->id)->expired_at);
+    }
+
+    public function test_an_active_member_of_a_permanent_type_counts_every_year_since_they_joined(): void
+    {
+        $user = UserModel::factory()->create();
+        $this->memberOf($user, MemberStatus::Active, MemberType::Honorary, '2023-11-05 10:00:00');
+
+        $source = $this->activitySource();
+
+        $this->assertSame([], $source->facts($user->id.':2022'));
+        $this->assertSame(CalendarDate::parse('2023-11-05')->getTimestamp(), $source->facts($user->id.':2023')[0]->occurredAt->getTimestamp());
+        $this->assertSame(CalendarDate::parse('2025-01-01')->getTimestamp(), $source->facts($user->id.':2025')[0]->occurredAt->getTimestamp());
+        $this->assertCount(1, $source->facts($user->id.':2026'));
+        $this->assertSame([], $source->facts($user->id.':2027'));
+        $this->assertCount(4, $source->history(null, 50)->subjects);
+    }
+
+    public function test_a_permanent_member_who_is_not_active_or_not_permanent_counts_for_nothing(): void
+    {
+        $inactive = UserModel::factory()->create();
+        $regular = UserModel::factory()->create();
+        $this->memberOf($inactive, MemberStatus::Inactive, MemberType::Honorary, '2023-01-01 00:00:00');
+        $this->memberOf($regular, MemberStatus::Active, MemberType::Regular, '2023-01-01 00:00:00');
+
+        $this->assertSame([], $this->activitySource()->history(null, 50)->subjects);
+    }
+
+    public function test_the_permanent_types_are_the_ones_of_the_module_setting(): void
+    {
+        config()->set('modules.settings.memberships.permanent_member_types', ['founder']);
+        $honorary = UserModel::factory()->create();
+        $founder = UserModel::factory()->create();
+        $this->memberOf($honorary, MemberStatus::Active, MemberType::Honorary, '2025-01-01 00:00:00');
+        $this->memberOf($founder, MemberStatus::Active, MemberType::Founder, '2025-01-01 00:00:00');
+
+        $source = $this->activitySource();
+
+        $this->assertSame([], $source->facts($honorary->id.':2025'));
+        $this->assertCount(1, $source->facts($founder->id.':2025'));
+    }
+
+    public function test_a_permanent_member_with_periods_is_one_subject_per_year(): void
+    {
+        $user = UserModel::factory()->create();
+        $member = $this->memberOf($user, MemberStatus::Active, MemberType::Honorary, '2023-11-05 10:00:00');
+        $this->period($member, MembershipStatus::Expired, '2023-02-01', '2023-12-31');
+
+        $facts = $this->activitySource()->facts($user->id.':2023');
+
+        $this->assertCount(1, $facts);
+        $this->assertSame(CalendarDate::parse('2023-02-01')->getTimestamp(), $facts[0]->occurredAt->getTimestamp());
+    }
+
+    public function test_the_history_crosses_the_batches_of_accounts_it_reads(): void
+    {
+        $expected = [];
+        foreach (range(1, 5) as $ignored) {
+            $user = UserModel::factory()->create();
+            $this->period($this->memberOf($user), MembershipStatus::Expired, '2024-01-01', '2025-12-31');
+            $expected[] = $user->id.':2024';
+            $expected[] = $user->id.':2025';
+        }
+        sort($expected);
+
+        $source = new MemberYearActivitySource(accountsPerQuery: 2);
+
+        foreach ([1, 3, 50] as $limit) {
+            $seen = [];
+            $cursor = null;
+
+            do {
+                $page = $source->history($cursor, $limit);
+                array_push($seen, ...array_map(static fn ($subject): string => $subject->subjectId, $page->subjects));
+                $cursor = $page->nextCursor;
+            } while ($cursor !== null);
+
+            $this->assertSame($expected, $seen, "limit {$limit}");
+        }
+    }
+
+    public function test_facts_and_history_answer_the_same_with_a_signed_in_user_and_without(): void
+    {
+        $user = UserModel::factory()->create();
+        $this->period($this->memberOf($user), MembershipStatus::Expired, '2024-01-01', '2025-12-31');
+        $source = $this->activitySource();
+
+        $without = [array_map($this->comparable(...), $source->facts($user->id.':2024')), $source->history(null, 50)->subjects[0]->subjectId];
+
+        $this->actingAs(UserModel::factory()->admin()->create());
+        $with = [array_map($this->comparable(...), $source->facts($user->id.':2024')), $source->history(null, 50)->subjects[0]->subjectId];
+
+        $this->assertSame($without, $with);
+        $this->assertCount(2, $source->history(null, 50)->subjects);
+    }
+
+    private function memberOf(?UserModel $user, MemberStatus $status = MemberStatus::Active, MemberType $type = MemberType::Regular, string $joined = '2020-01-01 00:00:00'): MemberModel
     {
         $this->numbers++;
 
@@ -372,10 +502,10 @@ final class MemberYearActivitySourceTest extends ActivitySourceTestCase
             'member_number' => sprintf('2020-%04d', $this->numbers),
             'first_name' => 'Ana',
             'last_name' => 'García',
-            'member_type' => MemberType::Regular->value,
+            'member_type' => $type->value,
             'status' => $status->value,
             'user_id' => $user?->id,
-            'joined_at' => '2020-01-01 00:00:00',
+            'joined_at' => $joined,
         ]);
     }
 

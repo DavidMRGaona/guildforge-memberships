@@ -15,8 +15,9 @@ use WeakMap;
  * (the panel or the module services, through the repository).
  *
  * It also tells the core (core#774) which years as a member of which account may have changed
- * when a record is linked to or unlinked from an account, deleted or restored: the status and
- * type of the record do not change the years its periods were in force.
+ * when a record is linked to or unlinked from an account, deleted or restored, and when the
+ * status, type or join day of a record changes: those only matter for a permanent member, whose
+ * years begin the day they joined, and never change the years its periods were in force.
  *
  * Mass updates (MemberModel::query()->update()) fire no model events; the module does
  * not use them on members.
@@ -51,6 +52,10 @@ final class MemberModelObserver
 
             $this->years->member($member, is_string($previous) ? $previous : null);
             $this->years->member($member, $member->user_id);
+        }
+
+        if ($member->wasChanged(['status', 'member_type', 'joined_at'])) {
+            $this->years->memberStateChanged($member);
         }
 
         if (! $member->wasChanged(self::ROLE_FIELDS)) {

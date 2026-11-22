@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Modules\Memberships\Infrastructure\Persistence\Eloquent\Observers;
 
 use DateTimeImmutable;
+use DateTimeInterface;
 use Illuminate\Contracts\Events\Dispatcher;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Events\MembershipActivated;
 use Modules\Memberships\Domain\Events\MembershipDeactivated;
 use Modules\Memberships\Domain\Events\MembershipExpired;
+use Modules\Memberships\Infrastructure\Activity\ActivityDays;
 use Modules\Memberships\Infrastructure\Activity\AnnouncesMemberYears;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
 use Modules\Memberships\Infrastructure\Services\CalendarDate;
@@ -69,7 +71,7 @@ final readonly class MembershipModelObserver
      */
     private function announceChangedYears(MembershipModel $membership, string $previousMemberId): void
     {
-        if (! $membership->wasChanged(['member_id', 'status', 'start_date', 'end_date'])) {
+        if (! $membership->wasChanged(['member_id', 'status', 'start_date', 'end_date', 'expired_at'])) {
             return;
         }
 
@@ -78,10 +80,12 @@ final readonly class MembershipModelObserver
             previousStatus: (string) $membership->getRawOriginal('status'),
             previousStart: (string) $membership->getRawOriginal('start_date'),
             previousEnd: (string) $membership->getRawOriginal('end_date'),
+            previousExpiredOn: $this->day($membership->getOriginal('expired_at')),
             memberId: $membership->member_id,
             status: $membership->status->value,
             start: $membership->start_date->toDateString(),
             end: $membership->end_date->toDateString(),
+            expiredOn: ActivityDays::of($membership->expired_at),
         );
     }
 
@@ -92,7 +96,13 @@ final readonly class MembershipModelObserver
             $membership->status->value,
             $membership->start_date->toDateString(),
             $membership->end_date->toDateString(),
+            ActivityDays::of($membership->expired_at),
         );
+    }
+
+    private function day(mixed $instant): ?string
+    {
+        return $instant instanceof DateTimeInterface ? ActivityDays::of($instant) : null;
     }
 
     private function syncMembers(string $previousMemberId, string $memberId): void

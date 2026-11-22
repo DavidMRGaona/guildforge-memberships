@@ -25,6 +25,7 @@ use Modules\Memberships\Domain\Enums\MemberType;
  * @property MembershipStatus $status
  * @property Carbon|null $activated_at
  * @property Carbon|null $cancelled_at
+ * @property Carbon|null $expired_at
  * @property string|null $notes
  * @property Carbon|null $created_at
  * @property Carbon $updated_at
@@ -59,6 +60,17 @@ final class MembershipModel extends Model
                 $membership->activated_at = now();
             }
 
+            // Set expired_at when status changes to Expired: the day it was expired by hand, which
+            // years as a member count up to; a period expired at its end has none worth keeping
+            // apart, and reactivating one clears it
+            if ($membership->isDirty('status') && $membership->status === MembershipStatus::Expired && $membership->expired_at === null) {
+                $membership->expired_at = now();
+            }
+
+            if ($membership->isDirty('status') && $membership->status === MembershipStatus::Active) {
+                $membership->expired_at = null;
+            }
+
             // Set cancelled_at when status changes to Cancelled
             if ($membership->isDirty('status') && $membership->status === MembershipStatus::Cancelled && $membership->cancelled_at === null) {
                 $membership->cancelled_at = now();
@@ -78,6 +90,7 @@ final class MembershipModel extends Model
         'status',
         'activated_at',
         'cancelled_at',
+        'expired_at',
         'notes',
     ];
 
@@ -93,6 +106,7 @@ final class MembershipModel extends Model
             'status' => MembershipStatus::class,
             'activated_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'expired_at' => 'datetime',
         ];
     }
 
