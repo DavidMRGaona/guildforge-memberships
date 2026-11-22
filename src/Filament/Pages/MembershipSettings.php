@@ -25,6 +25,8 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Memberships\Domain\Enums\MemberType;
+use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
+use Modules\Memberships\Jobs\RepublishPermanentMemberYears;
 
 /**
  * @property Schema $form
@@ -187,8 +189,23 @@ final class MembershipSettings extends Page implements HasForms
         abort_unless(self::canAccess(), 403);
 
         $formData = $this->form->getState();
+        $permanentBefore = app(MembershipSettingsReader::class)->permanentMemberTypes();
 
         $moduleManager->updateSettings(new ModuleName('memberships'), $formData);
+
+        // The active members of the types added or removed gain or lose years as a member (activity contract)
+        $permanentAfter = app(MembershipSettingsReader::class)->permanentMemberTypes();
+        $changed = array_values(array_map(
+            static fn (MemberType $type): string => $type->value,
+            array_filter(
+                MemberType::cases(),
+                static fn (MemberType $type): bool => in_array($type, $permanentBefore, true) !== in_array($type, $permanentAfter, true),
+            ),
+        ));
+
+        if ($changed !== []) {
+            RepublishPermanentMemberYears::dispatch($changed);
+        }
 
         Notification::make()
             ->title(__('memberships::memberships.settings.saved'))

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Memberships;
 
+use App\Application\Activity\Contracts\ActivitySourceInterface;
 use App\Application\Knowledge\Contracts\KnowledgeCapabilityInterface;
 use App\Application\Mail\DTOs\MailCategoryDTO;
 use App\Application\Modules\DTOs\NavigationItemDTO;
 use App\Application\Modules\DTOs\PermissionDTO;
 use App\Application\Modules\DTOs\SlotRegistrationDTO;
+use App\Domain\Profiles\Events\ProfileMembershipDisplayChanged;
 use App\Filament\Support\PanelNavigationGroup;
 use App\Modules\ModuleServiceProvider;
 use Filament\Pages\Page;
@@ -27,6 +29,7 @@ use Modules\Memberships\Application\Services\MemberServiceInterface;
 use Modules\Memberships\Application\Services\MembershipFeeServiceInterface;
 use Modules\Memberships\Application\Services\MembershipServiceInterface;
 use Modules\Memberships\Application\Services\MemberSituationQueryInterface;
+use Modules\Memberships\Console\Commands\AnnounceMemberYears;
 use Modules\Memberships\Console\Commands\ProcessExpiredMemberships;
 use Modules\Memberships\Console\Commands\SyncMemberRoles;
 use Modules\Memberships\Domain\Events\FeePaymentOverdue;
@@ -44,6 +47,7 @@ use Modules\Memberships\Filament\Resources\MemberResource;
 use Modules\Memberships\Filament\Widgets\ExpiringMembershipsWidget;
 use Modules\Memberships\Filament\Widgets\MembershipStatsWidget;
 use Modules\Memberships\Filament\Widgets\OverdueFeesWidget;
+use Modules\Memberships\Infrastructure\Activity\MemberYearActivitySource;
 use Modules\Memberships\Infrastructure\Knowledge\HasMemberRecordCapability;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\FeeStructureModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
@@ -67,6 +71,7 @@ use Modules\Memberships\Infrastructure\Services\MemberSituationQuery;
 use Modules\Memberships\Listeners\NotifyFeePaymentOverdue;
 use Modules\Memberships\Listeners\NotifyMembershipExpired;
 use Modules\Memberships\Listeners\NotifyMembershipExpiring;
+use Modules\Memberships\Listeners\RepublishMemberYearsOnDisplayChange;
 use Modules\Memberships\Policies\FeeStructurePolicy;
 use Modules\Memberships\Policies\MemberPolicy;
 use Modules\Memberships\Policies\MembershipFeePolicy;
@@ -178,6 +183,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
+                AnnounceMemberYears::class,
                 ProcessExpiredMemberships::class,
                 SyncMemberRoles::class,
             ]);
@@ -193,6 +199,9 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             // Process expired memberships daily at midnight
             $schedule->command('memberships:process-expired')->daily();
+
+            // Years as a member that begin today (activity contract)
+            $schedule->command('memberships:announce-years')->daily();
         });
     }
 
@@ -204,6 +213,12 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         Event::listen(
             MembershipExpiring::class,
             [NotifyMembershipExpiring::class, 'handle']
+        );
+
+        // Years as a member are reported only for accounts that show their membership (activity contract)
+        Event::listen(
+            ProfileMembershipDisplayChanged::class,
+            RepublishMemberYearsOnDisplayChange::class,
         );
 
         // Both stay silent until enabled in the module settings
@@ -496,6 +511,17 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
     public function getSettingsSchema(): array
     {
         return [];
+    }
+
+    /**
+     * Years as a member for the activity contract (core#774): one subject per account and
+     * calendar year in which a period of its member record was in force.
+     *
+     * @return array<class-string<ActivitySourceInterface>>
+     */
+    public function registerActivitySources(): array
+    {
+        return [MemberYearActivitySource::class];
     }
 
     /**
