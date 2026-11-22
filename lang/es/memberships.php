@@ -365,6 +365,11 @@ return [
     | Member import
     |--------------------------------------------------------------------------
     */
+    'activity' => [
+        'year_label' => 'Años como socio',
+        'year_title' => 'Socio en :year',
+    ],
+
     'import' => [
         'columns' => [
             'first_name' => 'Nombre',

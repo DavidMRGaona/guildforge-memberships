@@ -365,6 +365,11 @@ return [
     | Member import
     |--------------------------------------------------------------------------
     */
+    'activity' => [
+        'year_label' => 'Years as a member',
+        'year_title' => 'Member in :year',
+    ],
+
     'import' => [
         'columns' => [
             'first_name' => 'First name',

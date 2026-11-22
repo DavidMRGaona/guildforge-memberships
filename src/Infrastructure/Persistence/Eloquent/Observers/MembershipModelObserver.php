@@ -10,6 +10,7 @@ use Modules\Memberships\Domain\Enums\MembershipStatus;
 use Modules\Memberships\Domain\Events\MembershipActivated;
 use Modules\Memberships\Domain\Events\MembershipDeactivated;
 use Modules\Memberships\Domain\Events\MembershipExpired;
+use Modules\Memberships\Infrastructure\Activity\AnnouncesMemberYears;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
 use Modules\Memberships\Infrastructure\Services\CalendarDate;
 use Modules\Memberships\Infrastructure\Services\MemberRoleSynchronizer;
@@ -28,11 +29,13 @@ final readonly class MembershipModelObserver
     public function __construct(
         private Dispatcher $events,
         private MemberRoleSynchronizer $roles,
+        private AnnouncesMemberYears $years,
     ) {}
 
     public function created(MembershipModel $membership): void
     {
         $this->roles->syncMember($membership->member_id);
+        $this->announceCurrentYears($membership);
 
         if ($membership->status === MembershipStatus::Active) {
             $this->dispatchActivated($membership);
@@ -45,6 +48,7 @@ final readonly class MembershipModelObserver
 
         $this->syncMembers($previousMemberId, $membership->member_id);
         $this->dispatchStatusEvents($membership, $previousMemberId);
+        $this->announceChangedYears($membership, $previousMemberId);
     }
 
     public function deleted(MembershipModel $membership): void
@@ -52,10 +56,43 @@ final readonly class MembershipModelObserver
         $previousMemberId = (string) $membership->getRawOriginal('member_id');
 
         $this->syncMembers($previousMemberId, $membership->member_id);
+        $this->announceCurrentYears($membership);
 
         if ($membership->status === MembershipStatus::Active) {
             $this->dispatchDeactivated($membership, $membership->member_id);
         }
+    }
+
+    /**
+     * Years as a member (core#774): what the period covered before and covers now, for the
+     * account of the record it belonged to and of the one it belongs to.
+     */
+    private function announceChangedYears(MembershipModel $membership, string $previousMemberId): void
+    {
+        if (! $membership->wasChanged(['member_id', 'status', 'start_date', 'end_date'])) {
+            return;
+        }
+
+        $this->years->periodChanged(
+            previousMemberId: $previousMemberId !== '' ? $previousMemberId : $membership->member_id,
+            previousStatus: (string) $membership->getRawOriginal('status'),
+            previousStart: (string) $membership->getRawOriginal('start_date'),
+            previousEnd: (string) $membership->getRawOriginal('end_date'),
+            memberId: $membership->member_id,
+            status: $membership->status->value,
+            start: $membership->start_date->toDateString(),
+            end: $membership->end_date->toDateString(),
+        );
+    }
+
+    private function announceCurrentYears(MembershipModel $membership): void
+    {
+        $this->years->period(
+            $membership->member_id,
+            $membership->status->value,
+            $membership->start_date->toDateString(),
+            $membership->end_date->toDateString(),
+        );
     }
 
     private function syncMembers(string $previousMemberId, string $memberId): void

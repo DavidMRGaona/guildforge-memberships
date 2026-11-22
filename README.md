@@ -15,11 +15,12 @@ Módulo para GuildForge que gestiona los socios de la asociación, sus cuotas (p
 - **Widgets del dashboard**: estadísticas de socios, cuotas próximas a expirar y cuotas vencidas sin pagar.
 - **Pestaña «Socio» de Ajustes de la cuenta**: la cuenta vinculada a una ficha ve su número de socio, tipo, estado y fecha de alta, la membresía en vigor (o la más reciente), las cuotas sin pagar con su vencimiento (las atrasadas marcadas y contadas en la pestaña) y el último pago. Solo lectura; las cuentas sin ficha no ven la pestaña.
 - **Guías de ayuda**: guías del panel (categoría propia «Socios y cuotas») y del sitio (categoría «Socios y cuotas» del core, solo para cuentas vinculadas a una ficha, capacidad `memberships.has_member_record`) en `resources/knowledge/es/`, con el botón de ayuda en las páginas del panel del módulo.
+- **Años como socio (contrato de actividad del core)**: la fuente `memberships.year` cuenta, para quien construya sobre ella (p. ej. logros), un hecho por cada año natural de la zona de visualización en que la cuenta vinculada a una ficha tuvo una cuota en vigor, esté la ficha en el estado que esté. Una cuota cuenta si está activa o expirada (una expirada estuvo activa hasta su fin) desde su primer día y nunca por delante de hoy; pendiente y cancelada no cuentan, y los pagos tampoco: la cuota se activa a mano, no por cobrar. Un sujeto por cuenta y año (`<id de la cuenta>:<año>`), aunque haya varias fichas o cuotas solapadas. Nunca se cuentan fichas sin cuenta ni borradas. Es un dato sensible: solo alimenta recuentos y `describe()` devuelve un título neutro («Socio en 2025») sin enlace, solo a la propia cuenta y a quien puede ver socios. El módulo avisa al core al cambiar una cuota o vincular, desvincular, borrar o restaurar una ficha, y el comando diario `memberships:announce-years` avisa de los años que empiezan ese día.
 - **Zonas horarias**: los instantes (alta, pagos, activación) se guardan en la zona de almacenamiento del sitio (UTC cuando el sitio lo usa) y se muestran en la zona de visualización (por defecto Europe/Madrid); las fechas de las cuotas, las tarifas y los vencimientos son días naturales de la zona de visualización, y la cuota de un socio dura hasta el final de su último día allí.
 
 ## Requisitos
 
-- GuildForge core `^3.58` (almacenamiento de fechas en UTC y zona horaria de visualización; el rol de socio se elige en el core; base de conocimiento; campana de avisos)
+- GuildForge core `^3.86` (almacenamiento de fechas en UTC y zona horaria de visualización; el rol de socio se elige en el core; base de conocimiento; campana de avisos; contrato de actividad)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).
