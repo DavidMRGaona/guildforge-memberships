@@ -15,9 +15,9 @@ use Modules\Memberships\Domain\Enums\MembershipStatus;
  * expired one was active until its end). A pending period was never in force and a cancelled one
  * is not counted, whatever it covered. Payments do not matter: the module activates a period
  * explicitly and holds the association role through it, never through a paid fee. A year counts
- * from the first day of the period inside it and never ahead of today. A period expired by hand
- * stops counting the day it was expired (`expired_at`, in the display zone); one without that day
- * expired at its end.
+ * from the first day of the period inside it and never ahead of today. A period that became
+ * expired stops counting on the day it did (`expired_at`, in the display zone: by hand, or by the
+ * daily command after its end, which changes nothing); one without that day expired at its end.
  *
  * A member of a permanent type (honorary by default) holds the role without any period while
  * the record is active, so for as long as it is active each year from the day they joined counts

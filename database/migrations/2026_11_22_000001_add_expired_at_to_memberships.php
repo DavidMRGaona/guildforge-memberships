@@ -7,9 +7,9 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * The instant a membership was expired by hand (like cancelled_at for a cancellation): years as
- * a member (activity contract) stop at that day. Null, as in every row that exists, means it
- * expired at the end of its period.
+ * The instant a membership became expired, by hand or by the daily command (like cancelled_at for a
+ * cancellation): years as a member (activity contract) stop at that day or at the end of the
+ * period, whichever is first. Null, as in every row that exists, means it expired at its end.
  */
 return new class extends Migration
 {

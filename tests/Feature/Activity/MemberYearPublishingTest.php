@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Tests\Feature\Activity;
 
+require_once __DIR__.'/../../Support/FakeMemberDisplay.php';
+
 use App\Application\Activity\Services\ActivityPublisherInterface;
+use App\Application\Profiles\Services\ProfileMembershipDisplayInterface;
 use App\Application\Services\SettingsServiceInterface;
 use App\Domain\Activity\Events\ActivityRecorded;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
@@ -23,6 +26,7 @@ use Modules\Memberships\Infrastructure\Activity\MemberYearActivitySource;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipFeeModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
+use Modules\Memberships\Tests\Support\FakeMemberDisplay;
 use Tests\Support\Modules\ModuleTestCase;
 
 /**
@@ -44,6 +48,8 @@ final class MemberYearPublishingTest extends ModuleTestCase
         parent::setUp();
 
         $this->travelTo(CarbonImmutable::parse('2026-06-15T12:00:00+02:00'));
+        // Everybody shows their membership: the facts read below are the module's own
+        $this->app->instance(ProfileMembershipDisplayInterface::class, new FakeMemberDisplay);
         $this->events = Event::fake([ActivityRecorded::class]);
         // The publisher keeps the dispatcher it was built with
         $this->app->forgetInstance(ActivityPublisherInterface::class);
@@ -255,11 +261,14 @@ final class MemberYearPublishingTest extends ModuleTestCase
         $member = $this->memberOf($user);
         $this->period($member, MembershipStatus::Expired, '2024-01-01', '2025-12-31');
         $this->forgetRecorded();
+        $source = $this->app->make(MemberYearActivitySource::class);
+        $before = $source->facts($user->id.':2024');
 
         $member->forceDelete();
 
+        $this->assertCount(1, $before);
         $this->assertRecorded($user, [2024, 2025]);
-        $this->assertSame([], $this->app->make(MemberYearActivitySource::class)->facts($user->id.':2024'));
+        $this->assertSame([], $source->facts($user->id.':2024'));
     }
 
     public function test_the_daily_command_announces_the_year_that_begins_today(): void

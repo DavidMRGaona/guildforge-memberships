@@ -60,9 +60,9 @@ final class MembershipModel extends Model
                 $membership->activated_at = now();
             }
 
-            // Set expired_at when status changes to Expired: the day it was expired by hand, which
-            // years as a member count up to; a period expired at its end has none worth keeping
-            // apart, and reactivating one clears it
+            // Set expired_at when status changes to Expired: the day it became expired (by hand,
+            // or by the daily command after its end), which years as a member count up to;
+            // reactivating one clears it
             if ($membership->isDirty('status') && $membership->status === MembershipStatus::Expired && $membership->expired_at === null) {
                 $membership->expired_at = now();
             }

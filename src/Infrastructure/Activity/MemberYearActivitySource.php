@@ -44,10 +44,15 @@ use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
  */
 final readonly class MemberYearActivitySource implements ActivitySourceInterface
 {
-    /** @param  int  $accountsPerQuery  how many accounts the history reads at once */
+    /**
+     * @param  int  $accountsPerQuery  how many accounts the history reads at once
+     * @param  int  $maxBatchesPerCall  how many of those batches one history call reads at most, so a site where
+     *                                  most accounts hide their membership never reads the whole table in one call
+     */
     public function __construct(
         private ProfileMembershipDisplayInterface $display,
         private int $accountsPerQuery = 100,
+        private int $maxBatchesPerCall = 20,
     ) {}
 
     /** Stored by consumers with every fact: never changes. */
@@ -98,7 +103,10 @@ final readonly class MemberYearActivitySource implements ActivitySourceInterface
         $subjects = [];
         $hasMore = false;
         $from = $after[0] ?? null;
-        $inclusive = true;
+        // A cursor with the year 9999 says every year of that account is done (see below)
+        $inclusive = ($after[1] ?? 0) < 9999;
+        $batches = 0;
+        $capped = false;
 
         while (true) {
             $batch = $this->accountsFrom($from, $inclusive, $today);
@@ -127,14 +135,25 @@ final readonly class MemberYearActivitySource implements ActivitySourceInterface
 
             $from = array_last($batch);
             $inclusive = false;
+
+            if (++$batches >= $this->maxBatchesPerCall) {
+                $capped = true;
+
+                break;
+            }
         }
 
         // Another subject follows only when the page is full, so it has a last one
         $nextCursor = null;
 
-        if ($hasMore) {
-            $last = $subjects[count($subjects) - 1];
+        $last = array_last($subjects);
+
+        if ($hasMore && $last !== null) {
             $nextCursor = MemberYearCursor::after($last[0], $last[1]);
+        } elseif ($capped) {
+            // The call read all it may: carry on after the last account read (every one of its years is
+            // done), even when none of them showed anything, which the contract allows
+            $nextCursor = MemberYearCursor::after($from, 9999);
         }
 
         return new ActivityHistoryPageDTO(

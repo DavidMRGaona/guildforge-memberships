@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Tests\Feature\Activity;
 
+require_once __DIR__.'/../../Support/FakeMemberDisplay.php';
+
 use App\Application\Activity\Contracts\ActivitySourceInterface;
 use App\Application\Activity\DTOs\ActivityFactDTO;
 use App\Application\Activity\Enums\ActivityReadOutcome;
@@ -14,7 +16,6 @@ use App\Domain\Activity\ActivityKind;
 use App\Domain\Activity\ActivityRole;
 use App\Domain\Activity\Events\ActivityRecorded;
 use App\Domain\Profiles\Events\ProfileMembershipDisplayChanged;
-use App\Domain\Profiles\Exceptions\ProfileMembershipDisplayUnavailableException;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Event;
@@ -27,6 +28,7 @@ use Modules\Memberships\Infrastructure\Activity\MemberYearActivitySource;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MemberModel;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Models\MembershipModel;
 use Modules\Memberships\Infrastructure\Services\CalendarDate;
+use Modules\Memberships\Tests\Support\FakeMemberDisplay;
 use Tests\Support\Activity\ActivitySourceTestCase;
 use Tests\Support\Time\UsesUtcStorage;
 
@@ -600,6 +602,60 @@ final class MemberYearActivitySourceTest extends ActivitySourceTestCase
         $this->assertSame([$user->id.':2024', $user->id.':2025', $user->id.':2026'], $ids);
     }
 
+    public function test_the_accounts_of_a_batch_are_asked_about_in_chunks_the_core_accepts(): void
+    {
+        $expected = [];
+        foreach (UserModel::factory()->count(501)->create() as $user) {
+            $this->period($this->memberOf($user), MembershipStatus::Expired, '2024-01-01', '2024-12-31');
+            $expected[] = $user->id.':2024';
+        }
+        sort($expected);
+
+        // One batch of 501 accounts: the fake refuses more than MAX_IDS at once, as the core does
+        $page = (new MemberYearActivitySource($this->display, accountsPerQuery: 501))->history(null, 500);
+
+        $this->assertSame(array_slice($expected, 0, 500), array_map(static fn ($subject): string => $subject->subjectId, $page->subjects));
+        $this->assertNotNull($page->nextCursor);
+    }
+
+    public function test_a_history_call_reads_a_limited_number_of_batches_and_carries_on_from_a_cursor(): void
+    {
+        $expected = [];
+        foreach (range(1, 8) as $index) {
+            $user = UserModel::factory()->create();
+            $this->period($this->memberOf($user), MembershipStatus::Expired, '2024-01-01', '2024-12-31');
+
+            // Only the last two show their membership: the first calls find nothing at all
+            if ($index <= 6) {
+                $this->display->hidden[strtolower($user->id)] = true;
+            } else {
+                $expected[] = $user->id.':2024';
+            }
+        }
+        sort($expected);
+
+        $source = new MemberYearActivitySource($this->display, accountsPerQuery: 2, maxBatchesPerCall: 1);
+        $seen = [];
+        $emptyPagesWithCursor = 0;
+        $cursor = null;
+        $calls = 0;
+
+        do {
+            $page = $source->history($cursor, 50);
+            array_push($seen, ...array_map(static fn ($subject): string => $subject->subjectId, $page->subjects));
+
+            if ($page->subjects === [] && $page->nextCursor !== null) {
+                $emptyPagesWithCursor++;
+            }
+
+            $cursor = $page->nextCursor;
+            $this->assertLessThan(20, ++$calls);
+        } while ($cursor !== null);
+
+        $this->assertSame($expected, $seen);
+        $this->assertGreaterThan(0, $emptyPagesWithCursor);
+    }
+
     private function memberOf(?UserModel $user, MemberStatus $status = MemberStatus::Active, MemberType $type = MemberType::Regular, string $joined = '2020-01-01 00:00:00'): MemberModel
     {
         $this->numbers++;
@@ -634,29 +690,5 @@ final class MemberYearActivitySourceTest extends ActivitySourceTestCase
     private function comparable(ActivityFactDTO $fact): array
     {
         return [$fact->userId, $fact->role->value, $fact->occurredAt->getTimestamp()];
-    }
-}
-
-/** Which accounts show their membership, as the profile page would say: everybody unless hidden. */
-final class FakeMemberDisplay implements ProfileMembershipDisplayInterface
-{
-    /** @var array<string, true> */
-    public array $hidden = [];
-
-    public bool $failing = false;
-
-    public function showsMembership(array $userIds): array
-    {
-        if ($this->failing) {
-            throw ProfileMembershipDisplayUnavailableException::unreadable();
-        }
-
-        $answer = [];
-
-        foreach ($userIds as $userId) {
-            $answer[strtolower($userId)] = ! isset($this->hidden[strtolower($userId)]);
-        }
-
-        return $answer;
     }
 }
