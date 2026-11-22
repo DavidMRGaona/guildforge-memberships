@@ -42,8 +42,7 @@ final class MemberYearActivitySourceTest extends ActivitySourceTestCase
 
     private int $numbers = 0;
 
-    /** @var object{hidden: array<string, true>, failing: bool}&ProfileMembershipDisplayInterface */
-    private object $display;
+    private FakeMemberDisplay $display;
 
     protected function setUp(): void
     {
@@ -52,28 +51,7 @@ final class MemberYearActivitySourceTest extends ActivitySourceTestCase
         $this->travelTo(CarbonImmutable::parse('2026-06-15T12:00:00+02:00'));
 
         // Everybody shows their membership unless a test hides them
-        $this->display = new class implements ProfileMembershipDisplayInterface
-        {
-            /** @var array<string, true> */
-            public array $hidden = [];
-
-            public bool $failing = false;
-
-            public function showsMembership(array $userIds): array
-            {
-                if ($this->failing) {
-                    throw ProfileMembershipDisplayUnavailableException::unreadable();
-                }
-
-                $answer = [];
-
-                foreach ($userIds as $userId) {
-                    $answer[strtolower($userId)] = ! isset($this->hidden[strtolower($userId)]);
-                }
-
-                return $answer;
-            }
-        };
+        $this->display = new FakeMemberDisplay;
         $this->app->instance(ProfileMembershipDisplayInterface::class, $this->display);
     }
 
@@ -589,10 +567,13 @@ final class MemberYearActivitySourceTest extends ActivitySourceTestCase
         $reader = $this->app->make(ActivityReaderInterface::class);
 
         $this->display->hidden[strtolower($user->id)] = true;
-        $this->assertSame([], $reader->facts('memberships.year', $user->id.':2024')->facts);
+        $whileHidden = $reader->facts('memberships.year', $user->id.':2024')->facts;
 
         unset($this->display->hidden[strtolower($user->id)]);
-        $this->assertCount(1, $reader->facts('memberships.year', $user->id.':2024')->facts);
+        $whileShown = $reader->facts('memberships.year', $user->id.':2024')->facts;
+
+        $this->assertSame([], $whileHidden);
+        $this->assertCount(1, $whileShown);
     }
 
     public function test_when_the_display_may_have_changed_every_year_of_the_account_is_published_again(): void
@@ -653,5 +634,29 @@ final class MemberYearActivitySourceTest extends ActivitySourceTestCase
     private function comparable(ActivityFactDTO $fact): array
     {
         return [$fact->userId, $fact->role->value, $fact->occurredAt->getTimestamp()];
+    }
+}
+
+/** Which accounts show their membership, as the profile page would say: everybody unless hidden. */
+final class FakeMemberDisplay implements ProfileMembershipDisplayInterface
+{
+    /** @var array<string, true> */
+    public array $hidden = [];
+
+    public bool $failing = false;
+
+    public function showsMembership(array $userIds): array
+    {
+        if ($this->failing) {
+            throw ProfileMembershipDisplayUnavailableException::unreadable();
+        }
+
+        $answer = [];
+
+        foreach ($userIds as $userId) {
+            $answer[strtolower($userId)] = ! isset($this->hidden[strtolower($userId)]);
+        }
+
+        return $answer;
     }
 }
