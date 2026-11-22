@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Filament\Actions;
 
+use App\Application\Impersonation\Services\ImpersonationContextInterface;
 use App\Application\Services\TimezoneServiceInterface;
 use App\Application\Spreadsheets\DTOs\SpreadsheetTemplateDTO;
 use App\Application\Spreadsheets\Services\SpreadsheetWriterInterface;
 use App\Domain\Spreadsheets\Exceptions\SpreadsheetReadException;
+use App\Domain\Spreadsheets\Exceptions\SpreadsheetWriteException;
 use App\Filament\Concerns\ChecksPermissions;
 use App\Filament\Impersonation\ReadOnlyActions;
 use Closure;
@@ -21,6 +23,7 @@ use Filament\Schemas\Components\View;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Log;
+use Livewire\Component;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Modules\Memberships\Application\DTOs\Import\MemberImportOptionsDTO;
@@ -64,7 +67,7 @@ final class ImportMembersAction
             ->label(__('memberships::memberships.import.action.label'))
             ->icon('heroicon-o-arrow-up-tray')
             ->color('gray')
-            ->authorize(static fn (): bool => self::userCan(self::PERMISSION))
+            ->authorize(static fn (): bool => self::allowed())
             ->modalHeading(__('memberships::memberships.import.action.heading'))
             ->modalDescription(__('memberships::memberships.import.action.description'))
             ->modalWidth(Width::FourExtraLarge)
@@ -81,6 +84,8 @@ final class ImportMembersAction
                             ->required()
                             ->storeFiles(false)
                             ->maxSize(intdiv(MemberImportSpreadsheet::MAX_BYTES, 1024))
+                            ->validationMessages(['max' => __('memberships::memberships.import.fields.file_too_large')])
+                            ->extraInputAttributes(['accept' => '.csv,.xlsx'])
                             ->rule(static fn (): Closure => self::readableRule()),
                         Checkbox::make('link_by_email')
                             ->label(__('memberships::memberships.import.fields.link_by_email'))
@@ -107,18 +112,37 @@ final class ImportMembersAction
             ->label(__('memberships::memberships.import.template.label'))
             ->icon('heroicon-o-arrow-down-tray')
             ->link()
-            ->authorize(static fn (): bool => self::userCan(self::PERMISSION))
-            ->action(static function (): StreamedResponse {
-                $bytes = self::templateBytes();
+            ->authorize(static fn (): bool => self::allowed())
+            ->action(static fn (): ?StreamedResponse => self::downloadTemplate()));
+    }
 
-                return response()->streamDownload(
-                    static function () use ($bytes): void {
-                        echo $bytes;
-                    },
-                    (string) __('memberships::memberships.import.template.file_name'),
-                    ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-                );
-            }));
+    /**
+     * The template as a download; nothing without the permission, and a notification instead
+     * of an error when the writer fails.
+     */
+    public static function downloadTemplate(): ?StreamedResponse
+    {
+        if (! self::allowed()) {
+            self::notify('danger', 'not_allowed');
+
+            return null;
+        }
+
+        try {
+            $bytes = self::templateBytes();
+        } catch (SpreadsheetWriteException) {
+            self::notify('danger', 'template_failed');
+
+            return null;
+        }
+
+        return response()->streamDownload(
+            static function () use ($bytes): void {
+                echo $bytes;
+            },
+            (string) __('memberships::memberships.import.template.file_name'),
+            ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+        );
     }
 
     public static function templateBytes(): string
@@ -161,7 +185,8 @@ final class ImportMembersAction
         return static function (string $attribute, mixed $value, Closure $fail): void {
             $file = self::uploadedFile($value);
 
-            if (! $file instanceof TemporaryUploadedFile) {
+            // Nothing reaches the reader without the permission, whatever the page was sent
+            if (! self::allowed() || ! $file instanceof TemporaryUploadedFile) {
                 return;
             }
 
@@ -180,7 +205,10 @@ final class ImportMembersAction
     {
         $file = self::uploadedFile($state);
 
-        if (! $file instanceof TemporaryUploadedFile) {
+        // Filament draws a mounted action's modal without asking whether the action may be
+        // seen, and the page's mounted actions can be written by hand: a preview reveals
+        // which emails have members or accounts, so it needs the permission itself
+        if (! self::allowed() || ! $file instanceof TemporaryUploadedFile) {
             return ['preview' => null, 'error' => null];
         }
 
@@ -222,17 +250,24 @@ final class ImportMembersAction
     }
 
     /**
+     * Reads the file again and imports it; the file is forgotten whatever happens.
+     *
      * @param  array<string, mixed>  $data
      */
-    private static function import(array $data): void
+    public static function import(array $data): void
     {
         $file = self::uploadedFile($data['file'] ?? null);
 
         try {
             // Checked again here: the permission may be gone since the dialog opened
-            if (! self::userCan(self::PERMISSION) || ! $file instanceof TemporaryUploadedFile) {
+            if (! self::allowed()) {
                 self::notify('danger', 'not_allowed');
 
+                return;
+            }
+
+            // The field is required: only a forged call gets here without a file
+            if (! $file instanceof TemporaryUploadedFile) {
                 return;
             }
 
@@ -267,6 +302,35 @@ final class ImportMembersAction
         }
     }
 
+    /**
+     * Confirming checked the dialog and refused it (a file the reader refuses, too large…):
+     * the upload is forgotten and the field emptied, so a file with personal data is not left
+     * behind waiting for another try. Moving between steps keeps it.
+     */
+    public static function forgetAfterFailedConfirmation(Component $page): void
+    {
+        if (! property_exists($page, 'mountedActions') || ! is_array($page->mountedActions)) {
+            return;
+        }
+
+        $index = array_key_last($page->mountedActions);
+        $entry = $index === null ? null : $page->mountedActions[$index];
+
+        if (! is_array($entry) || ($entry['name'] ?? null) !== self::NAME || ! is_array($entry['data'] ?? null)) {
+            return;
+        }
+
+        foreach (is_array($entry['data']['file'] ?? null) ? $entry['data']['file'] : [$entry['data']['file'] ?? null] as $state) {
+            $file = self::uploadedFile($state);
+
+            if ($file instanceof TemporaryUploadedFile) {
+                self::forget($file);
+            }
+        }
+
+        $page->mountedActions[$index]['data']['file'] = [];
+    }
+
     /** The upload and the file Livewire keeps beside it with its original name. */
     private static function forget(TemporaryUploadedFile $file): void
     {
@@ -287,6 +351,7 @@ final class ImportMembersAction
         // Counts only: the rows hold personal data
         Log::info('Memberships: members imported from the panel', [
             'actor_id' => auth()->id(),
+            ...self::impersonation(),
             'imported' => $result->imported,
             'created' => $result->createdCount,
             'duplicates' => $report->duplicateCount(),
@@ -320,6 +385,28 @@ final class ImportMembersAction
             ->title(trans_choice('memberships::memberships.import.notifications.imported_title', $result->createdCount, ['count' => $result->createdCount]))
             ->body($lines === [] ? null : implode(' ', $lines))
             ->send();
+    }
+
+    /**
+     * Who really ran it while impersonating: a simulated import is undone, so the log must
+     * not read as if the impersonated account had imported anything.
+     *
+     * @return array{impersonator_id?: mixed, simulated?: true}
+     */
+    private static function impersonation(): array
+    {
+        $context = app(ImpersonationContextInterface::class);
+
+        if (! $context->isActive()) {
+            return [];
+        }
+
+        return ['impersonator_id' => $context->impersonator()?->getAuthIdentifier(), 'simulated' => true];
+    }
+
+    private static function allowed(): bool
+    {
+        return self::userCan(self::PERMISSION);
     }
 
     private static function notImportedReason(MemberImportPreviewDTO $report): string

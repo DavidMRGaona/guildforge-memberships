@@ -65,15 +65,15 @@ El socio vuelve a la lista con sus datos, cuotas y pagos tal como estaban, y rec
 
 ## Importar socios
 
-Si ya tienes a los socios en una hoja de cálculo, puedes darlos de alta de una vez, cada uno con su cuota actual. Hace falta el permiso **Importar socios**.
+Si ya tienes a los socios en una hoja de cálculo, puedes darlos de alta de una vez, cada uno con su cuota actual. Hacen falta los permisos **Importar socios** y **Ver listado de socios**, porque la importación empieza en la lista.
 
 1. En la lista de socios, pulsa **Importar socios**.
-2. Sube un fichero `.csv` o `.xlsx` de 2 MB como máximo y 1000 filas como mucho. Si no tienes uno, pulsa **Descargar la plantilla**: trae todas las columnas y una fila de ejemplo que puedes borrar.
+2. Sube un fichero `.csv` o `.xlsx` de 2 MB como máximo y 1000 filas como mucho. Si no tienes uno, pulsa **Descargar la plantilla**: trae todas las columnas y una fila de ejemplo. Bórrala antes de importar, porque si no se importaría como un socio más.
 3. Marca **Vincular por email con cuentas verificadas** solo si quieres unir cada ficha a la cuenta de la web con su email. Empieza desmarcada.
 4. Pulsa **Siguiente** para ver la vista previa: cuántos socios se crearán, cuántos ya existen y cuántas filas tienen errores, con una tabla de las filas que no se crearán y de las que se vincularán a una cuenta.
 5. Pulsa **Importar**. Al terminar verás cuántos socios se han creado.
 
-**Importar** solo se puede pulsar si no hay ninguna fila con errores y hay al menos un socio nuevo. Si hay errores no se crea nadie: corrige el fichero y vuelve a subirlo. Al importar se lee de nuevo el fichero y se comprueba todo otra vez, así que lo que haya cambiado mientras tanto también cuenta. El fichero subido se borra al terminar, se importe o no.
+**Importar** solo se puede pulsar si no hay ninguna fila con errores y hay al menos un socio nuevo. Si hay errores no se crea nadie: corrige el fichero y vuelve a subirlo. Al importar se lee de nuevo el fichero y se comprueba todo otra vez, así que lo que haya cambiado mientras tanto también cuenta. El fichero subido se borra al importar, y también si al pulsar **Importar** el fichero no se acepta. Si cierras el diálogo sin importar, el sitio lo borra más tarde.
 
 ### Formato
 
@@ -103,7 +103,7 @@ Una cuenta que ya tiene el rol {{association_role}} no se vincula a una ficha qu
 > [!WARNING]
 > Vincular una cuenta puede darle el rol {{association_role}} y, con él, activar sus roles que exigen ser socio. Si alguno de esos roles exige doble factor y la cuenta no lo tiene activado, la persona recibe un aviso para activarlo. Es lo esperado, no un fallo.
 
-La importación no envía ningún correo. Las cuotas que ya estén vencidas se detectan después, en la revisión diaria de siempre.
+La importación no envía correos de bienvenida ni de cuotas: solo el aviso de doble factor descrito arriba. Las cuotas que ya estén vencidas se detectan después, en la revisión diaria de siempre.
 
 ## Si algo no sale bien
 

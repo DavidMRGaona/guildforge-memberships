@@ -4,22 +4,28 @@ declare(strict_types=1);
 
 namespace Modules\Memberships\Tests\Feature\Filament;
 
+use App\Application\Impersonation\Services\ImpersonationContextInterface;
 use App\Application\Spreadsheets\DTOs\SpreadsheetLimitsDTO;
 use App\Application\Spreadsheets\DTOs\SpreadsheetTemplateDTO;
 use App\Application\Spreadsheets\Services\SpreadsheetReaderInterface;
 use App\Application\Spreadsheets\Services\SpreadsheetWriterInterface;
+use App\Domain\Impersonation\Enums\ImpersonationMode;
+use App\Domain\Spreadsheets\Exceptions\SpreadsheetWriteException;
 use App\Filament\Impersonation\ReadOnlyActions;
 use App\Infrastructure\Persistence\Eloquent\Models\PermissionModel;
 use App\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\Testing\TestAction;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Modules\Memberships\Application\DTOs\Import\MemberImportOptionsDTO;
@@ -55,6 +61,9 @@ final class ImportMembersTest extends ModuleTestCase
     protected ?string $moduleName = 'memberships';
 
     protected bool $autoEnableModule = true;
+
+    /** @var array{previews: list<int>, imports: list<int>} */
+    private array $serviceCalls = ['previews' => [], 'imports' => []];
 
     protected function setUp(): void
     {
@@ -98,6 +107,43 @@ final class ImportMembersTest extends ModuleTestCase
             ->call('callMountedAction');
 
         $this->assertSame(0, MemberModel::query()->count());
+    }
+
+    public function test_a_dialog_forged_without_the_permission_previews_nothing(): void
+    {
+        UserModel::factory()->create(['email' => 'ana@example.test', 'display_name' => 'Cuenta de Ana', 'name' => 'cuenta-de-ana']);
+        $this->spyImportService();
+        $this->actingAs($this->editorWith(['memberships:members.view_any']));
+
+        // Filament draws a mounted action's modal without asking whether it may be seen
+        $page = Livewire::test(ListMembers::class)
+            ->set('mountedActions', [['name' => ImportMembersAction::NAME, 'arguments' => [], 'context' => [], 'data' => ['link_by_email' => true]]])
+            ->set('mountedActions.0.data.file', $this->csv([['Ana', 'Pérez', 'ana@example.test']]));
+        $html = $this->dialogHtml($page);
+
+        $this->assertStringNotContainsString('Cuenta de Ana', $html);
+        $this->assertStringNotContainsString(e(trans_choice('memberships::memberships.import.preview.new', 1, ['count' => 1])), $html);
+        $this->assertTrue($this->submitDisabled($page));
+        $this->assertSame(['previews' => [], 'imports' => []], $this->serviceCalls);
+    }
+
+    public function test_calling_the_import_without_the_permission_creates_nothing_and_forgets_the_file(): void
+    {
+        $this->actingAs($this->editorWith(['memberships:members.view_any']));
+
+        ImportMembersAction::import(['file' => [$this->temporaryUpload([['Ana', 'Pérez', 'ana@example.test']])], 'link_by_email' => false]);
+
+        $this->assertSame(0, MemberModel::query()->count());
+        $this->assertSame([], $this->temporaryUploads());
+    }
+
+    public function test_calling_the_import_without_a_file_says_nothing(): void
+    {
+        $this->actingAsPanelAdmin();
+
+        ImportMembersAction::import(['link_by_email' => false]);
+
+        $this->assertSame([], session('filament.notifications', []));
     }
 
     public function test_a_permission_lost_after_opening_the_dialog_creates_nothing(): void
@@ -228,9 +274,7 @@ final class ImportMembersTest extends ModuleTestCase
             ->setActionData(['file' => $this->csv([['Ana', 'Pérez', 'ana@example.test'], ['Luis', 'García', 'luis@example.test']])]);
 
         // Filament draws action modals outside the component's HTML: render the dialog itself
-        $instance = $page->instance();
-        $this->assertInstanceOf(ListMembers::class, $instance);
-        $html = $instance->getSchema('mountedActionSchema0')?->toHtml() ?? '';
+        $html = $this->dialogHtml($page);
         $this->assertStringContainsString(e(trans_choice('memberships::memberships.import.preview.new', 1, ['count' => 1])), $html);
         $this->assertStringContainsString(e(trans_choice('memberships::memberships.import.preview.duplicate', 1, ['count' => 1])), $html);
         $this->assertStringContainsString(e(__('memberships::memberships.import.preview.duplicate_reason.email')), $html);
@@ -299,6 +343,42 @@ final class ImportMembersTest extends ModuleTestCase
         $this->assertSame([], $this->temporaryUploads());
     }
 
+    public function test_a_file_too_large_is_refused_in_megabytes_and_forgotten_when_confirming(): void
+    {
+        $this->actingAsPanelAdmin();
+
+        $page = Livewire::test(ListMembers::class)
+            ->callAction(ImportMembersAction::NAME, data: ['file' => UploadedFile::fake()->create('socios.csv', 3 * 1024, 'text/csv')])
+            ->assertHasActionErrors(['file']);
+
+        $this->assertContains(__('memberships::memberships.import.fields.file_too_large'), $page->errors()->all());
+        $this->assertSame([], $this->temporaryUploads());
+        $this->assertSame(0, MemberModel::query()->count());
+    }
+
+    public function test_a_file_the_reader_refuses_is_forgotten_when_confirming(): void
+    {
+        $this->actingAsPanelAdmin();
+
+        Livewire::test(ListMembers::class)
+            ->callAction(ImportMembersAction::NAME, data: [
+                'file' => UploadedFile::fake()->createWithContent('socios.csv', "Nombre;Apellidos\n"),
+            ])
+            ->assertHasActionErrors(['file'])
+            ->assertSet('mountedActions.0.data.file', []);
+
+        $this->assertSame([], $this->temporaryUploads());
+    }
+
+    public function test_the_file_field_offers_only_spreadsheets(): void
+    {
+        $this->actingAsPanelAdmin();
+
+        $html = $this->dialogHtml(Livewire::test(ListMembers::class)->mountAction(ImportMembersAction::NAME));
+
+        $this->assertStringContainsString('accept=".csv,.xlsx"', $html);
+    }
+
     public function test_the_uploaded_file_is_deleted_when_the_import_fails(): void
     {
         $this->actingAsPanelAdmin();
@@ -353,6 +433,48 @@ final class ImportMembersTest extends ModuleTestCase
         }
     }
 
+    public function test_a_simulated_import_logs_who_really_ran_it(): void
+    {
+        $impersonator = UserModel::factory()->admin()->create();
+        $this->actingAsPanelAdmin();
+        $this->app->instance(ImpersonationContextInterface::class, new readonly class($impersonator) implements ImpersonationContextInterface
+        {
+            public function __construct(private UserModel $impersonator) {}
+
+            public function isActive(): bool
+            {
+                return true;
+            }
+
+            public function impersonator(): Authenticatable
+            {
+                return $this->impersonator;
+            }
+
+            public function target(): ?Authenticatable
+            {
+                return auth()->user();
+            }
+
+            public function mode(): ImpersonationMode
+            {
+                return ImpersonationMode::Simulate;
+            }
+        });
+        $logged = [];
+        Event::listen(MessageLogged::class, static function (MessageLogged $message) use (&$logged): void {
+            if ($message->message === 'Memberships: members imported from the panel') {
+                $logged[] = $message->context;
+            }
+        });
+
+        ImportMembersAction::import(['file' => [$this->temporaryUpload([['Ana', 'Pérez', 'ana@example.test']])], 'link_by_email' => false]);
+
+        $this->assertCount(1, $logged);
+        $this->assertSame($impersonator->id, $logged[0]['impersonator_id']);
+        $this->assertTrue($logged[0]['simulated']);
+    }
+
     public function test_the_import_is_not_marked_as_reading_but_the_template_is(): void
     {
         $action = ImportMembersAction::make();
@@ -387,6 +509,38 @@ final class ImportMembersTest extends ModuleTestCase
         $this->assertSame(1, $preview->newCount(), json_encode($preview->toArray()) ?: '');
         $this->assertTrue($preview->rows[0]->hasPeriod);
         $this->assertTrue($preview->rows[0]->hasFee);
+    }
+
+    public function test_a_template_download_forged_without_the_permission_gives_nothing(): void
+    {
+        $this->actingAs($this->editorWith(['memberships:members.view_any']));
+
+        Livewire::test(ListMembers::class)
+            ->set('mountedActions', [
+                ['name' => ImportMembersAction::NAME, 'arguments' => [], 'context' => [], 'data' => ['link_by_email' => false]],
+                ['name' => ImportMembersAction::TEMPLATE_NAME, 'arguments' => [], 'context' => ['schemaComponent' => 'mountedActionSchema0.template'], 'data' => []],
+            ])
+            ->call('callMountedAction')
+            ->assertNoFileDownloaded();
+
+        $this->assertNull(ImportMembersAction::downloadTemplate());
+    }
+
+    public function test_a_template_the_writer_cannot_build_is_a_notification_not_an_error(): void
+    {
+        $this->actingAsPanelAdmin();
+        $this->app->instance(SpreadsheetWriterInterface::class, new class implements SpreadsheetWriterInterface
+        {
+            public function write(SpreadsheetTemplateDTO $template): string
+            {
+                throw SpreadsheetWriteException::failed();
+            }
+        });
+
+        Livewire::test(ListMembers::class)
+            ->callAction([TestAction::make(ImportMembersAction::NAME), TestAction::make(ImportMembersAction::TEMPLATE_NAME)->schemaComponent('template')])
+            ->assertNoFileDownloaded()
+            ->assertNotified(__('memberships::memberships.import.notifications.template_failed_title'));
     }
 
     public function test_the_template_downloads_as_an_xlsx(): void
@@ -470,6 +624,66 @@ final class ImportMembersTest extends ModuleTestCase
         }
 
         return UploadedFile::fake()->createWithContent('socios.csv', implode("\n", $lines)."\n");
+    }
+
+    /**
+     * Filament draws action modals outside the component's HTML: render the dialog itself.
+     *
+     * @param  Testable<ListMembers>  $page
+     */
+    private function dialogHtml(Testable $page): string
+    {
+        return $page->instance()->getSchema('mountedActionSchema0')?->toHtml() ?? '';
+    }
+
+    /**
+     * A file in Livewire's temporary uploads, as the dialog's field holds it.
+     *
+     * @param  list<list<string>>  $rows
+     */
+    private function temporaryUpload(array $rows): TemporaryUploadedFile
+    {
+        $name = Str::random(40).'.csv';
+        FileUploadConfiguration::storage()->putFileAs(FileUploadConfiguration::path(), $this->csv($rows), $name);
+
+        return TemporaryUploadedFile::createFromLivewire($name);
+    }
+
+    /**
+     * Records in serviceCalls what reaches the import service, answering as the real one.
+     */
+    private function spyImportService(): void
+    {
+        $real = app(MemberImportServiceInterface::class);
+        $record = function (string $kind, int $rows): void {
+            if ($kind === 'previews') {
+                $this->serviceCalls['previews'][] = $rows;
+            } else {
+                $this->serviceCalls['imports'][] = $rows;
+            }
+        };
+
+        $this->app->instance(MemberImportServiceInterface::class, new readonly class($real, $record) implements MemberImportServiceInterface
+        {
+            /**
+             * @param  Closure(string, int): void  $record
+             */
+            public function __construct(private MemberImportServiceInterface $real, private Closure $record) {}
+
+            public function preview(array $rows, MemberImportOptionsDTO $options): MemberImportPreviewDTO
+            {
+                ($this->record)('previews', count($rows));
+
+                return $this->real->preview($rows, $options);
+            }
+
+            public function import(array $rows, MemberImportOptionsDTO $options): MemberImportResultDTO
+            {
+                ($this->record)('imports', count($rows));
+
+                return $this->real->import($rows, $options);
+            }
+        });
     }
 
     /**

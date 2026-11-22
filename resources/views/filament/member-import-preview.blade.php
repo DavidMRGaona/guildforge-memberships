@@ -17,8 +17,14 @@
 @endphp
 
 <div class="gf-member-import-preview" style="display: grid; gap: 1rem; font-size: 0.875rem;">
+    {{-- The panel theme does not compile module classes: the error colour follows the scheme here --}}
+    <style>
+        .gf-member-import-preview .gf-member-import-error { color: var(--danger-600); }
+        .dark .gf-member-import-preview .gf-member-import-error { color: var(--danger-400); }
+    </style>
+
     @if ($error !== null)
-        <p style="color: var(--danger-600);">{{ $error }}</p>
+        <p class="gf-member-import-error">{{ $error }}</p>
     @elseif ($preview === null)
         <p>{{ __('memberships::memberships.import.preview.no_file') }}</p>
     @else

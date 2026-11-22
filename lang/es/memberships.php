@@ -392,7 +392,7 @@ return [
         'action' => [
             'label' => 'Importar socios',
             'heading' => 'Importar socios',
-            'description' => 'Da de alta socios desde un fichero .csv o .xlsx, con su cuota actual. Antes de importar verás qué pasará con cada fila.',
+            'description' => 'Da de alta socios desde un fichero .csv o .xlsx, con su cuota actual. Antes de importar verás cuántos se crearán y qué filas se saltarán, tienen errores o se vincularán a una cuenta.',
             'submit' => 'Importar',
         ],
         'steps' => [
@@ -402,6 +402,7 @@ return [
         'fields' => [
             'file' => 'Fichero de socios',
             'file_help' => 'Un .csv o .xlsx de 2 MB como máximo y 1000 filas como mucho, con una fila de cabeceras. Solo Nombre y Apellidos son obligatorios.',
+            'file_too_large' => 'El fichero no puede ocupar más de 2 MB.',
             'link_by_email' => 'Vincular por email con cuentas verificadas',
             'link_by_email_help' => 'Cada socio nuevo se vincula a la única cuenta activa y verificada con su email que no tenga ya una ficha. Si la cuenta recibe el rol de socio, se activan también sus roles que exigen ser socio; si alguno exige doble factor y la cuenta no lo tiene, esa persona recibe un aviso para activarlo.',
         ],
@@ -454,6 +455,8 @@ return [
             'unreadable_title' => 'No se ha podido leer el fichero',
             'not_allowed_title' => 'No puedes importar socios',
             'not_allowed_body' => 'No se ha importado nada.',
+            'template_failed_title' => 'No se ha podido preparar la plantilla',
+            'template_failed_body' => 'Vuelve a intentarlo en un momento.',
         ],
         'busy' => 'Ya hay otra importación de socios en marcha. Inténtalo de nuevo en un momento.',
         'link_skipped' => [
