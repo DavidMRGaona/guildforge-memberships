@@ -59,6 +59,7 @@ Ninguno de estos permisos se concede solo, tampoco al rol de edición: se dan a 
 | **Crear socio** | Dar de alta socios |
 | **Editar socio** | Cambiar fichas y gestionar sus cuotas |
 | **Eliminar socio** | Borrar socios |
+| **Importar socios** | Dar de alta socios en bloque desde un `.csv` o `.xlsx`, con su cuota actual, y vincularlos por email con sus cuentas. Se usa desde la lista, así que también necesita **Ver listado de socios**. Cómo se hace está en **Importar socios**, dentro de la guía «Dar de alta y editar socios» |
 | **Ver listado de tarifas** y **Ver tarifa** | Ver las tarifas |
 | **Crear tarifa**, **Editar tarifa** y **Eliminar tarifa** | Cambiar las tarifas |
 | **Ver los pagos de los socios** | Ver la pestaña **Pagos** de cada socio |
@@ -73,4 +74,5 @@ Ninguno de estos permisos se concede solo, tampoco al rol de edición: se dan a 
 
 
 [[action:filament.admin.resources.members.index|Ver los socios|if=memberships:members.view_any]]
+[[action:filament.admin.pages.ayuda?guia=memberships.panel.manage-members|Cómo importar socios|if=memberships:members.import]]
 [[action:filament.admin.resources.fee-structures.index|Ver las tarifas|if=memberships:fee_structures.view_any]]

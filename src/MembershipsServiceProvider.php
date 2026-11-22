@@ -61,6 +61,7 @@ use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\Eloquen
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\EloquentMembershipFeeRepository;
 use Modules\Memberships\Infrastructure\Persistence\Eloquent\Repositories\EloquentMembershipRepository;
 use Modules\Memberships\Infrastructure\Services\Import\MemberImportService;
+use Modules\Memberships\Infrastructure\Services\Import\MemberImportSpreadsheet;
 use Modules\Memberships\Infrastructure\Services\LinkableAccountFinder;
 use Modules\Memberships\Infrastructure\Services\MemberNumberGenerator;
 use Modules\Memberships\Infrastructure\Services\MemberService;
@@ -112,6 +113,7 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         $this->app->bind(MembershipFeeServiceInterface::class, MembershipFeeService::class);
         $this->app->bind(MemberSituationQueryInterface::class, MemberSituationQuery::class);
         $this->app->bind(MemberImportServiceInterface::class, MemberImportService::class);
+        $this->app->scoped(MemberImportSpreadsheet::class);
         $this->app->bind(LinkableAccountFinderInterface::class, LinkableAccountFinder::class);
     }
 
@@ -399,6 +401,15 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
                 name: 'members.delete',
                 label: __('memberships::memberships.permissions.members.delete'),
                 group: __('memberships::memberships.navigation.members'),
+                module: 'memberships',
+                roles: [],
+            ),
+            // Creates members in bulk and may link them to accounts: no default role
+            new PermissionDTO(
+                name: 'members.import',
+                label: __('memberships::memberships.permissions.members.import'),
+                group: __('memberships::memberships.navigation.members'),
+                description: __('memberships::memberships.permissions.members.import_help'),
                 module: 'memberships',
                 roles: [],
             ),
