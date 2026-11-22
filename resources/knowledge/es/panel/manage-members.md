@@ -1,15 +1,15 @@
 ---
 id: memberships.panel.manage-members
 title: Dar de alta y editar socios
-summary: Crea la ficha de un socio, vincúlala a su cuenta de la web, cambia su estado o bórrala.
+summary: Crea la ficha de un socio o impórtalos desde una hoja de cálculo, vincúlala a su cuenta de la web, cambia su estado o bórrala.
 category: memberships
 audience: panel
 order: 20
-keywords: [alta, dar de alta, nuevo socio, crear socio, añadir socio, inscribir socio, ficha, editar socio, datos del socio, vincular, usuario vinculado, cuenta, baja, dar de baja, suspender, expulsar, borrar socio, eliminar socio, número de socio, buscar socio]
+keywords: [importar, importar socios, carga masiva, csv, xlsx, excel, hoja de cálculo, plantilla, alta, dar de alta, nuevo socio, crear socio, añadir socio, inscribir socio, ficha, editar socio, datos del socio, vincular, usuario vinculado, cuenta, baja, dar de baja, suspender, expulsar, borrar socio, eliminar socio, número de socio, buscar socio]
 related: [memberships.panel.memberships, memberships.panel.overview, memberships.panel.member-role, core.panel.manage-users]
 conditions:
   permissions:
-    any: ['memberships:members.create', 'memberships:members.update']
+    any: ['memberships:members.create', 'memberships:members.update', 'memberships:members.import']
 ---
 Cada persona asociada tiene una ficha de socio. Aquí se crea, se mantiene al día y se borra. Sus cuotas tienen su propia guía.
 
@@ -63,9 +63,53 @@ Hace falta el mismo permiso que para borrar.
 
 El socio vuelve a la lista con sus datos, cuotas y pagos tal como estaban, y recupera el rol de socio si su ficha lo cumple. **Ver ficha** abre un socio borrado solo para consultarlo, con sus cuotas y pagos; hasta que lo restaures no se puede editar ni registrar pagos.
 
+## Importar socios
+
+Si ya tienes a los socios en una hoja de cálculo, puedes darlos de alta de una vez, cada uno con su cuota actual. Hace falta el permiso **Importar socios**.
+
+1. En la lista de socios, pulsa **Importar socios**.
+2. Sube un fichero `.csv` o `.xlsx` de 2 MB como máximo y 1000 filas como mucho. Si no tienes uno, pulsa **Descargar la plantilla**: trae todas las columnas y una fila de ejemplo que puedes borrar.
+3. Marca **Vincular por email con cuentas verificadas** solo si quieres unir cada ficha a la cuenta de la web con su email. Empieza desmarcada.
+4. Pulsa **Siguiente** para ver la vista previa: cuántos socios se crearán, cuántos ya existen y cuántas filas tienen errores, con una tabla de las filas que no se crearán y de las que se vincularán a una cuenta.
+5. Pulsa **Importar**. Al terminar verás cuántos socios se han creado.
+
+**Importar** solo se puede pulsar si no hay ninguna fila con errores y hay al menos un socio nuevo. Si hay errores no se crea nadie: corrige el fichero y vuelve a subirlo. Al importar se lee de nuevo el fichero y se comprueba todo otra vez, así que lo que haya cambiado mientras tanto también cuenta. El fichero subido se borra al terminar, se importe o no.
+
+### Formato
+
+- La primera fila son las cabeceras, con los nombres de la plantilla. Da igual que estén en mayúsculas o sin tildes, y el orden de las columnas tampoco importa.
+- Solo **Nombre** y **Apellidos** son obligatorios. Las columnas que no se reconocen se ignoran y la vista previa las nombra.
+- Cada fila es un socio con, si se indica, su periodo actual y la cuota de ese periodo. Las cuotas anteriores no se importan: añádelas desde la ficha del socio si las necesitas.
+
+### Valores admitidos
+
+- **Fechas**: `31/12/2025` o `2025-12-31`. El alta y el nacimiento no pueden ser futuros.
+- **Importe**: `25`, `25,00` o `25.00`, sin signo negativo.
+- **Tipo de socio**, **Tipo de periodo** y **Forma de pago**: el nombre que ves en el panel, por ejemplo «Regular», «Año natural» o «Transferencia bancaria».
+- **Número de socio**: con el formato `AAAA-NNNN`. Si lo dejas vacío, se genera con el año de la fecha de alta, como al crear un socio a mano.
+- **Periodo**: si das el inicio y el fin sin tipo, se elige el tipo con el que encajan. Si falta el inicio o el fin, se deduce del tipo.
+- **Cuota**: necesita un periodo. Vence el primer día del periodo si no indicas otra fecha. La forma de pago y la referencia necesitan la fecha de pago.
+
+### Socios que ya existen
+
+Una fila cuyo **Número de socio** o **Email** ya tiene otro socio, también uno borrado, se salta: nunca se cambia un socio que ya existe. Por eso puedes subir dos veces el mismo fichero sin duplicar a nadie. Si dos filas del mismo fichero repiten número o email, las dos se marcan con error.
+
+### Vincular con las cuentas
+
+Con la casilla marcada, cada socio nuevo se une a la única cuenta activa con su email, siempre que la cuenta lo tenga verificado y no esté vinculada ya a otra ficha. Si hay dudas, el socio entra sin vincular y puedes unirlo después en **Usuario vinculado**.
+
+Una cuenta que ya tiene el rol {{association_role}} no se vincula a una ficha que se lo quitaría (sin un periodo en curso ni un tipo permanente); la vista previa lo explica en su fila.
+
+> [!WARNING]
+> Vincular una cuenta puede darle el rol {{association_role}} y, con él, activar sus roles que exigen ser socio. Si alguno de esos roles exige doble factor y la cuenta no lo tiene activado, la persona recibe un aviso para activarlo. Es lo esperado, no un fallo.
+
+La importación no envía ningún correo. Las cuotas que ya estén vencidas se detectan después, en la revisión diaria de siempre.
+
 ## Si algo no sale bien
 
 - **No encuentras la cuenta en Usuario vinculado**: busca por el nombre de la cuenta, no por el email. La persona tiene que haberse registrado antes.
+- **Importar no se puede pulsar**: la vista previa dice por qué. Corrige en el fichero las filas con errores, deja una sola cabecera por columna o divide un fichero de más de 1000 filas, y vuelve a subirlo.
+- **«Hay otra importación en marcha»**: alguien está importando a la vez. Espera un momento y vuelve a subir el fichero.
 - **La cuenta no recibe el rol {{association_role}}**: comprueba que la ficha está en **Activo**, que tiene una cuota **Activa** (o es de un tipo permanente) y que la asignación automática está activada en la configuración del módulo.
 
 [[action:filament.admin.resources.members.create|Dar de alta un socio|if=memberships:members.create]]

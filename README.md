@@ -19,7 +19,7 @@ Módulo para GuildForge que gestiona los socios de la asociación, sus cuotas (p
 
 ## Requisitos
 
-- GuildForge core `^3.58` (almacenamiento de fechas en UTC y zona horaria de visualización; el rol de socio se elige en el core; base de conocimiento; campana de avisos)
+- GuildForge core `^3.87` (almacenamiento de fechas en UTC y zona horaria de visualización; el rol de socio se elige en el core; base de conocimiento; campana de avisos; lector y escritor de hojas de cálculo para importar socios)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).
@@ -158,6 +158,7 @@ En el grupo **Personas**:
 
 - **Socios**: listado y ficha del socio; en la ficha, la pestaña **Cuotas** permite crear, editar y borrar sus cuotas, y la pestaña **Pagos** añadir pagos, registrar cobros, corregirlos y borrarlos (con doble confirmación).
 - **Tarifas** (debajo de **Socios**): importe por tipo de socio y periodo.
+- **Importar socios** (cabecera de la lista de socios, con `members.import`): sube un `.csv` o `.xlsx` de 2 MB y 1000 filas como mucho, muestra la vista previa del servicio (socios nuevos, duplicados con su motivo, filas con errores por columna y cuentas que se vincularían o por qué no) y solo deja importar cuando `canImport()` lo permite. La casilla **Vincular por email con cuentas verificadas** empieza desmarcada. Al importar se lee el fichero otra vez y el servicio lo vuelve a comprobar todo; «ocupado» y `MemberImportFailedException` salen como notificación. El fichero subido (y el que Livewire guarda a su lado) se borra al terminar, se importe o no; el de un diálogo cerrado sin importar lo borra Livewire en una subida posterior, cuando ya tiene más de un día. El log del panel guarda `actor_id` y los recuentos, nunca datos de las filas. **Descargar la plantilla** da un `.xlsx` con todas las columnas y una fila de ejemplo, hecho con el escritor del core. Una impersonación de solo lectura no puede importar.
 
 El panel no tiene todavía pantallas para registrar pagos.
 
@@ -180,6 +181,7 @@ Los permisos llevan el prefijo `memberships:` y se asignan a los roles en el edi
 | `members.create` | Crear socio | — |
 | `members.update` | Editar socio | — |
 | `members.delete` | Eliminar socio | — |
+| `members.import` | Importar socios desde un `.csv` o `.xlsx`, con su cuota actual, y vincularlos por email con sus cuentas | — |
 | `fee_structures.view_any` | Ver listado de tarifas | — |
 | `fee_structures.view` | Ver tarifa | — |
 | `fee_structures.create` | Crear tarifa | — |

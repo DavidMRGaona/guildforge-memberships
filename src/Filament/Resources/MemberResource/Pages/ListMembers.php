@@ -7,6 +7,7 @@ namespace Modules\Memberships\Filament\Resources\MemberResource\Pages;
 use App\Filament\Concerns\HasKnowledgeGuideAction;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Modules\Memberships\Filament\Actions\ImportMembersAction;
 use Modules\Memberships\Filament\Resources\MemberResource;
 
 class ListMembers extends ListRecords
@@ -20,6 +21,7 @@ class ListMembers extends ListRecords
         return array_filter([
             CreateAction::make()
                 ->label(__('memberships::memberships.pages.create_member')),
+            ImportMembersAction::make(),
             $this->knowledgeGuideAction('memberships.panel.overview'),
         ]);
     }
