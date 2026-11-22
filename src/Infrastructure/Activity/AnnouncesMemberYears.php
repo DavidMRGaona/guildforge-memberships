@@ -124,6 +124,25 @@ final class AnnouncesMemberYears
     }
 
     /**
+     * Every year any of the account's records counts for, oldest first.
+     *
+     * @return list<int>
+     */
+    public function yearsOfAccount(string $userId): array
+    {
+        $years = [];
+
+        foreach (MemberModel::query()->where('user_id', $userId)->pluck('id') as $memberId) {
+            array_push($years, ...$this->yearsOfMember((string) $memberId));
+        }
+
+        $years = array_values(array_unique($years));
+        sort($years);
+
+        return $years;
+    }
+
+    /**
      * The status, type or join day of a record changed: it may have been, or may now be, a
      * permanent member, whose years begin the day they joined.
      */

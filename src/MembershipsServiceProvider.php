@@ -10,6 +10,7 @@ use App\Application\Mail\DTOs\MailCategoryDTO;
 use App\Application\Modules\DTOs\NavigationItemDTO;
 use App\Application\Modules\DTOs\PermissionDTO;
 use App\Application\Modules\DTOs\SlotRegistrationDTO;
+use App\Domain\Profiles\Events\ProfileMembershipDisplayChanged;
 use App\Filament\Support\PanelNavigationGroup;
 use App\Modules\ModuleServiceProvider;
 use Filament\Pages\Page;
@@ -69,6 +70,7 @@ use Modules\Memberships\Infrastructure\Services\MemberSituationQuery;
 use Modules\Memberships\Listeners\NotifyFeePaymentOverdue;
 use Modules\Memberships\Listeners\NotifyMembershipExpired;
 use Modules\Memberships\Listeners\NotifyMembershipExpiring;
+use Modules\Memberships\Listeners\RepublishMemberYearsOnDisplayChange;
 use Modules\Memberships\Policies\FeeStructurePolicy;
 use Modules\Memberships\Policies\MemberPolicy;
 use Modules\Memberships\Policies\MembershipFeePolicy;
@@ -209,6 +211,12 @@ final class MembershipsServiceProvider extends ModuleServiceProvider
         Event::listen(
             MembershipExpiring::class,
             [NotifyMembershipExpiring::class, 'handle']
+        );
+
+        // Years as a member are reported only for accounts that show their membership (activity contract)
+        Event::listen(
+            ProfileMembershipDisplayChanged::class,
+            RepublishMemberYearsOnDisplayChange::class,
         );
 
         // Both stay silent until enabled in the module settings

@@ -6,11 +6,18 @@ namespace Modules\Memberships\Tests\Feature\Activity;
 
 use App\Application\Activity\Contracts\ActivitySourceInterface;
 use App\Application\Activity\DTOs\ActivityFactDTO;
+use App\Application\Activity\Enums\ActivityReadOutcome;
+use App\Application\Activity\Services\ActivityPublisherInterface;
 use App\Application\Activity\Services\ActivityReaderInterface;
+use App\Application\Profiles\Services\ProfileMembershipDisplayInterface;
 use App\Domain\Activity\ActivityKind;
 use App\Domain\Activity\ActivityRole;
+use App\Domain\Activity\Events\ActivityRecorded;
+use App\Domain\Profiles\Events\ProfileMembershipDisplayChanged;
+use App\Domain\Profiles\Exceptions\ProfileMembershipDisplayUnavailableException;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Modules\Memberships\Domain\Enums\MembershipStatus;
@@ -35,11 +42,39 @@ final class MemberYearActivitySourceTest extends ActivitySourceTestCase
 
     private int $numbers = 0;
 
+    /** @var object{hidden: array<string, true>, failing: bool}&ProfileMembershipDisplayInterface */
+    private object $display;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->travelTo(CarbonImmutable::parse('2026-06-15T12:00:00+02:00'));
+
+        // Everybody shows their membership unless a test hides them
+        $this->display = new class implements ProfileMembershipDisplayInterface
+        {
+            /** @var array<string, true> */
+            public array $hidden = [];
+
+            public bool $failing = false;
+
+            public function showsMembership(array $userIds): array
+            {
+                if ($this->failing) {
+                    throw ProfileMembershipDisplayUnavailableException::unreadable();
+                }
+
+                $answer = [];
+
+                foreach ($userIds as $userId) {
+                    $answer[strtolower($userId)] = ! isset($this->hidden[strtolower($userId)]);
+                }
+
+                return $answer;
+            }
+        };
+        $this->app->instance(ProfileMembershipDisplayInterface::class, $this->display);
     }
 
     protected function activitySource(): ActivitySourceInterface
@@ -462,7 +497,7 @@ final class MemberYearActivitySourceTest extends ActivitySourceTestCase
         }
         sort($expected);
 
-        $source = new MemberYearActivitySource(accountsPerQuery: 2);
+        $source = new MemberYearActivitySource($this->display, accountsPerQuery: 2);
 
         foreach ([1, 3, 50] as $limit) {
             $seen = [];
@@ -491,6 +526,97 @@ final class MemberYearActivitySourceTest extends ActivitySourceTestCase
 
         $this->assertSame($without, $with);
         $this->assertCount(2, $source->history(null, 50)->subjects);
+    }
+
+    public function test_an_account_that_does_not_show_its_membership_has_no_facts_and_no_history(): void
+    {
+        $hidden = UserModel::factory()->create();
+        $shown = UserModel::factory()->create();
+        $this->period($this->memberOf($hidden), MembershipStatus::Expired, '2024-01-01', '2024-12-31');
+        $this->period($this->memberOf($shown), MembershipStatus::Expired, '2024-01-01', '2024-12-31');
+        $this->display->hidden[strtolower($hidden->id)] = true;
+
+        $source = $this->activitySource();
+
+        $this->assertSame([], $source->facts($hidden->id.':2024'));
+        $this->assertCount(1, $source->facts($shown->id.':2024'));
+        $this->assertSame([$shown->id.':2024'], array_map(static fn ($subject): string => $subject->subjectId, $source->history(null, 50)->subjects));
+    }
+
+    public function test_the_history_skips_hidden_accounts_across_batches_without_losing_the_rest(): void
+    {
+        $expected = [];
+        foreach (range(1, 6) as $index) {
+            $user = UserModel::factory()->create();
+            $this->period($this->memberOf($user), MembershipStatus::Expired, '2024-01-01', '2024-12-31');
+
+            if ($index % 2 === 0) {
+                $this->display->hidden[strtolower($user->id)] = true;
+            } else {
+                $expected[] = $user->id.':2024';
+            }
+        }
+        sort($expected);
+
+        $source = new MemberYearActivitySource($this->display, accountsPerQuery: 2);
+        $seen = [];
+        $cursor = null;
+
+        do {
+            $page = $source->history($cursor, 2);
+            array_push($seen, ...array_map(static fn ($subject): string => $subject->subjectId, $page->subjects));
+            $cursor = $page->nextCursor;
+        } while ($cursor !== null);
+
+        $this->assertSame($expected, $seen);
+    }
+
+    public function test_a_failure_reading_who_shows_their_membership_is_not_an_answer(): void
+    {
+        $user = UserModel::factory()->create();
+        $this->period($this->memberOf($user), MembershipStatus::Expired, '2024-01-01', '2024-12-31');
+        $this->display->failing = true;
+        $reader = $this->app->make(ActivityReaderInterface::class);
+
+        $this->assertSame(ActivityReadOutcome::Failed, $reader->facts('memberships.year', $user->id.':2024')->outcome);
+        $this->assertSame(ActivityReadOutcome::Failed, $reader->history('memberships.year', null, 10)->outcome);
+    }
+
+    public function test_the_core_gives_no_facts_for_a_hidden_account_and_reads_it_again_when_it_shows_it(): void
+    {
+        $user = UserModel::factory()->create();
+        $this->period($this->memberOf($user), MembershipStatus::Expired, '2024-01-01', '2024-12-31');
+        $reader = $this->app->make(ActivityReaderInterface::class);
+
+        $this->display->hidden[strtolower($user->id)] = true;
+        $this->assertSame([], $reader->facts('memberships.year', $user->id.':2024')->facts);
+
+        unset($this->display->hidden[strtolower($user->id)]);
+        $this->assertCount(1, $reader->facts('memberships.year', $user->id.':2024')->facts);
+    }
+
+    public function test_when_the_display_may_have_changed_every_year_of_the_account_is_published_again(): void
+    {
+        $user = UserModel::factory()->create();
+        $other = UserModel::factory()->create();
+        $this->period($this->memberOf($user), MembershipStatus::Expired, '2024-01-01', '2025-12-31');
+        $this->period($this->memberOf($other), MembershipStatus::Expired, '2024-01-01', '2024-12-31');
+        $this->memberOf($user, MemberStatus::Active, MemberType::Honorary, '2026-02-01 10:00:00');
+
+        $events = Event::fake([ActivityRecorded::class]);
+        $this->app->forgetInstance(ActivityPublisherInterface::class);
+
+        event(new ProfileMembershipDisplayChanged($user->id));
+
+        $ids = [];
+        foreach ($events->dispatched(ActivityRecorded::class) as [$event]) {
+            $this->assertSame('memberships.year', $event->sourceType);
+            $ids[$event->subjectId] = true;
+        }
+        $ids = array_keys($ids);
+        sort($ids);
+
+        $this->assertSame([$user->id.':2024', $user->id.':2025', $user->id.':2026'], $ids);
     }
 
     private function memberOf(?UserModel $user, MemberStatus $status = MemberStatus::Active, MemberType $type = MemberType::Regular, string $joined = '2020-01-01 00:00:00'): MemberModel

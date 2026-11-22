@@ -26,7 +26,7 @@ Módulo para GuildForge que gestiona los socios de la asociación, sus cuotas (p
 
 ## Requisitos
 
-- GuildForge core `^3.86` (almacenamiento de fechas en UTC y zona horaria de visualización; el rol de socio se elige en el core; base de conocimiento; campana de avisos; contrato de actividad)
+- GuildForge core `^3.88` (almacenamiento de fechas en UTC y zona horaria de visualización; el rol de socio se elige en el core; base de conocimiento; campana de avisos; contrato de actividad)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).

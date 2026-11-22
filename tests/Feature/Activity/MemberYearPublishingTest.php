@@ -324,8 +324,10 @@ final class MemberYearPublishingTest extends ModuleTestCase
         $ids = [];
 
         foreach ($this->events->dispatched(ActivityRecorded::class) as [$event]) {
-            $this->assertSame('memberships.year', $event->sourceType);
-            $ids[$event->subjectId] = true;
+            // The core's own sources announce too (accounts created by the test)
+            if ($event->sourceType === 'memberships.year') {
+                $ids[$event->subjectId] = true;
+            }
         }
 
         $ids = array_keys($ids);

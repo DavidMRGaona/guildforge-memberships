@@ -10,6 +10,7 @@ use App\Application\Activity\DTOs\ActivityHistoryPageDTO;
 use App\Application\Activity\DTOs\ActivitySubjectDTO;
 use App\Application\Activity\DTOs\ActivitySubjectFactsDTO;
 use App\Application\Authorization\Services\AuthorizationServiceInterface;
+use App\Application\Profiles\Services\ProfileMembershipDisplayInterface;
 use App\Application\Services\TimezoneServiceInterface;
 use App\Domain\Activity\ActivityKind;
 use App\Domain\Activity\ActivityRole;
@@ -33,14 +34,19 @@ use Modules\Memberships\Infrastructure\Services\MembershipSettingsReader;
  * period while the record is active, so as long as it is active each calendar year from the day
  * they joined counts as well, whether or not they have periods.
  *
- * Membership is sensitive, so the subjects only feed counts: describe() gives a neutral title and
- * no link, and only to the account itself or to whoever may manage members. Never reads the
- * signed-in user outside describe(): the same answer in a queued job as in a request.
+ * Membership is sensitive: the site shows that somebody is a member only when they turn on the
+ * «Socio» badge of their profile, so facts() and history() report only the accounts that show it
+ * (ProfileMembershipDisplayInterface; if that cannot be read its exception goes up, so the core
+ * keeps what it had) and the module republishes an account when its answer may have changed. The
+ * subjects only feed counts: describe() gives a neutral title and no link, and only to the account
+ * itself or to whoever may manage members. Never reads the signed-in user outside describe(): the
+ * same answer in a queued job as in a request.
  */
 final readonly class MemberYearActivitySource implements ActivitySourceInterface
 {
     /** @param  int  $accountsPerQuery  how many accounts the history reads at once */
     public function __construct(
+        private ProfileMembershipDisplayInterface $display,
         private int $accountsPerQuery = 100,
     ) {}
 
@@ -73,6 +79,11 @@ final readonly class MemberYearActivitySource implements ActivitySourceInterface
         }
 
         [$userId, $year] = $parsed;
+
+        if ($this->shown([$userId]) === []) {
+            return [];
+        }
+
         $day = $this->firstDaysOf([$userId], ActivityDays::today())[$userId][$year] ?? null;
 
         return $day === null ? [] : [self::fact($userId, $day)];
@@ -90,12 +101,13 @@ final readonly class MemberYearActivitySource implements ActivitySourceInterface
         $inclusive = true;
 
         while (true) {
-            $userIds = $this->accountsFrom($from, $inclusive, $today);
+            $batch = $this->accountsFrom($from, $inclusive, $today);
 
-            if ($userIds === []) {
+            if ($batch === []) {
                 break;
             }
 
+            $userIds = $this->shown($batch);
             $days = $this->firstDaysOf($userIds, $today);
 
             foreach ($userIds as $userId) {
@@ -113,7 +125,7 @@ final readonly class MemberYearActivitySource implements ActivitySourceInterface
                 }
             }
 
-            $from = array_last($userIds);
+            $from = array_last($batch);
             $inclusive = false;
         }
 
@@ -178,6 +190,24 @@ final readonly class MemberYearActivitySource implements ActivitySourceInterface
         }
 
         return $described;
+    }
+
+    /**
+     * The accounts that show their membership, in the order given. A failure is not an answer:
+     * the exception goes up, never «nobody shows it».
+     *
+     * @param  list<string>  $userIds
+     * @return list<string>
+     */
+    private function shown(array $userIds): array
+    {
+        $shown = [];
+
+        foreach (array_chunk($userIds, ProfileMembershipDisplayInterface::MAX_IDS) as $chunk) {
+            $shown += $this->display->showsMembership($chunk);
+        }
+
+        return array_values(array_filter($userIds, static fn (string $userId): bool => ($shown[$userId] ?? false) === true));
     }
 
     /**
