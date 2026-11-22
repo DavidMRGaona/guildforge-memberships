@@ -370,15 +370,6 @@ final class ImportMembersTest extends ModuleTestCase
         $this->assertSame([], $this->temporaryUploads());
     }
 
-    public function test_the_file_field_offers_only_spreadsheets(): void
-    {
-        $this->actingAsPanelAdmin();
-
-        $html = $this->dialogHtml(Livewire::test(ListMembers::class)->mountAction(ImportMembersAction::NAME));
-
-        $this->assertStringContainsString('accept=".csv,.xlsx"', $html);
-    }
-
     public function test_the_uploaded_file_is_deleted_when_the_import_fails(): void
     {
         $this->actingAsPanelAdmin();

@@ -85,7 +85,6 @@ final class ImportMembersAction
                             ->storeFiles(false)
                             ->maxSize(intdiv(MemberImportSpreadsheet::MAX_BYTES, 1024))
                             ->validationMessages(['max' => __('memberships::memberships.import.fields.file_too_large')])
-                            ->extraInputAttributes(['accept' => '.csv,.xlsx'])
                             ->rule(static fn (): Closure => self::readableRule()),
                         Checkbox::make('link_by_email')
                             ->label(__('memberships::memberships.import.fields.link_by_email'))
@@ -304,8 +303,11 @@ final class ImportMembersAction
 
     /**
      * Confirming checked the dialog and refused it (a file the reader refuses, too large…):
-     * the upload is forgotten and the field emptied, so a file with personal data is not left
+     * the upload is deleted and the field emptied, so a file with personal data is not left
      * behind waiting for another try. Moving between steps keeps it.
+     *
+     * Filament has no hook for a refused confirmation, so the page calls this: ListMembers
+     * does it in callMountedAction(). Any other page that offers this action must do the same.
      */
     public static function forgetAfterFailedConfirmation(Component $page): void
     {
